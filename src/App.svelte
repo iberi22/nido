@@ -66,7 +66,7 @@
         <h3>ℹ️ Info Proyecto</h3>
         <p>Terreno: {floorPlanStore.config.plot.width}m × {floorPlanStore.config.plot.height}m</p>
         <p>Área: {floorPlanStore.config.plot.width * floorPlanStore.config.plot.height}m²</p>
-        <p>Piso Actual: {floorPlanStore.currentData.name}</p>
+        <p>Piso Actual: {floorPlanStore.currentFloor.name}</p>
       </div>
     </aside>
 

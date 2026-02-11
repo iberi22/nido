@@ -19,7 +19,7 @@
     {#each floors as floor}
       <button
         class="floor-btn"
-        class:active={floorPlanStore.currentFloor === floor.id}
+        class:active={floorPlanStore.currentFloorId === floor.id}
         onclick={() => selectFloor(floor.id)}
       >
         <span class="icon">{floor.icon}</span>

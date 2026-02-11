@@ -3,17 +3,27 @@
 
   const tools = [
     { id: 'select', icon: '🖱️', label: 'Seleccionar' },
-    { id: 'wall', icon: '🧱', label: 'Pared' },
-    { id: 'window', icon: '🪟', label: 'Ventana' },
-    { id: 'door', icon: '🚪', label: 'Puerta' },
     { id: 'dimension', icon: '📏', label: 'Medir' },
-    { id: 'text', icon: '📝', label: 'Texto' },
-    { id: 'furniture', icon: '🪑', label: 'Mobiliario' },
     { id: 'delete', icon: '🗑️', label: 'Eliminar', danger: true }
+  ];
+
+  const libraryItems = [
+    { type: 'wall', icon: '🧱', label: 'Muro' },
+    { type: 'door', icon: '🚪', label: 'Puerta' },
+    { type: 'sliding_door', icon: '↔️', label: 'C. Corrediza' },
+    { type: 'window', icon: '🪟', label: 'Ventana' },
+    { type: 'furniture', icon: '🪑', label: 'Mueble' },
+    { type: 'motorcycle', icon: '🏍️', label: 'Moto' },
+    { type: 'car', icon: '🚗', label: 'Carro' }
   ];
 
   function selectTool(toolId: string) {
     floorPlanStore.setTool(toolId);
+  }
+
+  function handleDragStart(e: DragEvent, type: string) {
+    e.dataTransfer?.setData('application/json', type);
+    e.dataTransfer!.effectAllowed = 'copy';
   }
 </script>
 
@@ -33,6 +43,25 @@
       </button>
     {/each}
   </div>
+
+  <div class="separator"></div>
+
+  <h3>📚 Biblioteca</h3>
+  <div class="tool-grid">
+    {#each libraryItems as item}
+      <div
+        class="tool-btn draggable"
+        draggable="true"
+        ondragstart={(e) => handleDragStart(e, item.type)}
+        title="Arrastra al plano"
+        role="button"
+        tabindex="0"
+      >
+        <span class="icon">{item.icon}</span>
+        <span class="label">{item.label}</span>
+      </div>
+    {/each}
+  </div>
 </div>
 
 <style>
@@ -45,6 +74,12 @@
     margin: 0 0 12px 0;
     font-size: 14px;
     color: #475569;
+  }
+
+  .separator {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 16px 0;
   }
 
   .tool-grid {
@@ -85,6 +120,14 @@
     background: #dc2626;
     border-color: #b91c1c;
     color: white;
+  }
+
+  .draggable {
+    cursor: grab;
+    border-style: dashed;
+  }
+  .draggable:active {
+    cursor: grabbing;
   }
 
   .icon {

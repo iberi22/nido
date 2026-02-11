@@ -1,14 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import Konva from 'konva';
-  import { floorPlanStore } from './stores/floorPlanStore.svelte';
+  import { floorPlanStore, type Component, type LayerType } from './stores/floorPlanStore.svelte';
 
   let container: HTMLDivElement;
   let stage: Konva.Stage;
   let layer: Konva.Layer;
+  let tr: Konva.Transformer;
 
   const config = $derived(floorPlanStore.config);
-  const floorData = $derived(floorPlanStore.currentData);
+  const floorData = $derived(floorPlanStore.currentFloor); // Reactive floor state
   const SCALE = $derived(config.scale);
   const VIRTUAL_WIDTH = 550;
   const VIRTUAL_HEIGHT = 1600;
@@ -20,7 +21,6 @@
     h: config.plot.height * SCALE
   });
 
-  // Colors shorthand
   const C = $derived(config.colors);
 
   onMount(() => {
@@ -33,14 +33,60 @@
   $effect(() => {
     if (layer && floorData) {
       layer.destroyChildren();
+      // Re-add transformer since layer was cleared
+      layer.add(tr);
       draw();
     }
   });
+
+  // Watch selection changes
+  $effect(() => {
+    if (!tr || !stage) return;
+    const selectedId = floorPlanStore.selectedComponentId;
+    if (selectedId) {
+      const node = stage.findOne(`#${selectedId}`);
+      if (node) {
+        tr.nodes([node]);
+        tr.getLayer()?.batchDraw();
+      } else {
+        tr.nodes([]);
+      }
+    } else {
+      tr.nodes([]);
+      tr.getLayer()?.batchDraw();
+    }
+  });
+
 
   function initCanvas() {
     stage = new Konva.Stage({ container, width: VIRTUAL_WIDTH, height: VIRTUAL_HEIGHT, draggable: true });
     layer = new Konva.Layer();
     stage.add(layer);
+
+    // Initialize transformer
+    tr = new Konva.Transformer({
+      anchorSize: 8,
+      borderDash: [4, 4],
+      borderStroke: '#3b82f6',
+      anchorStroke: '#3b82f6',
+      anchorFill: '#ffffff',
+      rotateEnabled: true,
+      enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right']
+    });
+    layer.add(tr);
+
+    // Stage Selection Logic
+    stage.on('click tap', (e: any) => {
+      if (e.target === stage || e.target.name() === 'background') {
+        floorPlanStore.selectComponent(null);
+        return;
+      }
+      // If clicked on a component group or shape
+      const id = e.target.id() || e.target.getParent()?.id();
+      if (id) {
+        floorPlanStore.selectComponent(id);
+      }
+    });
 
     stage.on('wheel', (e) => {
       e.evt.preventDefault();
@@ -53,6 +99,44 @@
       ns = Math.max(0.15, Math.min(6, ns));
       stage.scale({ x: ns, y: ns });
       stage.position({ x: ptr.x - mp.x * ns, y: ptr.y - mp.y * ns });
+    });
+
+    // Handle drag end for components
+    layer.on('dragend', (e) => {
+      const id = e.target.id();
+      if (id && floorPlanStore.currentFloor.components.find(c => c.id === id)) {
+        // Calculate new position in meters
+        const newX = (e.target.x() - PLOT.x) / SCALE;
+        const newY = (e.target.y() - PLOT.y) / SCALE;
+        floorPlanStore.updateComponent(id, { x: newX, y: newY });
+      }
+    });
+
+    // Handle transform end
+    layer.on('transformend', (e) => {
+      const node = e.target;
+      const id = node.id();
+      const scaleX = node.scaleX();
+      const scaleY = node.scaleY();
+
+      // Reset scale to 1 and update width/height
+      node.scaleX(1);
+      node.scaleY(1);
+
+      const comp = floorPlanStore.currentFloor.components.find(c => c.id === id);
+      if (comp) {
+        const newWidth = (node.width() * scaleX) / SCALE;
+        const newHeight = (node.height() * scaleY) / SCALE;
+        const newRot = node.rotation();
+        const newX = (node.x() - PLOT.x) / SCALE;
+        const newY = (node.y() - PLOT.y) / SCALE; // Origin might change
+
+        floorPlanStore.updateComponent(id, {
+          x: newX, y: newY,
+          width: newWidth, height: newHeight,
+          rotation: newRot
+        });
+      }
     });
 
     draw();
@@ -69,38 +153,270 @@
     layer.batchDraw();
   }
 
-  // ── Main draw ──
+  // ── Drag & Drop ──
+  function handleDragOver(e: DragEvent) {
+    e.preventDefault(); // Necessary to allow dropping
+  }
+
+  function handleDrop(e: DragEvent) {
+    e.preventDefault();
+    stage.setPointersPositions(e);
+    const ptr = stage.getPointerPosition();
+    if (!ptr) return;
+
+    const type = e.dataTransfer?.getData('application/json');
+    if (!type) return;
+
+    // Convert from stage pixels to world meters (relative to plot origin PLOT.x/y)
+    // Stage transform: x' = (world_x * scaleX + stageX)
+    // world_x = (x' - stageX) / scaleX
+    // But our internal logic is: Component X (meters) -> Render X (pixels) = (comp.x * SCALE + PLOT.x)
+    // So we need to reverse:
+    // 1. Get pointer stage coords: px, py
+    // 2. Transform to layer coords (reverse stage pan/zoom): lx = (px - stage.x()) / stage.scaleX()
+    // 3. Transform to plot relative meters: mx = (lx - PLOT.x) / SCALE
+
+    const lx = (ptr.x - stage.x()) / stage.scaleX();
+    const ly = (ptr.y - stage.y()) / stage.scaleX();
+
+    const mx = (lx - PLOT.x) / SCALE; // meters x
+    const my = (ly - PLOT.y) / SCALE; // meters y
+
+    const id = crypto.randomUUID();
+    let width = 1;
+    let height = 1;
+    let layer: LayerType = 'furniture';
+    let rot = 0;
+
+    // Defaults per type
+    if (type === 'door') { width = 0.9; height = 0.2; layer= 'structure'; }
+    if (type === 'sliding_door') { width = 1.5; height = 0.2; layer= 'structure'; }
+    if (type === 'window') { width = 1.2; height = 0.2; layer='structure'; }
+    if (type === 'wall') { width = 3; height = config.wallThickness; layer='structure'; }
+    if (type === 'motorcycle') { width = 0.6; height = 1.8; layer='furniture'; }
+    if (type === 'car') { width = 1.8; height = 4.2; layer='furniture'; }
+    if (type === 'furniture') { width = 1; height = 1; layer='furniture'; }
+
+    floorPlanStore.addComponent({
+      id,
+      type,
+      x: mx,
+      y: my,
+      width,
+      height,
+      rotation: rot,
+      layer,
+      properties: { note: 'New' }
+    });
+
+    floorPlanStore.selectComponent(id);
+  }
+
   function draw() {
     drawBackground();
     drawHeader();
     drawPlotOutline();
     drawGlobalDimensions();
-    drawZones();
-    drawWalls();
-    drawStairs();
-    drawElements();
-    drawDimensions();
-    drawCompass();
+
+    // Draw Components Layer by Layer
+    // Order: Zones -> Structure -> Furniture -> Annotations
+    const layers: LayerType[] = ['zones', 'structure', 'furniture', 'annotations'];
+
+    layers.forEach(layerName => {
+      const comps = floorData.components.filter(c => c.layer === layerName);
+      comps.forEach(comp => drawComponent(comp));
+    });
+
     drawFooter();
+    drawCompass(); // on top
+
+    // Ensure transformer is on top
+    tr.moveToTop();
     layer.batchDraw();
+  }
+
+  function drawComponent(comp: Component) {
+    const cx = PLOT.x + comp.x * SCALE;
+    const cy = PLOT.y + comp.y * SCALE;
+    const cw = (comp.width || 0) * SCALE;
+    const ch = (comp.height || 0) * SCALE;
+
+    const group = new Konva.Group({
+      id: comp.id,
+      x: cx,
+      y: cy,
+      width: cw,
+      height: ch,
+      rotation: comp.rotation || 0,
+      draggable: !comp.locked && !['zone', 'text', 'dimension'].includes(comp.type)
+    });
+
+    // Content based on type
+    switch (comp.type) {
+      case 'zone':
+        group.add(new Konva.Rect({
+          width: cw, height: ch,
+          fill: comp.properties.color || C.zone_fill,
+          stroke: C.blueprint_line, strokeWidth: 0.8, dash: [4, 4]
+        }));
+        // Label
+        const zName = comp.properties.name || '';
+        const zSub = comp.properties.subtitle;
+        group.add(new Konva.Text({
+          x: 4, y: 4, text: zName,
+          fontSize: 10, fontFamily: 'Consolas', fill: C.blueprint_text, fontStyle: 'bold'
+        }));
+        if (zSub) {
+           group.add(new Konva.Text({
+            x: 4, y: 18, text: zSub,
+            fontSize: 8, fontFamily: 'Consolas', fill: C.blueprint_text, opacity: 0.6
+          }));
+        }
+        // Zones are mostly static backgrounds, dragging them is weird usually, but let's allow it if user unlocks
+        group.draggable(!comp.locked);
+        break;
+
+      case 'wall':
+        // Wall logic: If x1,y1,x2,y2 exist in props, use them relative to 0,0
+        // BUT our store migration normalized components to x,y,width,height
+        // Draw standard wall rect
+        group.add(new Konva.Rect({
+          width: cw, height: ch,
+          fill: C.wall_fill, stroke: C.blueprint_line, strokeWidth: 1.2
+        }));
+        break;
+
+      case 'furniture':
+      case 'motorcycle':
+      case 'car':
+        // Outline
+        group.add(new Konva.Rect({
+          width: cw, height: ch,
+          stroke: C.accent, strokeWidth: 1, fill: 'transparent',
+          cornerRadius: 4, dash: [4, 2]
+        }));
+        // Icon/Text
+        let icon = comp.type === 'motorcycle' ? '🏍️' : comp.type === 'car' ? '🚗' : '🪑';
+        group.add(new Konva.Text({
+          width: cw, height: ch, text: icon,
+          fontSize: Math.min(cw, ch) / 2, align: 'center', verticalAlign: 'middle',
+          opacity: 0.6
+        }));
+        break;
+
+      case 'stairs':
+        // Special renderer for stairs from properties.data
+        if (comp.properties.data) {
+           // We need to render the sub-components relative to (0,0) of the group
+           // The original data had absolute coordinates.
+           // Since comp.x/y is 0, we can just use the original coordinates relative to PLOT
+           // wait, if comp.x is 0, then cx = PLOT.x.
+           // Components inside stairs had x/y relative to 0,0 of floor.
+           // So we draw them directly.
+           // BUT, to make the whole stair group draggable, we should find bounding box?
+           // For now, let's just render them as children.
+           const sData = comp.properties.data;
+           sData.components.forEach((part: any) => {
+             const px = part.x * SCALE;
+             const py = part.y * SCALE;
+             const pw = part.width * SCALE;
+             const ph = part.height * SCALE;
+
+             // Part shape
+             group.add(new Konva.Rect({
+               x: px, y: py, width: pw, height: ph,
+               stroke: C.blueprint_line, strokeWidth: 1,
+               fill: part.id === 'landing' ? 'rgba(135, 206, 235, 0.15)' : 'rgba(135, 206, 235, 0.05)'
+             }));
+
+             // Steps lines
+             if (part.steps) {
+               if (part.orientation === 'vertical') {
+                 const stepH = ph / part.steps;
+                 for(let i=0; i<=part.steps; i++) {
+                   group.add(new Konva.Line({ points: [px, py + i*stepH, px+pw, py + i*stepH], stroke: C.blueprint_line, strokeWidth: 0.5 }));
+                 }
+               } else {
+                 const stepW = pw / part.steps;
+                 for(let i=0; i<=part.steps; i++) {
+                   group.add(new Konva.Line({ points: [px + i*stepW, py, px+i*stepW, py+ph], stroke: C.blueprint_line, strokeWidth: 0.5 }));
+                 }
+               }
+             }
+           });
+        }
+        break;
+
+      case 'door':
+      case 'sliding_door':
+      case 'garage_door':
+      case 'pedestrian_door':
+        // Draw Generic Door with swing
+        group.add(new Konva.Rect({
+          width: cw, height: ch, stroke: 'transparent' // Hit area
+        }));
+        // Opening
+        group.add(new Konva.Line({
+          points: [0, 0, cw, 0],
+          stroke: comp.type.includes('garage') ? C.highlight : C.accent,
+          strokeWidth: comp.type.includes('garage') ? 6 : 4
+        }));
+        // Swing/Arc
+        if (comp.type === 'pedestrian_door' || comp.type === 'door') {
+           group.add(new Konva.Arc({
+             x: 0, y: 0, innerRadius: 0, outerRadius: cw, angle: 90,
+             stroke: C.accent, strokeWidth: 1, opacity: 0.5
+           }));
+           group.add(new Konva.Line({ points: [0,0, 0,cw], stroke: C.accent, strokeWidth: 2 }));
+        }
+        break;
+
+      case 'dimension':
+        const props = comp.properties;
+        // x,y is "from". props has "toX, toY"
+        // Draw dimension line from (0,0) to relative (toX-x, toY-y)
+        // Wait, dimension components are "annotations", maybe not grouped?
+        // Let's rely on absolute coords for now?
+        // Better: Group is at x,y. Draw to relative target.
+        const dx = (props.toX - comp.x) * SCALE;
+        const dy = (props.toY - comp.y) * SCALE;
+
+        group.add(new Konva.Line({
+          points: [0, 0, dx, dy],
+          stroke: C.blueprint_line, strokeWidth: 0.8
+        }));
+        // Markers
+        // Text center
+        group.add(new Konva.Text({
+          x: dx/2 - 10, y: dy/2 - 10,
+          text: props.label,
+          fontSize: 10, fontFamily: 'Consolas', fill: C.blueprint_text
+        }));
+        break;
+
+      default:
+        // Generic fallback
+        group.add(new Konva.Rect({
+          width: cw, height: ch,
+          stroke: 'red', strokeWidth: 1
+        }));
+    }
+
+    layer.add(group);
   }
 
   // ── Background & Grid ──
   function drawBackground() {
-    layer.add(new Konva.Rect({ x: -600, y: -600, width: VIRTUAL_WIDTH + 1200, height: VIRTUAL_HEIGHT + 1200, fill: C.blueprint_bg }));
+    layer.add(new Konva.Rect({
+      name: 'background',
+      x: -600, y: -600, width: VIRTUAL_WIDTH + 1200, height: VIRTUAL_HEIGHT + 1200, fill: C.blueprint_bg
+    }));
     // Major grid
     for (let x = -600; x < VIRTUAL_WIDTH + 600; x += 50) {
       layer.add(new Konva.Line({ points: [x, -600, x, VIRTUAL_HEIGHT + 600], stroke: C.blueprint_line, strokeWidth: 0.3, opacity: 0.2 }));
     }
     for (let y = -600; y < VIRTUAL_HEIGHT + 600; y += 50) {
       layer.add(new Konva.Line({ points: [-600, y, VIRTUAL_WIDTH + 600, y], stroke: C.blueprint_line, strokeWidth: 0.3, opacity: 0.2 }));
-    }
-    // Minor grid
-    for (let x = -600; x < VIRTUAL_WIDTH + 600; x += 25) {
-      layer.add(new Konva.Line({ points: [x, -600, x, VIRTUAL_HEIGHT + 600], stroke: C.blueprint_line, strokeWidth: 0.15, opacity: 0.08 }));
-    }
-    for (let y = -600; y < VIRTUAL_HEIGHT + 600; y += 25) {
-      layer.add(new Konva.Line({ points: [-600, y, VIRTUAL_WIDTH + 600, y], stroke: C.blueprint_line, strokeWidth: 0.15, opacity: 0.08 }));
     }
   }
 
@@ -114,416 +430,56 @@
       x: PLOT.x, y: 52, text: floorData.subtitle || '',
       fontSize: 11, fontFamily: 'Consolas, monospace', fill: C.blueprint_text, opacity: 0.65
     }));
-    // Norm info line
-    layer.add(new Konva.Text({
-      x: PLOT.x, y: 72, text: `NSR-10 | POT Cali | Muro: ${config.wallThickness * 100}cm | Escala 1:${config.scale}`,
-      fontSize: 9, fontFamily: 'Consolas, monospace', fill: C.accent, opacity: 0.8
-    }));
   }
 
   // ── Plot outline ──
   function drawPlotOutline() {
     const wt = config.wallThickness * SCALE;
-    // Outer walls as thick filled rectangles
-    // Top wall
     layer.add(new Konva.Rect({ x: PLOT.x - wt, y: PLOT.y - wt, width: PLOT.w + wt * 2, height: wt, fill: C.wall_fill, stroke: C.blueprint_line, strokeWidth: 1.5 }));
-    // Bottom wall
     layer.add(new Konva.Rect({ x: PLOT.x - wt, y: PLOT.y + PLOT.h, width: PLOT.w + wt * 2, height: wt, fill: C.wall_fill, stroke: C.blueprint_line, strokeWidth: 1.5 }));
-    // Left wall
     layer.add(new Konva.Rect({ x: PLOT.x - wt, y: PLOT.y, width: wt, height: PLOT.h, fill: C.wall_fill, stroke: C.blueprint_line, strokeWidth: 1.5 }));
-    // Right wall
     layer.add(new Konva.Rect({ x: PLOT.x + PLOT.w, y: PLOT.y, width: wt, height: PLOT.h, fill: C.wall_fill, stroke: C.blueprint_line, strokeWidth: 1.5 }));
   }
 
   // ── Global Dimensions ──
   function drawGlobalDimensions() {
-    // Top: total width
+    // We already have dims in components now, but we can keep these global plot dims
     dimLine(PLOT.x, PLOT.y - 35, PLOT.x + PLOT.w, PLOT.y - 35, `${config.plot.width}m`);
-    // Right: total height
     dimLineV(PLOT.x + PLOT.w + 35, PLOT.y, PLOT.x + PLOT.w + 35, PLOT.y + PLOT.h, `${config.plot.height}m`);
   }
 
-  // ── Zones ──
-  function drawZones() {
-    floorData.zones?.forEach(z => {
-      const zx = PLOT.x + z.x * SCALE;
-      const zy = PLOT.y + z.y * SCALE;
-      const zw = z.width * SCALE;
-      const zh = z.height * SCALE;
-
-      // Zone fill
-      layer.add(new Konva.Rect({
-        x: zx, y: zy, width: zw, height: zh,
-        stroke: C.blueprint_line, strokeWidth: 0.8,
-        fill: z.color || C.zone_fill,
-        dash: [4, 4]
-      }));
-
-      // Zone label (centered)
-      const lines = z.name.split('\n');
-      lines.forEach((line: string, i: number) => {
-        layer.add(new Konva.Text({
-          x: zx + 8, y: zy + 12 + i * 14,
-          text: line, fontSize: 10, fontFamily: 'Consolas, monospace',
-          fill: C.blueprint_text, fontStyle: 'bold', width: zw - 16
-        }));
-      });
-      if (z.subtitle) {
-        layer.add(new Konva.Text({
-          x: zx + 8, y: zy + 12 + lines.length * 14 + 4,
-          text: z.subtitle, fontSize: 8, fontFamily: 'Consolas, monospace',
-          fill: C.blueprint_text, opacity: 0.55, width: zw - 16
-        }));
-      }
-
-      // Local dimension (only if zone is narrower than plot)
-      if (z.width < config.plot.width && z.width >= 1) {
-        dimLine(zx, zy + zh + 12, zx + zw, zy + zh + 12, `${z.width}m`);
-      }
-    });
+  function drawFooter() {
+     // Concise footer
+     layer.add(new Konva.Text({
+       x: PLOT.x, y: PLOT.y + PLOT.h + 20,
+       text: `${floorData.id.toUpperCase()} | Scale 1:${config.scale}`,
+       fontSize: 10, fill: C.blueprint_text, opacity: 0.5
+     }));
   }
 
-  // ── Internal Walls ──
-  function drawWalls() {
-    const wt = config.wallThickness * SCALE;
-    const walls = (floorData as any).walls;
-    if (!walls) return;
-
-    walls.forEach((w: any) => {
-      const x1 = PLOT.x + w.x1 * SCALE;
-      const y1 = PLOT.y + w.y1 * SCALE;
-      const x2 = PLOT.x + w.x2 * SCALE;
-      const y2 = PLOT.y + w.y2 * SCALE;
-
-      const isVertical = x1 === x2;
-      if (isVertical) {
-        layer.add(new Konva.Rect({
-          x: x1 - wt / 2, y: Math.min(y1, y2),
-          width: wt, height: Math.abs(y2 - y1),
-          fill: C.wall_fill, stroke: C.blueprint_line, strokeWidth: 1.2
-        }));
-      } else {
-        layer.add(new Konva.Rect({
-          x: Math.min(x1, x2), y: y1 - wt / 2,
-          width: Math.abs(x2 - x1), height: wt,
-          fill: C.wall_fill, stroke: C.blueprint_line, strokeWidth: 1.2
-        }));
-      }
-    });
-  }
-
-  // ── L-Shaped Staircase (Component-based) ──
-  function drawStairs() {
-    const stairs = (floorData as any).stairs;
-    if (!stairs?.components) return;
-
-    stairs.components.forEach((comp: any) => {
-      const cx = PLOT.x + comp.x * SCALE;
-      const cy = PLOT.y + comp.y * SCALE;
-      const cw = comp.width * SCALE;
-      const ch = comp.height * SCALE;
-
-      if (comp.id === 'landing') {
-        // Landing - highlighted rectangle
-        layer.add(new Konva.Rect({
-          x: cx, y: cy, width: cw, height: ch,
-          stroke: C.blueprint_line, strokeWidth: 1.5,
-          fill: 'rgba(135, 206, 235, 0.15)'
-        }));
-        if (comp.label) {
-          layer.add(new Konva.Text({
-            x: cx + 4, y: cy + ch / 2 - 5,
-            text: comp.label, fontSize: 8, fontFamily: 'Consolas, monospace',
-            fill: C.blueprint_text, opacity: 0.6
-          }));
-        }
-        return;
-      }
-
-      // Stair run outline
-      layer.add(new Konva.Rect({
-        x: cx, y: cy, width: cw, height: ch,
-        stroke: C.blueprint_line, strokeWidth: 1.2,
-        fill: 'rgba(135, 206, 235, 0.05)'
-      }));
-
-      const steps = comp.steps || 0;
-      if (comp.orientation === 'vertical' && steps > 0) {
-        // Vertical run: horizontal step lines
-        const stepH = ch / steps;
-        for (let i = 0; i <= steps; i++) {
-          layer.add(new Konva.Line({
-            points: [cx, cy + i * stepH, cx + cw, cy + i * stepH],
-            stroke: C.blueprint_line, strokeWidth: 0.8
-          }));
-        }
-        // Direction arrow
-        if (comp.arrowDir === 'up') {
-          layer.add(new Konva.Arrow({
-            points: [cx + cw / 2, cy + ch - 12, cx + cw / 2, cy + 12],
-            pointerLength: 8, pointerWidth: 6,
-            fill: C.accent, stroke: C.accent, strokeWidth: 1.5, opacity: 0.55
-          }));
-        }
-      } else if (comp.orientation === 'horizontal' && steps > 0) {
-        // Horizontal run: vertical step lines
-        const stepW = cw / steps;
-        for (let i = 0; i <= steps; i++) {
-          layer.add(new Konva.Line({
-            points: [cx + i * stepW, cy, cx + i * stepW, cy + ch],
-            stroke: C.blueprint_line, strokeWidth: 0.8
-          }));
-        }
-        // Direction arrow
-        if (comp.arrowDir === 'right') {
-          layer.add(new Konva.Arrow({
-            points: [cx + 8, cy + ch / 2, cx + cw - 8, cy + ch / 2],
-            pointerLength: 7, pointerWidth: 5,
-            fill: C.accent, stroke: C.accent, strokeWidth: 1.2, opacity: 0.5
-          }));
-        }
-      }
-    });
-
-    // Overall staircase label (REMOVED due to clutter)
-    /*
-    const first = stairs.components[0];
-    const label_x = PLOT.x + first.x * SCALE;
-    const label_y = PLOT.y + (first.y + first.height) * SCALE + 8;
-    layer.add(new Konva.Text({
-      x: label_x, y: label_y,
-      text: `▲ ESCALERA EN L (${stairs.totalSteps} pasos)`,
-      fontSize: 8, fontFamily: 'Consolas, monospace',
-      fill: C.accent, opacity: 0.7
-    }));
-    */
-  }
-
-  // ── Elements (car, doors, etc.) ──
-  function drawElements() {
-    floorData.elements?.forEach(el => {
-      const ex = PLOT.x + el.x * SCALE;
-      const ey = PLOT.y + el.y * SCALE;
-
-      if (el.type === 'garage_door' && el.width) {
-        const dw = el.width * SCALE;
-        // Thick garage door opening
-        layer.add(new Konva.Line({
-          points: [ex, ey, ex + dw, ey],
-          stroke: C.highlight, strokeWidth: 6
-        }));
-        // Basculante arc (half-circle upward)
-        layer.add(new Konva.Arc({
-          x: ex + dw / 2, y: ey,
-          innerRadius: 0, outerRadius: dw / 2,
-          angle: 180, rotation: 0,
-          stroke: C.highlight, strokeWidth: 0.8, opacity: 0.3, dash: [4, 3]
-        }));
-        // Garage label (REMOVED due to clutter with zone title)
-        /*
-        layer.add(new Konva.Text({
-          x: ex, y: ey + 10, text: '▼ GARAJE',
-          fontSize: 9, fontFamily: 'Consolas, monospace', fill: C.highlight, align: 'center', width: dw
-        }));
-        */
-      }
-
-      if (el.type === 'pedestrian_door' && el.width) {
-        const dw = el.width * SCALE;
-        // Door opening
-        layer.add(new Konva.Line({
-          points: [ex, ey, ex + dw, ey],
-          stroke: C.accent, strokeWidth: 5
-        }));
-        // Door swing arc (90° from hinge on left side)
-        layer.add(new Konva.Arc({
-          x: ex, y: ey,
-          innerRadius: 0, outerRadius: dw,
-          angle: 90, rotation: 0,
-          stroke: C.accent, strokeWidth: 0.8, opacity: 0.5
-        }));
-        // Door leaf line
-        layer.add(new Konva.Line({
-          points: [ex, ey, ex, ey + dw],
-          stroke: C.accent, strokeWidth: 1, opacity: 0.5
-        }));
-        /*
-        layer.add(new Konva.Text({
-          x: ex, y: ey + 10, text: '▼ ENTRADA',
-          fontSize: 9, fontFamily: 'Consolas, monospace', fill: C.accent
-        }));
-        */
-      }
-
-      if (el.type === 'sliding_door' && el.width) {
-        const dw = el.width * SCALE;
-        // Sliding door: two overlapping panels
-        layer.add(new Konva.Line({
-          points: [ex, ey, ex + dw, ey],
-          stroke: C.accent, strokeWidth: 5
-        }));
-        // Double arrow for sliding
-        layer.add(new Konva.Arrow({
-          points: [ex + dw / 2, ey + 12, ex + dw - 5, ey + 12],
-          pointerLength: 4, pointerWidth: 3,
-          fill: C.accent, stroke: C.accent, strokeWidth: 0.8, opacity: 0.6
-        }));
-        layer.add(new Konva.Arrow({
-          points: [ex + dw / 2, ey + 12, ex + 5, ey + 12],
-          pointerLength: 4, pointerWidth: 3,
-          fill: C.accent, stroke: C.accent, strokeWidth: 0.8, opacity: 0.6
-        }));
-        /*
-        layer.add(new Konva.Text({
-          x: ex - 5, y: ey + 8, text: 'CORREDIZA',
-          fontSize: 7, fontFamily: 'Consolas, monospace', fill: C.accent, opacity: 0.7
-        }));
-        */
-      }
-
-      if (el.type === 'car' && el.width && el.height) {
-        const cw = el.width * SCALE;
-        const ch = el.height * SCALE;
-        // Car body
-        layer.add(new Konva.Rect({
-          x: ex, y: ey, width: cw, height: ch,
-          stroke: C.blueprint_line, strokeWidth: 0.8,
-          fill: 'transparent', cornerRadius: 8,
-          dash: [6, 3], opacity: 0.45
-        }));
-        // Windshield + rear window
-        layer.add(new Konva.Line({ points: [ex + 10, ey + 18, ex + cw - 10, ey + 18], stroke: C.blueprint_line, strokeWidth: 0.5, opacity: 0.35 }));
-        layer.add(new Konva.Line({ points: [ex + 10, ey + ch - 22, ex + cw - 10, ey + ch - 22], stroke: C.blueprint_line, strokeWidth: 0.5, opacity: 0.35 }));
-        // Wheels
-        [ey + 32, ey + ch - 32].forEach(wy => {
-          [ex + 14, ex + cw - 14].forEach(wx => {
-            layer.add(new Konva.Circle({ x: wx, y: wy, radius: 8, stroke: C.blueprint_line, strokeWidth: 0.6, opacity: 0.35 }));
-          });
-        });
-        layer.add(new Konva.Text({ x: ex, y: ey + ch / 2 - 5, width: cw, text: '🚗', fontSize: 16, align: 'center', opacity: 0.35 }));
-      }
-
-      if (el.type === 'motorcycle' && el.width && el.height) {
-        const mw = el.width * SCALE;
-        const mh = el.height * SCALE;
-        // Motorcycle body outline
-        layer.add(new Konva.Rect({
-          x: ex, y: ey, width: mw, height: mh,
-          stroke: C.accent, strokeWidth: 0.7,
-          fill: 'transparent', cornerRadius: 4,
-          dash: [4, 2], opacity: 0.5
-        }));
-        // Front wheel
-        layer.add(new Konva.Circle({
-          x: ex + mw / 2, y: ey + 10,
-          radius: Math.min(mw, 18) / 2.5,
-          stroke: C.accent, strokeWidth: 0.6, opacity: 0.45
-        }));
-        // Rear wheel
-        layer.add(new Konva.Circle({
-          x: ex + mw / 2, y: ey + mh - 10,
-          radius: Math.min(mw, 18) / 2.5,
-          stroke: C.accent, strokeWidth: 0.6, opacity: 0.45
-        }));
-        // Handlebar (horizontal line at front)
-        layer.add(new Konva.Line({
-          points: [ex + 4, ey + 5, ex + mw - 4, ey + 5],
-          stroke: C.accent, strokeWidth: 0.8, opacity: 0.4
-        }));
-        // Moto emoji centered
-        layer.add(new Konva.Text({
-          x: ex, y: ey + mh / 2 - 6, width: mw,
-          text: '🏍️', fontSize: 12, align: 'center', opacity: 0.4
-        }));
-      }
-    });
-  }
-
-  // ── Compass ──
   function drawCompass() {
     const cx = PLOT.x + PLOT.w + 60;
     const cy = PLOT.y + PLOT.h - 30;
-    // Circle
     layer.add(new Konva.Circle({ x: cx, y: cy, radius: 18, stroke: C.blueprint_line, strokeWidth: 1, opacity: 0.6 }));
-    // N arrow
-    layer.add(new Konva.Arrow({
-      points: [cx, cy + 10, cx, cy - 12],
-      pointerLength: 5, pointerWidth: 4,
-      fill: C.blueprint_text, stroke: C.blueprint_text, strokeWidth: 1.5, opacity: 0.7
-    }));
+    layer.add(new Konva.Arrow({ points: [cx, cy + 10, cx, cy - 12], pointerLength: 5, pointerWidth: 4, fill: C.blueprint_text, stroke: C.blueprint_text, strokeWidth: 1.5, opacity: 0.7 }));
     layer.add(new Konva.Text({ x: cx - 4, y: cy - 28, text: 'N', fontSize: 12, fill: C.blueprint_text, fontFamily: 'Consolas', fontStyle: 'bold' }));
   }
 
-  // ── Footer ──
-  function drawFooter() {
-    const fy = PLOT.y + PLOT.h + 60;
-    // Title block border
-    layer.add(new Konva.Rect({
-      x: PLOT.x, y: fy, width: PLOT.w, height: 50,
-      stroke: C.blueprint_line, strokeWidth: 1, fill: 'rgba(30, 58, 95, 0.8)'
-    }));
-    layer.add(new Konva.Text({
-      x: PLOT.x + 10, y: fy + 8,
-      text: floorData.name,
-      fontSize: 12, fontFamily: 'Consolas', fill: C.blueprint_text, fontStyle: 'bold'
-    }));
-    layer.add(new Konva.Text({
-      x: PLOT.x + 10, y: fy + 25,
-      text: `${floorData.subtitle || ''} | Escala 1:${config.scale} | Muro ${config.wallThickness * 100}cm`,
-      fontSize: 9, fontFamily: 'Consolas', fill: C.blueprint_text, opacity: 0.7
-    }));
-    layer.add(new Konva.Text({
-      x: PLOT.x + PLOT.w - 100, y: fy + 8,
-      text: `Barrio Santa Elena\nComuna 10 - Estrato 3`,
-      fontSize: 8, fontFamily: 'Consolas', fill: C.accent, opacity: 0.8
-    }));
-  }
-
-  // ── Per-floor Dimension Annotations ──
-  function drawDimensions() {
-    const dims = (floorData as any).dimensions;
-    if (!dims) return;
-
-    dims.forEach((d: any) => {
-      const x1 = PLOT.x + d.from[0] * SCALE;
-      const y1 = PLOT.y + d.from[1] * SCALE;
-      const x2 = PLOT.x + d.to[0] * SCALE;
-      const y2 = PLOT.y + d.to[1] * SCALE;
-
-      const isVertical = d.from[0] === d.to[0];
-      if (isVertical) {
-        dimLineV(x1 + (d.side === 'right' ? 25 : -25), y1, x2 + (d.side === 'right' ? 25 : -25), y2, d.label);
-      } else {
-        dimLine(x1, y1 + (d.side === 'bottom' ? 18 : -18), x2, y2 + (d.side === 'bottom' ? 18 : -18), d.label);
-      }
-    });
-  }
-
-  // ── Dimension Helpers ──
+  // Helpers
   function dimLine(x1: number, y1: number, x2: number, y2: number, label: string) {
-    // Horizontal dimension
     layer.add(new Konva.Line({ points: [x1, y1, x2, y2], stroke: C.blueprint_line, strokeWidth: 0.8 }));
-    layer.add(new Konva.Line({ points: [x1, y1 - 4, x1, y1 + 4], stroke: C.blueprint_line, strokeWidth: 0.8 }));
-    layer.add(new Konva.Line({ points: [x2, y1 - 4, x2, y1 + 4], stroke: C.blueprint_line, strokeWidth: 0.8 }));
-    layer.add(new Konva.Text({
-      x: (x1 + x2) / 2 - 12, y: y1 - 14,
-      text: label, fontSize: 10, fontFamily: 'Consolas', fill: C.blueprint_text
-    }));
+    layer.add(new Konva.Text({ x: (x1 + x2) / 2 - 12, y: y1 - 14, text: label, fontSize: 10, fontFamily: 'Consolas', fill: C.blueprint_text }));
   }
-
   function dimLineV(x1: number, y1: number, x2: number, y2: number, label: string) {
-    // Vertical dimension
     layer.add(new Konva.Line({ points: [x1, y1, x2, y2], stroke: C.blueprint_line, strokeWidth: 0.8 }));
-    layer.add(new Konva.Line({ points: [x1 - 4, y1, x1 + 4, y1], stroke: C.blueprint_line, strokeWidth: 0.8 }));
-    layer.add(new Konva.Line({ points: [x1 - 4, y2, x1 + 4, y2], stroke: C.blueprint_line, strokeWidth: 0.8 }));
-    layer.add(new Konva.Text({
-      x: x1 + 8, y: (y1 + y2) / 2 - 5,
-      text: label, fontSize: 10, fontFamily: 'Consolas', fill: C.blueprint_text
-    }));
+    layer.add(new Konva.Text({ x: x1 + 8, y: (y1 + y2) / 2 - 5, text: label, fontSize: 10, fontFamily: 'Consolas', fill: C.blueprint_text }));
   }
 </script>
 
-<div class="canvas-wrapper">
+<div class="canvas-wrapper"
+     ondrop={handleDrop}
+     ondragover={handleDragOver}
+     role="application">
   <div class="canvas-toolbar">
     <button onclick={() => floorPlanStore.zoomIn()}>🔍+</button>
     <button onclick={() => floorPlanStore.zoomOut()}>🔍−</button>
