@@ -16,7 +16,7 @@
     "@types/node": "^24.10.1",
     "@types/three": "^0.182.0",
     "konva": "^10.2.0",
-    "svelte": "^5.45.2",
+    "svelte": "^5.53.0",
     "svelte-check": "^4.3.4",
     "svelte-konva": "^1.0.1",
     "three": "^0.182.0",
