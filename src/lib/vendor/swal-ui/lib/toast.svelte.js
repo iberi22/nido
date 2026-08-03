@@ -20,6 +20,12 @@ export const toasts = $state([]);
 
 const DEFAULT_DURATION = 5000;
 
+/**
+ * @param {'success'|'error'|'warning'|'info'|'loading'} type
+ * @param {string} message
+ * @param {string} [title]
+ * @param {number} [duration]
+ */
 function add(type, message, title, duration) {
   const id = Math.random().toString(36).substring(2, 9);
   toasts.push({ id, type, message, title, duration });
@@ -30,17 +36,21 @@ function add(type, message, title, duration) {
   return id;
 }
 
+/**
+ * @param {string} id
+ */
 function dismiss(id) {
   const i = toasts.findIndex((t) => t.id === id);
   if (i !== -1) toasts.splice(i, 1);
 }
 
+/** @type {{ success: (message: string, title?: string, duration?: number) => string, error: (message: string, title?: string, duration?: number) => string, info: (message: string, title?: string, duration?: number) => string, warning: (message: string, title?: string, duration?: number) => string, loading: (message: string, title?: string) => string, dismiss: (id: string) => void }} */
 export const toast = {
   success: (message, title, duration) => add('success', message, title, duration),
   error: (message, title, duration) => add('error', message, title, duration),
   info: (message, title, duration) => add('info', message, title, duration),
   warning: (message, title, duration) => add('warning', message, title, duration),
-  /** Devuelve el id para cerrarlo manualmente con toast.dismiss(id) */
+  /** Returns the id so it can be closed manually with toast.dismiss(id) */
   loading: (message, title) => add('loading', message, title),
   dismiss,
 };

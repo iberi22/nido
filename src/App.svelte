@@ -4,203 +4,143 @@
   import Toolbar from './lib/Toolbar.svelte';
   import FloorSelector from './lib/FloorSelector.svelte';
   import { floorPlanStore } from './lib/stores/floorPlanStore.svelte';
+  import { Button, Card, Badge, StatusBadge, Tabs, Toaster } from '@swal/ui';
+  import { toast } from './lib/vendor/swal-ui/lib/toast.svelte.js';
 
-  let currentView = $state('2d'); // '2d' | '3d'
+  let currentView = $state<'2d' | '3d'>('2d');
+  let activeTab = $state('plan');
+  let showExport = $state(false);
+  let exportStatus = $state<'idle' | 'done' | 'error'>('idle');
+
+  function handleExport() {
+    try {
+      const json = JSON.stringify(floorPlanStore, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'nido-property.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      exportStatus = 'done';
+      toast.success('JSON exported');
+    } catch (e) {
+      exportStatus = 'error';
+      toast.error('Export failed: ' + String(e));
+    }
+  }
 </script>
 
-<main class="app-container">
-  <header class="header">
-    <div class="header-left">
-      <span class="logo">🏠</span>
-      <h1>Floor Plan Designer</h1>
-      <span class="project-name">Casa 3 Pisos - Parametrizado</span>
+<main class="nido-shell">
+  <header class="nido-topbar">
+    <div class="topbar-left">
+      <span class="logo-mark">🏠</span>
+      <div class="brand">
+        <h1 class="brand-title">NIDO</h1>
+        <span class="brand-sub">Intelligent Home Administration</span>
+      </div>
+      <Badge variant="info">Casa 3 Pisos</Badge>
+      <StatusBadge status="healthy">Local</StatusBadge>
     </div>
 
-    <div class="view-selector">
-      <button
-        class:active={currentView === '2d'}
-        onclick={() => currentView = '2d'}
-      >
-        ✏️ Editor 2D
-      </button>
-      <button
-        class:active={currentView === '3d'}
-        onclick={() => currentView = '3d'}
-      >
-        🧊 Visor 3D
-      </button>
+    <div class="topbar-center">
+      <Tabs bind:value={activeTab}>
+        <button class="swal-tab" class:active={activeTab === 'plan'} onclick={() => (activeTab = 'plan')}>Plans</button>
+        <button class="swal-tab" class:active={activeTab === 'inventory'} onclick={() => (activeTab = 'inventory')}>Inventory</button>
+        <button class="swal-tab" class:active={activeTab === 'taxes'} onclick={() => (activeTab = 'taxes')}>Taxes</button>
+        <button class="swal-tab" class:active={activeTab === 'maintenance'} onclick={() => (activeTab = 'maintenance')}>Maintenance</button>
+      </Tabs>
     </div>
 
-    <div class="header-right">
-      <button class="btn primary">📤 Exportar JSON</button>
+    <div class="topbar-right">
+      <Button variant="ghost" size="sm" onclick={() => (currentView = '2d')}>2D</Button>
+      <Button variant="ghost" size="sm" onclick={() => (currentView = '3d')}>3D</Button>
+      <Button variant="primary" size="sm" onclick={handleExport}>Export</Button>
     </div>
   </header>
 
-  <div class="content">
-    <aside class="sidebar">
-      <FloorSelector />
-
+  <div class="nido-content">
+    <aside class="nido-sidebar">
+      <Card>
+        <FloorSelector />
+      </Card>
       {#if currentView === '2d'}
-        <Toolbar />
-        <div class="properties-panel">
-          <h3>⚙️ Parámetros Globales</h3>
+        <Card>
+          <Toolbar />
+        </Card>
+        <Card>
+          <h3 class="panel-title">⚙️ Global Parameters</h3>
           <div class="param-group">
-            <label>Ancho Muros (m)</label>
-            <input
-              type="number"
-              step="0.05"
-              bind:value={floorPlanStore.config.wallThickness}
-            />
+            <label for="wall-thickness">Wall thickness (m)</label>
+            <input id="wall-thickness" type="number" step="0.05" bind:value={floorPlanStore.config.wallThickness} />
           </div>
           <div class="param-group">
-            <label>Escala (px/m)</label>
-            <input
-              type="number"
-              bind:value={floorPlanStore.config.scale}
-            />
+            <label for="scale">Scale (px/m)</label>
+            <input id="scale" type="number" bind:value={floorPlanStore.config.scale} />
           </div>
-        </div>
+        </Card>
       {/if}
-
-      <div class="info-panel">
-        <h3>ℹ️ Info Proyecto</h3>
-        <p>Terreno: {floorPlanStore.config.plot.width}m × {floorPlanStore.config.plot.height}m</p>
-        <p>Área: {floorPlanStore.config.plot.width * floorPlanStore.config.plot.height}m²</p>
-        <p>Piso Actual: {floorPlanStore.currentFloor.name}</p>
-      </div>
     </aside>
 
-    <div class="viewport">
+    <section class="nido-main">
       {#if currentView === '2d'}
         <CanvasStage />
       {:else}
         <Scene3D />
       {/if}
-    </div>
+    </section>
   </div>
+
+  <Toaster />
 </main>
 
 <style>
   :global(body) {
     margin: 0;
-    font-family: 'Inter', system-ui, sans-serif;
-    color: #1e293b;
-    height: 100vh;
-    overflow: hidden;
+    background: var(--swal-bg, #020617);
+    color: var(--swal-text, #f1f5f9);
+    font-family: var(--swal-font, Inter, sans-serif);
   }
-
-  .app-container {
+  .nido-shell {
     display: flex;
     flex-direction: column;
     height: 100vh;
+    background: var(--swal-bg, #020617);
+    color: var(--swal-text, #f1f5f9);
   }
-
-  .header {
-    height: 60px;
-    background: white;
-    border-bottom: 1px solid #e2e8f0;
+  .nido-topbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    gap: 16px;
+    padding: 10px 16px;
+    background: var(--swal-elevated, #0f172a);
+    border-bottom: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));
   }
-
-  .header-left {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .topbar-left { display: flex; align-items: center; gap: 10px; }
+  .logo-mark { font-size: 22px; }
+  .brand-title { margin: 0; font-size: 16px; font-weight: 600; }
+  .brand-sub { font-size: 11px; color: var(--swal-text-secondary, #94a3b8); }
+  .topbar-center { display: flex; gap: 4px; }
+  .swal-tab {
+    background: transparent; border: none; color: var(--swal-text-secondary, #94a3b8);
+    padding: 6px 12px; cursor: pointer; border-radius: 6px; font-size: 13px;
   }
-
-  .header h1 {
-    font-size: 18px;
-    margin: 0;
-    font-weight: 700;
-  }
-
-  .project-name {
-    padding: 4px 8px;
-    background: #f1f5f9;
-    border-radius: 4px;
-    font-size: 12px;
-    color: #64748b;
-  }
-
-  .view-selector {
-    display: flex;
-    gap: 4px;
-    background: #f1f5f9;
-    padding: 4px;
-    border-radius: 8px;
-  }
-
-  .view-selector button {
-    border: none;
-    background: transparent;
-    padding: 6px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-    color: #64748b;
-    transition: all 0.2s;
-  }
-
-  .view-selector button.active {
-    background: white;
-    color: #2563eb;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  }
-
-  .btn {
-    padding: 8px 16px;
-    border-radius: 6px;
-    border: none;
-    cursor: pointer;
-    font-weight: 500;
-  }
-
-  .btn.primary {
-    background: #2563eb;
-    color: white;
-  }
-
-  .content {
-    flex: 1;
-    display: flex;
-    overflow: hidden;
-  }
-
-  .sidebar {
-    width: 280px;
-    background: white;
-    border-right: 1px solid #e2e8f0;
-    display: flex;
-    flex-direction: column;
+  .swal-tab.active, .swal-tab:hover { color: var(--swal-accent, #06b6d4); background: rgba(6, 182, 212, 0.1); }
+  .topbar-right { display: flex; gap: 6px; }
+  .swal-active { box-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
+  .nido-content { display: flex; flex: 1; min-height: 0; }
+  .nido-sidebar {
+    width: 280px; padding: 12px; display: flex; flex-direction: column; gap: 12px;
+    background: var(--swal-elevated, #0f172a); border-right: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));
     overflow-y: auto;
   }
-
-  .viewport {
-    flex: 1;
-    display: flex;
-    position: relative;
-    background: #f8fafc;
+  .panel-title { margin: 0 0 8px; font-size: 13px; color: var(--swal-text-secondary, #94a3b8); }
+  .param-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
+  .param-group label { font-size: 12px; color: var(--swal-text-secondary, #94a3b8); }
+  .param-group input {
+    background: var(--swal-surface, rgba(15, 23, 42, 0.8)); border: 1px solid var(--swal-border, rgba(255, 255, 255, 0.12));
+    color: var(--swal-text, #f1f5f9); border-radius: 6px; padding: 6px 8px; font-size: 13px;
   }
-
-  .properties-panel, .info-panel {
-    padding: 16px;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  h3 {
-    margin: 0 0 10px 0;
-    font-size: 14px;
-    color: #475569;
-  }
-
-  p {
-    font-size: 13px;
-    color: #64748b;
-    margin: 4px 0;
-  }
+  .nido-main { flex: 1; min-width: 0; background: var(--swal-void, #000); position: relative; }
 </style>

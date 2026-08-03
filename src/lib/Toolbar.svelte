@@ -1,20 +1,21 @@
 <script lang="ts">
   import { floorPlanStore } from './stores/floorPlanStore.svelte';
+  import { Button } from '@swal/ui';
 
   const tools = [
-    { id: 'select', icon: '🖱️', label: 'Seleccionar' },
-    { id: 'dimension', icon: '📏', label: 'Medir' },
-    { id: 'delete', icon: '🗑️', label: 'Eliminar', danger: true }
+    { id: 'select', icon: '🖱️', label: 'Select' },
+    { id: 'dimension', icon: '📏', label: 'Measure' },
+    { id: 'delete', icon: '🗑️', label: 'Delete', danger: true }
   ];
 
   const libraryItems = [
-    { type: 'wall', icon: '🧱', label: 'Muro' },
-    { type: 'door', icon: '🚪', label: 'Puerta' },
-    { type: 'sliding_door', icon: '↔️', label: 'C. Corrediza' },
-    { type: 'window', icon: '🪟', label: 'Ventana' },
-    { type: 'furniture', icon: '🪑', label: 'Mueble' },
-    { type: 'motorcycle', icon: '🏍️', label: 'Moto' },
-    { type: 'car', icon: '🚗', label: 'Carro' }
+    { type: 'wall', icon: '🧱', label: 'Wall' },
+    { type: 'door', icon: '🚪', label: 'Door' },
+    { type: 'sliding_door', icon: '↔️', label: 'Sliding door' },
+    { type: 'window', icon: '🪟', label: 'Window' },
+    { type: 'furniture', icon: '🪑', label: 'Furniture' },
+    { type: 'motorcycle', icon: '🏍️', label: 'Motorcycle' },
+    { type: 'car', icon: '🚗', label: 'Car' }
   ];
 
   function selectTool(toolId: string) {
@@ -28,114 +29,45 @@
 </script>
 
 <div class="toolbar">
-  <h3>✏️ Herramientas</h3>
+  <h3 class="panel-title">✏️ Tools</h3>
   <div class="tool-grid">
     {#each tools as tool}
-      <button
-        class="tool-btn"
-        class:active={floorPlanStore.currentTool === tool.id}
-        class:danger={tool.danger}
+      <Button
+        variant={tool.danger ? 'danger' : 'ghost'}
+        size="sm"
         onclick={() => selectTool(tool.id)}
         title={tool.label}
       >
         <span class="icon">{tool.icon}</span>
         <span class="label">{tool.label}</span>
-      </button>
+      </Button>
     {/each}
   </div>
 
   <div class="separator"></div>
 
-  <h3>📚 Biblioteca</h3>
+  <h3 class="panel-title">📚 Library</h3>
   <div class="tool-grid">
     {#each libraryItems as item}
-      <div
-        class="tool-btn draggable"
-        draggable="true"
+      <Button
+        variant="ghost"
+        size="sm"
+        draggable={true}
         ondragstart={(e) => handleDragStart(e, item.type)}
-        title="Arrastra al plano"
-        role="button"
-        tabindex="0"
+        title={item.label}
       >
         <span class="icon">{item.icon}</span>
         <span class="label">{item.label}</span>
-      </div>
+      </Button>
     {/each}
   </div>
 </div>
 
 <style>
-  .toolbar {
-    padding: 16px;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  h3 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    color: #475569;
-  }
-
-  .separator {
-    height: 1px;
-    background: #e2e8f0;
-    margin: 16px 0;
-  }
-
-  .tool-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .tool-btn {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 12px 8px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .tool-btn:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-  }
-
-  .tool-btn.active {
-    background: #2563eb;
-    border-color: #1d4ed8;
-    color: white;
-  }
-
-  .tool-btn.danger {
-    color: #dc2626;
-  }
-
-  .tool-btn.danger.active {
-    background: #dc2626;
-    border-color: #b91c1c;
-    color: white;
-  }
-
-  .draggable {
-    cursor: grab;
-    border-style: dashed;
-  }
-  .draggable:active {
-    cursor: grabbing;
-  }
-
-  .icon {
-    font-size: 20px;
-  }
-
-  .label {
-    font-size: 11px;
-    font-weight: 500;
-  }
+  .toolbar { display: flex; flex-direction: column; gap: 8px; }
+  .panel-title { margin: 0 0 4px; font-size: 13px; color: var(--swal-text-secondary, #94a3b8); }
+  .tool-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+  .icon { font-size: 14px; }
+  .label { font-size: 11px; }
+  .separator { height: 1px; background: var(--swal-border, rgba(255, 255, 255, 0.08)); margin: 4px 0; }
 </style>
