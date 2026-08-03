@@ -1,5 +1,6 @@
 // Floor Plan Store - Svelte 5 Runes
 import houseData from '../data/house-data.json';
+import type { Property, Floor, Zone, Room, Item, Taxes, Lease, Maintenance, Utility } from '../domain/property';
 
 // --- New Component Architecture ---
 
@@ -40,27 +41,89 @@ export class FloorPlanStore {
   zoom = $state(100);
   selectedComponentId = $state<string | null>(null);
 
+  // Canonical Property reactive state
+  property = $state<Property>({
+    id: 'casa-3-pisos-cali',
+    name: 'Casa 3 Pisos - Barrio Santa Elena',
+    type: 'house',
+    location: { city: 'Cali', comuna: 'Comuna 10', estrato: 3, geohash: 'd0ybf91z' },
+    floors: [],
+    rooms: [],
+    items: [],
+    taxes: {
+      predial: {
+        jurisdiction: 'Cali',
+        avaluo: 150000000,
+        rate_pct: 0.008,
+        installments: 4,
+        dueDates: ['2026-03-31', '2026-06-30', '2026-09-30', '2026-12-31']
+      }
+    },
+    leases: [],
+    maintenance: [],
+    utilities: []
+  });
+
   // Data
-  config: FloorPlanConfig = houseData.config;
-  project = houseData.project;
-  norms = houseData.norms;
+  config = $state<FloorPlanConfig>({
+    wallThickness: 0.15,
+    scale: 50,
+    plot: { width: 6, height: 26, margin: 100 },
+    colors: {}
+  });
+
+  norms = $state<any>({});
+
+  project = $derived({
+    name: this.property.name,
+    location: `${this.property.location.city}, Colombia - ${this.property.location.comuna}`,
+    estrato: this.property.location.estrato,
+    maxPisos: 5,
+    norma: "NSR-10 / POT Acuerdo 069-2000"
+  });
 
   // Floors map (reactive)
   floors = $state<Record<string, FloorState>>({});
 
   constructor() {
-    this.initData();
+    this.initPersistence();
   }
 
-  // Initialize from static JSON (Migration Logic)
-  private initData() {
-    const rawFloors = houseData.floors as Record<string, any>;
+  // Offline Persistence Initializer
+  private initPersistence() {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const cached = window.localStorage.getItem('nido_property');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          this.loadProperty(parsed);
+          return;
+        } catch (e) {
+          console.error('Failed to load cached property from localStorage', e);
+        }
+      }
+    }
+    // Load fallback from seed
+    this.loadFromSeed();
+  }
 
-    Object.keys(rawFloors).forEach(key => {
-      const floorData = rawFloors[key];
+  // Load fallback seed data
+  private loadFromSeed() {
+    // houseData is typed as the migrated property seed structure
+    const seed = houseData as unknown as Property;
+    this.loadProperty(seed);
+  }
+
+  // Initialize from property array
+  private initData() {
+    this.floors = {};
+    const rawFloors = this.property.floors;
+
+    rawFloors.forEach(floorData => {
+      const key = floorData.id;
       // Resolve reference if needed (like 'third' ref 'second')
-      const sourceData = floorData.ref && rawFloors[floorData.ref]
-        ? { ...JSON.parse(JSON.stringify(rawFloors[floorData.ref])), ...floorData }
+      const sourceData = floorData.ref
+        ? { ...JSON.parse(JSON.stringify(rawFloors.find(f => f.id === floorData.ref))), ...floorData }
         : floorData;
 
       this.floors[key] = {
@@ -82,12 +145,7 @@ export class FloorPlanStore {
       components.push({
         id: z.id || crypto.randomUUID(),
         type: 'zone',
-        x: z.x, y: z.y, // Keep internal coordinates (will be scaled by renderer or here?)
-        // NOTE: The previous renderer multiplied by SCALE at render time.
-        // To make the editor consistent, we should store RAW units (meters) and scale in renderer,
-        // OR store SCALED units (pixels).
-        // Decision: Store RAW METERS in Component state to respect "CAD" precision,
-        // renderers apply config.scale.
+        x: z.x, y: z.y,
         width: z.width,
         height: z.height,
         rotation: 0,
@@ -95,7 +153,8 @@ export class FloorPlanStore {
         properties: {
           name: z.name,
           subtitle: z.subtitle,
-          color: z.color || this.config.colors.zone_fill
+          color: z.color || this.config.colors.zone_fill,
+          type: z.type
         },
         locked: true // Zones usually locked background
       });
@@ -103,18 +162,17 @@ export class FloorPlanStore {
 
     // 2. Walls -> Components
     source.walls?.forEach((w: any, i: number) => {
-      // Wall defined by x1,y1 -> x2,y2
       components.push({
         id: w.id || `wall-${i}-${crypto.randomUUID()}`,
         type: 'wall',
         x: Math.min(w.x1, w.x2),
         y: Math.min(w.y1, w.y2),
-        width: Math.abs(w.x2 - w.x1) || this.config.wallThickness, // Vertical wall width is thickness
-        height: Math.abs(w.y2 - w.y1) || this.config.wallThickness, // Horizontal wall height is thickness
+        width: Math.abs(w.x2 - w.x1) || this.config.wallThickness,
+        height: Math.abs(w.y2 - w.y1) || this.config.wallThickness,
         layer: 'structure',
         rotation: 0,
         properties: {
-          x1: w.x1, y1: w.y1, x2: w.x2, y2: w.y2, // Keep original points for now
+          x1: w.x1, y1: w.y1, x2: w.x2, y2: w.y2,
           thickness: this.config.wallThickness,
           note: w.note
         }
@@ -132,7 +190,7 @@ export class FloorPlanStore {
         x: el.x,
         y: el.y,
         width: el.width,
-        height: el.height || (el.width ? el.width : 0), // Fallback
+        height: el.height || (el.width ? el.width : 0),
         rotation: el.rotation || 0,
         layer: layer,
         properties: {
@@ -147,10 +205,10 @@ export class FloorPlanStore {
       components.push({
         id: 'stairs-main',
         type: 'stairs',
-        x: 0, y: 0, // Stairs usually have absolute positioning in their sub-components
+        x: 0, y: 0,
         layer: 'structure',
         properties: {
-          data: source.stairs // Keep raw data for custom renderer
+          data: source.stairs
         }
       });
     }
@@ -172,6 +230,216 @@ export class FloorPlanStore {
     });
 
     return components;
+  }
+
+  // --- Canonical Property Load/Save & Offline Persistence ---
+
+  loadProperty(prop: Property) {
+    this.property = prop;
+    if (prop.config) {
+      this.config = prop.config;
+    }
+    if (prop.norms) {
+      this.norms = prop.norms;
+    }
+    this.initData();
+  }
+
+  saveProperty(): Property {
+    // Sync current components from floors record back to property.floors before saving
+    this.property.floors = this.property.floors.map(floor => {
+      const liveFloor = this.floors[floor.id];
+      if (liveFloor) {
+        return {
+          ...floor,
+          zones: liveFloor.components
+            .filter(c => c.type === 'zone')
+            .map(c => ({
+              id: c.id,
+              name: c.properties.name,
+              subtitle: c.properties.subtitle,
+              x: c.x, y: c.y, width: c.width || 0, height: c.height || 0,
+              type: c.properties.type || 'zone',
+              color: c.properties.color
+            })),
+          walls: liveFloor.components
+            .filter(c => c.type === 'wall')
+            .map(c => ({
+              id: c.id,
+              x1: c.properties.x1 ?? c.x,
+              y1: c.properties.y1 ?? c.y,
+              x2: c.properties.x2 ?? (c.x + (c.width || 0)),
+              y2: c.properties.y2 ?? (c.y + (c.height || 0)),
+              note: c.properties.note
+            })),
+          elements: liveFloor.components
+            .filter(c => ['door', 'sliding_door', 'garage_door', 'pedestrian_door', 'car', 'motorcycle', 'furniture'].includes(c.type) || c.layer === 'furniture')
+            .map(c => ({
+              type: c.type,
+              x: c.x, y: c.y,
+              width: c.width || 0, height: c.height || 0,
+              rotation: c.rotation || 0,
+              note: c.properties.note
+            })),
+          stairs: liveFloor.components.find(c => c.type === 'stairs')?.properties.data || floor.stairs,
+          dimensions: liveFloor.components
+            .filter(c => c.type === 'dimension')
+            .map(c => ({
+              from: [c.x, c.y],
+              to: [c.properties.toX ?? c.x, c.properties.toY ?? c.y],
+              label: c.properties.label,
+              side: c.properties.side,
+              note: c.properties.note
+            }))
+        };
+      }
+      return floor;
+    });
+
+    // Keep config & norms synced in canonical property
+    this.property.config = this.config;
+    this.property.norms = this.norms;
+
+    // LocalStorage sync
+    if (typeof window !== 'undefined' && window.localStorage) {
+      window.localStorage.setItem('nido_property', JSON.stringify(this.property));
+    }
+
+    // Async call to IndexedDB stub
+    this.saveToIndexedDB(this.property);
+
+    return this.property;
+  }
+
+  private async saveToIndexedDB(prop: Property): Promise<void> {
+    if (typeof window === 'undefined' || !window.indexedDB) {
+      return;
+    }
+    return new Promise((resolve) => {
+      try {
+        const request = window.indexedDB.open('NidoOfflineDB', 1);
+        request.onupgradeneeded = (e: any) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('properties')) {
+            db.createObjectStore('properties', { keyPath: 'id' });
+          }
+        };
+        request.onsuccess = (e: any) => {
+          const db = e.target.result;
+          const transaction = db.transaction('properties', 'readwrite');
+          const store = transaction.objectStore('properties');
+          store.put(prop);
+          resolve();
+        };
+        request.onerror = () => {
+          resolve();
+        };
+      } catch (err) {
+        resolve();
+      }
+    });
+  }
+
+  // --- CRUD Collections for Canonical Data Model ---
+
+  // Rooms CRUD
+  addRoom(room: Room) {
+    if (!this.property.rooms) this.property.rooms = [];
+    this.property.rooms.push(room);
+  }
+
+  updateRoom(id: string, updates: Partial<Room>) {
+    const room = this.property.rooms?.find(r => r.id === id);
+    if (room) {
+      Object.assign(room, updates);
+    }
+  }
+
+  removeRoom(id: string) {
+    if (this.property.rooms) {
+      this.property.rooms = this.property.rooms.filter(r => r.id !== id);
+    }
+  }
+
+  // Items CRUD
+  addItem(item: Item) {
+    if (!this.property.items) this.property.items = [];
+    this.property.items.push(item);
+  }
+
+  updateItem(id: string, updates: Partial<Item>) {
+    const item = this.property.items?.find(i => i.id === id);
+    if (item) {
+      Object.assign(item, updates);
+    }
+  }
+
+  removeItem(id: string) {
+    if (this.property.items) {
+      this.property.items = this.property.items.filter(i => i.id !== id);
+    }
+  }
+
+  // Taxes CRUD
+  updateTaxes(updates: Taxes) {
+    this.property.taxes = updates;
+  }
+
+  // Leases CRUD
+  addLease(lease: Lease) {
+    if (!this.property.leases) this.property.leases = [];
+    this.property.leases.push(lease);
+  }
+
+  updateLease(id: string, updates: Partial<Lease>) {
+    const lease = this.property.leases?.find(l => l.id === id);
+    if (lease) {
+      Object.assign(lease, updates);
+    }
+  }
+
+  removeLease(id: string) {
+    if (this.property.leases) {
+      this.property.leases = this.property.leases.filter(l => l.id !== id);
+    }
+  }
+
+  // Maintenance CRUD
+  addMaintenance(maint: Maintenance) {
+    if (!this.property.maintenance) this.property.maintenance = [];
+    this.property.maintenance.push(maint);
+  }
+
+  updateMaintenance(id: string, updates: Partial<Maintenance>) {
+    const maint = this.property.maintenance?.find(m => m.id === id);
+    if (maint) {
+      Object.assign(maint, updates);
+    }
+  }
+
+  removeMaintenance(id: string) {
+    if (this.property.maintenance) {
+      this.property.maintenance = this.property.maintenance.filter(m => m.id !== id);
+    }
+  }
+
+  // Utilities CRUD
+  addUtility(utility: Utility) {
+    if (!this.property.utilities) this.property.utilities = [];
+    this.property.utilities.push(utility);
+  }
+
+  updateUtility(id: string, updates: Partial<Utility>) {
+    const util = this.property.utilities?.find(u => u.id === id);
+    if (util) {
+      Object.assign(util, updates);
+    }
+  }
+
+  removeUtility(id: string) {
+    if (this.property.utilities) {
+      this.property.utilities = this.property.utilities.filter(u => u.id !== id);
+    }
   }
 
   // --- Actions ---
@@ -197,11 +465,8 @@ export class FloorPlanStore {
     const floor = this.currentFloor;
     const index = floor.components.findIndex(c => c.id === id);
     if (index !== -1) {
-      // Create new reference for reactivity if needed, or structuredClone
       const comp = floor.components[index];
       floor.components[index] = { ...comp, ...updates };
-
-      // If updating x/y/rotation, ensures numeric consistency
     }
   }
 
