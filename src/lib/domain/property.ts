@@ -71,6 +71,7 @@ export interface PredialTax {
   rate_pct: number;
   installments: number;
   dueDates: string[];
+  paidIndexes?: number[];
 }
 
 export interface Taxes {

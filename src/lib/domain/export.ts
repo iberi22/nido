@@ -20,9 +20,12 @@ export function buildDXF(property: Property): string {
 
   let floorIndex = 0;
   const floors = property.floors || {};
+  const floorsRecord = Array.isArray(floors)
+    ? Object.fromEntries(floors.map((f, i) => [String(i), f]))
+    : (floors as Record<string, any>);
 
-  for (const floorId of Object.keys(floors)) {
-    const floor = floors[floorId];
+  for (const floorId of Object.keys(floorsRecord)) {
+    const floor = floorsRecord[floorId];
     if (!floor || !floor.components) continue;
 
     // Lay out floors side-by-side to avoid overlap in CAD
@@ -149,14 +152,17 @@ export function buildPDF(
   });
 
   const floors = property.floors || {};
-  const floorKeys = Object.keys(floors);
+  const floorsRecord = Array.isArray(floors)
+    ? Object.fromEntries(floors.map((f, i) => [String(i), f]))
+    : (floors as Record<string, any>);
+  const floorKeys = Object.keys(floorsRecord);
 
   floorKeys.forEach((floorId, idx) => {
     if (idx > 0) {
       doc.addPage(isA1 ? 'a1' : 'a2', 'landscape');
     }
 
-    const floor = floors[floorId];
+    const floor = floorsRecord[floorId];
     if (!floor) return;
 
     // 1. Draw Blueprint Background (Dark navy)
@@ -367,10 +373,10 @@ export function buildPDF(
     // Project Details (Left Column)
     doc.setTextColor(224, 244, 255);
     doc.setFontSize(8);
-    doc.text(`PROYECTO: ${property.project?.name || 'NIDO'}`, tbX + 6, tbY + 28);
-    doc.text(`UBICACIÓN: ${property.project?.location || 'COMUNA 10, CALI'}`, tbX + 6, tbY + 33);
-    doc.text(`NORMA: ${property.project?.norma || 'NSR-10'}`, tbX + 6, tbY + 42);
-    doc.text(`ESTRATO: ${property.project?.estrato || 3} | PISOS MÁX: ${property.project?.maxPisos || 5}`, tbX + 6, tbY + 46);
+    doc.text(`PROYECTO: ${property.name || 'NIDO'}`, tbX + 6, tbY + 28);
+    doc.text(`UBICACIÓN: ${property.location?.city || 'COMUNA 10, CALI'}`, tbX + 6, tbY + 33);
+    doc.text(`NORMA: ${property.norms?.building || property.norms || 'NSR-10'}`, tbX + 6, tbY + 42);
+    doc.text(`ESTRATO: ${property.location?.estrato || 3} | PISOS MÁX: ${(property.floors || []).length}`, tbX + 6, tbY + 46);
 
     // Metadata (Right Column)
     doc.text(`ESCALA: 1:${scale}`, tbX + 86, tbY + 28);

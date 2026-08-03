@@ -869,3 +869,175 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 
 ---
 
+---
+
+## REQ-029: Accounts, auth & roles (feature accounts-auth)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature accounts-auth)*
+
+*Feature: `accounts-auth` · status: planned*
+
+## REQ-030: Costs & income tracking (feature costs)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature costs)*
+
+*Feature: `costs` · status: stable*
+
+## REQ-031: Canonical property data model (feature data-model)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature data-model)*
+
+*Feature: `data-model` · status: stable*
+
+## REQ-032: Escrow & dispute governance (feature escrow-disputes)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature escrow-disputes)*
+
+*Feature: `escrow-disputes` · status: planned*
+
+## REQ-033: Architect export (DXF/PDF/ZIP) (feature export-cad)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature export-cad)*
+
+*Feature: `export-cad` · status: stable*
+
+## REQ-034: GitCore protocol compliance (feature gitcore-compliance)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature gitcore-compliance)*
+
+*Feature: `gitcore-compliance` · status: stable*
+
+## REQ-035: Leasing: contracts & payments (feature leasing)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature leasing)*
+
+*Feature: `leasing` · status: planned*
+
+## REQ-036: edge-mesh rental network integration (feature mesh-integration)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature mesh-integration)*
+
+*Feature: `mesh-integration` · status: planned*
+
+## REQ-037: Building norms validation (feature norms-validation)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature norms-validation)*
+
+*Feature: `norms-validation` · status: stable*
+
+## REQ-038: GPS proximity discovery (feature p2p-discovery)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature p2p-discovery)*
+
+*Feature: `p2p-discovery` · status: planned*
+
+## REQ-039: 2D floor plan editor (feature plans-2d)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature plans-2d)*
+
+*Feature: `plans-2d` · status: planned*
+
+## REQ-040: 3D viewer (feature plans-3d)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature plans-3d)*
+
+*Feature: `plans-3d` · status: planned*
+
+## REQ-041: PWA offline-first (feature pwa-offline)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature pwa-offline)*
+
+*Feature: `pwa-offline` · status: stable*
+
+## REQ-042: Property tax (predial) tracking (feature taxes)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature taxes)*
+
+*Feature: `taxes` · status: partial*
+
+## REQ-043: Tenant portal (feature tenant-portal)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature tenant-portal)*
+
+*Feature: `tenant-portal` · status: planned*
+
+## REQ-044: Toolchain & local CI (feature toolchain-ci)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature toolchain-ci)*
+
+*Feature: `toolchain-ci` · status: stable*
+
+## REQ-045: Cross-app verified trust score (feature trust-score)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature trust-score)*
+
+*Feature: `trust-score` · status: planned*
+
+## REQ-046: UI on @swal/ui (feature ui-swal)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature ui-swal)*
+
+*Feature: `ui-swal` · status: planned*
+
+## REQ-047: Verified 1-time invitations (feature verified-invitations)
+
+- **Category:** Functional
+- **Priority:** P2
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature verified-invitations)*
+
+*Feature: `verified-invitations` · status: planned*

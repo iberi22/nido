@@ -1,11 +1,12 @@
 <script lang="ts">
   import { floorPlanStore } from './stores/floorPlanStore.svelte';
+  import { Button } from '@swal/ui';
 
   const floors = [
-    { id: 'ground', icon: '🏗️', label: 'Piso 1 (4m)', description: 'Bodega/Parqueadero' },
-    { id: 'second', icon: '🏠', label: 'Piso 2', description: 'Apartamentos' },
-    { id: 'third', icon: '🏢', label: 'Piso 3', description: 'Apartamentos' },
-    { id: 'roof', icon: '☁️', label: 'Terraza', description: 'Área social' }
+    { id: 'ground', icon: '🏗️', label: 'Floor 1 (4m)', description: 'Bodega/Parking' },
+    { id: 'second', icon: '🏠', label: 'Floor 2', description: 'Apartments' },
+    { id: 'third', icon: '🏢', label: 'Floor 3', description: 'Apartments' },
+    { id: 'roof', icon: '☁️', label: 'Terrace', description: 'Social area' }
   ];
 
   function selectFloor(floorId: string) {
@@ -14,82 +15,31 @@
 </script>
 
 <div class="floor-selector">
-  <h3>📋 Piso</h3>
+  <h3 class="panel-title">📋 Floor</h3>
   <div class="floor-buttons">
     {#each floors as floor}
-      <button
-        class="floor-btn"
-        class:active={floorPlanStore.currentFloorId === floor.id}
+      <Button
+        variant={floorPlanStore.currentFloorId === floor.id ? 'primary' : 'ghost'}
+        size="sm"
+        fullWidth
         onclick={() => selectFloor(floor.id)}
       >
         <span class="icon">{floor.icon}</span>
-        <div class="info">
+        <span class="info">
           <span class="label">{floor.label}</span>
           <span class="desc">{floor.description}</span>
-        </div>
-      </button>
+        </span>
+      </Button>
     {/each}
   </div>
 </div>
 
 <style>
-  .floor-selector {
-    padding: 16px;
-    border-bottom: 1px solid #e2e8f0;
-  }
-
-  h3 {
-    margin: 0 0 12px 0;
-    font-size: 14px;
-    color: #475569;
-  }
-
-  .floor-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .floor-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    text-align: left;
-  }
-
-  .floor-btn:hover {
-    background: #f1f5f9;
-    border-color: #cbd5e1;
-  }
-
-  .floor-btn.active {
-    background: #2563eb;
-    border-color: #1d4ed8;
-    color: white;
-  }
-
-  .icon {
-    font-size: 24px;
-  }
-
-  .info {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .label {
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-  .desc {
-    font-size: 11px;
-    opacity: 0.7;
-  }
+  .floor-selector { display: flex; flex-direction: column; gap: 8px; }
+  .panel-title { margin: 0 0 4px; font-size: 13px; color: var(--swal-text-secondary, #94a3b8); }
+  .floor-buttons { display: flex; flex-direction: column; gap: 6px; }
+  .icon { font-size: 14px; }
+  .info { display: flex; flex-direction: column; align-items: flex-start; }
+  .label { font-size: 12px; font-weight: 500; }
+  .desc { font-size: 10px; opacity: 0.7; }
 </style>

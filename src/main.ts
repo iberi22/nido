@@ -1,5 +1,6 @@
 import { mount } from 'svelte';
 import './app.css';
+import '@swal/ui/tokens';
 import App from './App.svelte';
 import { initDatabaseSync } from './lib/stores/sync.svelte';
 
