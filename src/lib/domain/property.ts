@@ -22,6 +22,15 @@ export interface Zone {
   width: number;
   height: number;
   color?: string;
+  // Norms-validation extension (REQ-011): stair geometry for NSR-10 checks
+  stairs?: {
+    type?: string;
+    totalSteps?: number;
+    riser_mm?: number;
+    tread_mm?: number;
+    totalRise_m?: number;
+  };
+  properties?: Record<string, any>;
 }
 
 export interface Floor {
