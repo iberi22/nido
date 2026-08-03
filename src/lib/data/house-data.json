@@ -1,10 +1,26 @@
 {
-  "project": {
-    "name": "Casa 3 Pisos - Barrio Santa Elena",
-    "location": "Cali, Colombia - Comuna 10",
+  "id": "casa-3-pisos-cali",
+  "name": "Casa 3 Pisos - Barrio Santa Elena",
+  "type": "house",
+  "location": {
+    "city": "Cali",
+    "comuna": "Comuna 10",
     "estrato": 3,
-    "maxPisos": 5,
-    "norma": "NSR-10 / POT Acuerdo 069-2000"
+    "geohash": "d0ybf91z"
+  },
+  "norms": {
+    "NSR10_stairs": {
+      "minWidth_m": 0.90,
+      "tread_min_mm": 280,
+      "riser_min_mm": 100,
+      "riser_max_mm": 180,
+      "formula": "2R + H = 620-640mm"
+    },
+    "POT_garage": {
+      "minWidth_m": 2.60,
+      "minDepth_m": 5.00,
+      "accessWidth_independent_m": 3.20
+    }
   },
   "config": {
     "wallThickness": 0.15,
@@ -24,22 +40,9 @@
       "zone_fill": "rgba(135, 206, 235, 0.06)"
     }
   },
-  "norms": {
-    "NSR10_stairs": {
-      "minWidth_m": 0.90,
-      "tread_min_mm": 280,
-      "riser_min_mm": 100,
-      "riser_max_mm": 180,
-      "formula": "2R + H = 620-640mm"
-    },
-    "POT_garage": {
-      "minWidth_m": 2.60,
-      "minDepth_m": 5.00,
-      "accessWidth_independent_m": 3.20
-    }
-  },
-  "floors": {
-    "ground": {
+  "floors": [
+    {
+      "id": "ground",
       "name": "PLANTA BAJA (PISO 1)",
       "subtitle": "ALTURA 4M - SIN COLUMNAS INTERIORES",
       "height_m": 4.0,
@@ -141,7 +144,8 @@
         { "from": [2.5, 6.3], "to": [3.5, 6.3], "label": "1,0m", "side": "bottom", "note": "P. Bodega" }
       ]
     },
-    "second": {
+    {
+      "id": "second",
       "name": "PISO 2 - APARTAMENTOS",
       "subtitle": "ESTILO JAPONÉS COMPACTO - ALTURA 2.8M",
       "height_m": 2.8,
@@ -187,12 +191,15 @@
       },
       "elements": []
     },
-    "third": {
+    {
+      "id": "third",
       "name": "PISO 3 - APARTAMENTOS",
       "subtitle": "PISO IDÉNTICO AL PISO 2",
-      "ref": "second"
+      "ref": "second",
+      "zones": []
     },
-    "roof": {
+    {
+      "id": "roof",
       "name": "TERRAZA - AZOTEA",
       "subtitle": "ÁREA SOCIAL ABIERTA - PANELES SOLARES OPCIONALES",
       "height_m": 0,
@@ -204,5 +211,68 @@
       ],
       "elements": []
     }
-  }
+  ],
+  "rooms": [
+    {
+      "id": "room-ground-garage",
+      "floorId": "ground",
+      "zoneId": "garage",
+      "name": "Principal Garage",
+      "area_m2": 15,
+      "items": []
+    }
+  ],
+  "items": [
+    {
+      "id": "item-camera-01",
+      "roomId": "room-ground-garage",
+      "name": "Seguridad Camara",
+      "category": "security",
+      "value": 250000,
+      "warrantyUntil": "2027-12-31"
+    }
+  ],
+  "taxes": {
+    "predial": {
+      "jurisdiction": "Cali",
+      "avaluo": 150000000,
+      "rate_pct": 0.008,
+      "installments": 4,
+      "dueDates": [
+        "2026-03-31",
+        "2026-06-30",
+        "2026-09-30",
+        "2026-12-31"
+      ]
+    }
+  },
+  "leases": [],
+  "maintenance": [
+    {
+      "id": "maint-elevator-01",
+      "itemId": "item-camera-01",
+      "type": "Camara Cleaning",
+      "interval_days": 180,
+      "lastDone": "2026-01-15",
+      "nextDue": "2026-07-15"
+    }
+  ],
+  "utilities": [
+    {
+      "id": "water-01",
+      "type": "water",
+      "provider": "EMCALI",
+      "account": "123-456",
+      "dueDay": 15,
+      "budget": 80000
+    },
+    {
+      "id": "energy-01",
+      "type": "energy",
+      "provider": "EMCALI",
+      "account": "789-012",
+      "dueDay": 18,
+      "budget": 150000
+    }
+  ]
 }
