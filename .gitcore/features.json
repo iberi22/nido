@@ -231,9 +231,9 @@
       "phase": 4,
       "passes": true,
       "status": "stable",
-      "progress_pct": 85,
-      "claimed_pct": 85,
-      "verified_pct": 85,
+      "progress_pct": 90,
+      "claimed_pct": 90,
+      "verified_pct": 90,
       "req_ids": [
         "REQ-017"
       ],
@@ -640,9 +640,9 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 85,
-      "claimed_pct": 85,
-      "verified_pct": 85,
+      "progress_pct": 90,
+      "claimed_pct": 90,
+      "verified_pct": 90,
       "req_ids": [
         "REQ-025"
       ],
@@ -678,11 +678,11 @@
       "name": "Property tax (predial) tracking",
       "sdlc_phase": "PENDING",
       "phase": 3,
-      "passes": false,
-      "status": "partial",
-      "progress_pct": 70,
-      "claimed_pct": 70,
-      "verified_pct": 60,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 90,
+      "claimed_pct": 90,
+      "verified_pct": 90,
       "req_ids": [
         "REQ-015"
       ],
@@ -706,7 +706,7 @@
         "src/lib/domain/taxes.ts"
       ],
       "last_updated": null,
-      "notes": "code delivered, test files empty — re-dispatch tests",
+      "notes": "implemented locally 2026-08-03 (was empty from PR #14); 5 tests passing",
       "last_verified": "2026-08-03"
     },
     {
@@ -754,9 +754,9 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 85,
-      "claimed_pct": 85,
-      "verified_pct": 85,
+      "progress_pct": 90,
+      "claimed_pct": 90,
+      "verified_pct": 90,
       "req_ids": [
         "REQ-028"
       ],
@@ -775,13 +775,14 @@
         }
       ],
       "implemented_in": [
-        "package.json",
         "vitest.config.ts",
         "playwright.config.ts",
+        "package.json",
         "scripts/"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-03",
+      "notes": "vitest+playwright+vite-plugin-pwa installed; 58 unit tests running"
     },
     {
       "id": "trust-score",
@@ -826,11 +827,11 @@
       "name": "UI on @swal/ui",
       "sdlc_phase": "PENDING",
       "phase": 1,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 80,
+      "claimed_pct": 80,
+      "verified_pct": 80,
       "req_ids": [
         "REQ-027"
       ],
@@ -855,9 +856,14 @@
           "req_id": "REQ-027"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": [
+        "src/App.svelte",
+        "src/lib/Toolbar.svelte",
+        "src/lib/FloorSelector.svelte",
+        "src/lib/vendor/swal-ui/"
+      ],
       "last_updated": null,
-      "notes": "FAILED: @swal/ui not on npm — needs vendoring",
+      "notes": "UI shell on vendored @swal/ui; 5 tests passing; plans-2d/3d canvas still pending",
       "last_verified": "2026-08-03"
     },
     {
@@ -865,11 +871,11 @@
       "name": "Public utilities administration",
       "sdlc_phase": "PENDING",
       "phase": 3,
-      "passes": false,
-      "status": "partial",
-      "progress_pct": 70,
-      "claimed_pct": 70,
-      "verified_pct": 60,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 90,
+      "claimed_pct": 90,
+      "verified_pct": 90,
       "req_ids": [
         "REQ-014"
       ],
@@ -898,7 +904,7 @@
         "src/lib/domain/utilities.ts"
       ],
       "last_updated": null,
-      "notes": "code delivered, test files empty — re-dispatch tests",
+      "notes": "implemented locally 2026-08-03 (was empty from PR #14); 10 tests passing",
       "last_verified": "2026-08-03"
     },
     {
