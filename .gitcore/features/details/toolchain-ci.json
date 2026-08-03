@@ -1,0 +1,44 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "toolchain-ci",
+  "name": "Toolchain & local CI",
+  "category": "process",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-028"
+  ],
+  "description": "Vitest + @testing-library/svelte unit, Playwright e2e, Biome, Vite pinned stable, verify.sh → state-report.json.",
+  "functional_summary": "Vitest + @testing-library/svelte unit, Playwright e2e, Biome, Vite pinned stable, verify.sh → state-report.json.",
+  "user_stories": [],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/toolchain-ci.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [],
+    "integration": [
+      "test/integration/toolchain-ci.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

@@ -1,0 +1,112 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "utilities",
+  "name": "Public utilities administration",
+  "category": "domain",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-014"
+  ],
+  "description": "Water/energy/gas/internet: providers, due dates, consumption, budget vs actual, split bills.",
+  "functional_summary": "Water/energy/gas/internet: providers, due dates, consumption, budget vs actual, split bills.",
+  "user_stories": [
+    {
+      "id": "US-303",
+      "as_a": "owner",
+      "i_want": "track water/energy/gas/internet consumption and due dates",
+      "so_that": "I never miss a bill and can budget",
+      "acceptance": [
+        {
+          "criterion": "Utility CRUD by type with provider, account, dueDay, budget",
+          "test": null
+        },
+        {
+          "criterion": "Consumption logging (value + date)",
+          "test": null
+        },
+        {
+          "criterion": "Budget vs actual chart",
+          "test": null
+        },
+        {
+          "criterion": "Due-date notifications",
+          "test": null
+        },
+        {
+          "criterion": "Split bill support for tenants",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Utilities",
+        "layout": "[Tabs: Water | Energy | Gas | Internet] / [Cards: provider, account, dueDay, budget, StatusBadge next-due] / [Consumption chart + Add reading]",
+        "components": [
+          "@swal/ui: Tabs, Card, Table, Input, Button, StatusBadge, Toaster",
+          "chart lib"
+        ],
+        "flow": [
+          "Register utility → log monthly reading → chart budget vs actual → due-date reminder toast → optional split bill per tenant"
+        ],
+        "states": [
+          "ok",
+          "due-soon",
+          "overdue",
+          "over-budget"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/utilities.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/utilities.test.ts",
+      "test/unit/utilities-split.test.ts"
+    ],
+    "integration": [],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "Utility CRUD by type with provider, account, dueDay, budget",
+      "test": null
+    },
+    {
+      "criterion": "Consumption logging (value + date)",
+      "test": null
+    },
+    {
+      "criterion": "Budget vs actual chart",
+      "test": null
+    },
+    {
+      "criterion": "Due-date notifications",
+      "test": null
+    },
+    {
+      "criterion": "Split bill support for tenants",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

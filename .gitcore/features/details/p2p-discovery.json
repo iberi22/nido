@@ -1,0 +1,169 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "p2p-discovery",
+  "name": "GPS proximity discovery",
+  "category": "domain",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-023"
+  ],
+  "description": "Geohash-based discovery of listings near you; listings anchored to floor plan + live presence (anti-scam).",
+  "functional_summary": "Geohash-based discovery of listings near you; listings anchored to floor plan + live presence (anti-scam).",
+  "user_stories": [
+    {
+      "id": "US-601",
+      "as_a": "landlord",
+      "i_want": "publish a listing anchored to my floor plan",
+      "so_that": "nearby people can find it",
+      "acceptance": [
+        {
+          "criterion": "Listing: property, floor plan reference, price, availability",
+          "test": null
+        },
+        {
+          "criterion": "Geohash computed from property location",
+          "test": null
+        },
+        {
+          "criterion": "Presence: landlord online indicator",
+          "test": null
+        },
+        {
+          "criterion": "Listing only visible to authorized network radius",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Publish Listing (M5)",
+        "layout": "[Modal: select property, price, availability, radius] / [Geohash badge auto] / [Live status]",
+        "components": [
+          "@swal/ui: Modal, Input, Button, Badge, StatusBadge, Toaster"
+        ],
+        "flow": [
+          "Landlord creates listing linked to plan → geohash computed → presence starts → visible to radius"
+        ],
+        "states": [
+          "draft",
+          "published",
+          "unavailable",
+          "unpublished"
+        ]
+      }
+    },
+    {
+      "id": "US-602",
+      "as_a": "renter",
+      "i_want": "discover listings near me by GPS",
+      "so_that": "I can rent in my own neighborhood",
+      "acceptance": [
+        {
+          "criterion": "GPS permission requested with consent",
+          "test": null
+        },
+        {
+          "criterion": "Listings within radius (geohash neighbors)",
+          "test": null
+        },
+        {
+          "criterion": "Sort by distance and trust score",
+          "test": null
+        },
+        {
+          "criterion": "Anonymous browsing until interest confirmed",
+          "test": null
+        },
+        {
+          "criterion": "No fake listings: listing requires plan anchor + geohash match",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Nearby Discovery (M5)",
+        "layout": "[Map/list: listings in radius sorted by distance + trust] / [Listing card: plan thumbnail, price, landlord trust badge] / [Consent banner for GPS]",
+        "components": [
+          "@swal/ui: Card, Badge, StatusBadge, Button, Input",
+          "map lib + geohash"
+        ],
+        "flow": [
+          "GPS consent → geohash neighbors fetched → sort by distance+trust → browse anonymous → express interest"
+        ],
+        "states": [
+          "consent-required",
+          "locating",
+          "results",
+          "interest-sent"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/p2p-discovery.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/p2p-discovery.test.ts"
+    ],
+    "integration": [],
+    "e2e": [
+      "test/e2e/p2p-discovery.spec.ts"
+    ]
+  },
+  "acceptance": [
+    {
+      "criterion": "Listing: property, floor plan reference, price, availability",
+      "test": null
+    },
+    {
+      "criterion": "Geohash computed from property location",
+      "test": null
+    },
+    {
+      "criterion": "Presence: landlord online indicator",
+      "test": null
+    },
+    {
+      "criterion": "Listing only visible to authorized network radius",
+      "test": null
+    },
+    {
+      "criterion": "GPS permission requested with consent",
+      "test": null
+    },
+    {
+      "criterion": "Listings within radius (geohash neighbors)",
+      "test": null
+    },
+    {
+      "criterion": "Sort by distance and trust score",
+      "test": null
+    },
+    {
+      "criterion": "Anonymous browsing until interest confirmed",
+      "test": null
+    },
+    {
+      "criterion": "No fake listings: listing requires plan anchor + geohash match",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

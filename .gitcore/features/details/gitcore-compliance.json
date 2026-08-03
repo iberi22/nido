@@ -1,0 +1,50 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "gitcore-compliance",
+  "name": "GitCore protocol compliance",
+  "category": "process",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-001",
+    "REQ-002",
+    "REQ-003",
+    "REQ-004",
+    "REQ-005",
+    "REQ-006",
+    "REQ-007"
+  ],
+  "description": "Repo complies with GitCore 3.8.0: AGENTS.md read order, SRC/SRS present, planning local, features.json source of truth.",
+  "functional_summary": "Repo complies with GitCore 3.8.0: AGENTS.md read order, SRC/SRS present, planning local, features.json source of truth.",
+  "user_stories": [],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/gitcore-compliance.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [],
+    "integration": [
+      "test/integration/gitcore-compliance.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

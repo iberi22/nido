@@ -1,0 +1,112 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "verified-invitations",
+  "name": "Verified 1-time invitations",
+  "category": "security",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-019"
+  ],
+  "description": "1-time-use token generate/verify (mimatera pattern) to invite tenant/inspector; revocable, audited.",
+  "functional_summary": "1-time-use token generate/verify (mimatera pattern) to invite tenant/inspector; revocable, audited.",
+  "user_stories": [
+    {
+      "id": "US-402",
+      "as_a": "owner",
+      "i_want": "invite a tenant/inspector with a 1-time-use token",
+      "so_that": "access is controlled and revocable",
+      "acceptance": [
+        {
+          "criterion": "POST /api/token/generate creates URL-safe 1-time token",
+          "test": null
+        },
+        {
+          "criterion": "Token consumed on first verify, creates session",
+          "test": null
+        },
+        {
+          "criterion": "Token expiry + revoke",
+          "test": null
+        },
+        {
+          "criterion": "Audit log of invitations",
+          "test": null
+        },
+        {
+          "criterion": "Role scoped at creation",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Invitations",
+        "layout": "[Table: invitee, role, token, status (active/used/revoked), expiry, created] / [Generate Invite modal: role + expiry]",
+        "components": [
+          "@swal/ui: Table, Modal, Button, Input, Badge, Toaster"
+        ],
+        "flow": [
+          "Owner generates token with role+expiry → shares link → invitee verifies (1-time) → session created with role → audit logged"
+        ],
+        "states": [
+          "active",
+          "used",
+          "expired",
+          "revoked"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/verified-invitations.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/verified-invitations.test.ts"
+    ],
+    "integration": [
+      "test/integration/verified-invitations.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "POST /api/token/generate creates URL-safe 1-time token",
+      "test": null
+    },
+    {
+      "criterion": "Token consumed on first verify, creates session",
+      "test": null
+    },
+    {
+      "criterion": "Token expiry + revoke",
+      "test": null
+    },
+    {
+      "criterion": "Audit log of invitations",
+      "test": null
+    },
+    {
+      "criterion": "Role scoped at creation",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

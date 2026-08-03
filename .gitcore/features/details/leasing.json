@@ -1,0 +1,114 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "leasing",
+  "name": "Leasing: contracts & payments",
+  "category": "domain",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-020"
+  ],
+  "description": "Lease creation with eSignature (ML-DSA-65 signed), rent collection (Stripe → Polygon), deposits, screening.",
+  "functional_summary": "Lease creation with eSignature (ML-DSA-65 signed), rent collection (Stripe → Polygon), deposits, screening.",
+  "user_stories": [
+    {
+      "id": "US-501",
+      "as_a": "landlord",
+      "i_want": "create a lease contract and collect rent",
+      "so_that": "the rental is formal and traceable",
+      "acceptance": [
+        {
+          "criterion": "Lease CRUD: tenant, start/end, rent, deposit, services included",
+          "test": null
+        },
+        {
+          "criterion": "eSignature via ML-DSA-65 signed document",
+          "test": null
+        },
+        {
+          "criterion": "Rent collection: invoice → payment (Stripe; later Polygon)",
+          "test": null
+        },
+        {
+          "criterion": "Payment history per lease",
+          "test": null
+        },
+        {
+          "criterion": "Late-payment reminders",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Leasing",
+        "layout": "[Lease list → detail: terms, services, deposit] / [Contract viewer with sign button] / [Invoices: create, status, pay] / [Payment history table]",
+        "components": [
+          "@swal/ui: Card, Table, Modal, Button, Input, Badge, StatusBadge, Toaster"
+        ],
+        "flow": [
+          "Create lease → both parties eSign (ML-DSA-65) → invoice generated monthly → tenant pays (Stripe) → receipt → late reminder if overdue"
+        ],
+        "states": [
+          "draft",
+          "signed",
+          "active",
+          "paid",
+          "late",
+          "ended"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/leasing.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/leasing.test.ts"
+    ],
+    "integration": [
+      "test/integration/leasing-payments.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "Lease CRUD: tenant, start/end, rent, deposit, services included",
+      "test": null
+    },
+    {
+      "criterion": "eSignature via ML-DSA-65 signed document",
+      "test": null
+    },
+    {
+      "criterion": "Rent collection: invoice → payment (Stripe; later Polygon)",
+      "test": null
+    },
+    {
+      "criterion": "Payment history per lease",
+      "test": null
+    },
+    {
+      "criterion": "Late-payment reminders",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

@@ -1,0 +1,104 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "costs",
+  "name": "Costs & income tracking",
+  "category": "domain",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-013"
+  ],
+  "description": "Expenses/income with receipts, categories, reports, tax-ready exports.",
+  "functional_summary": "Expenses/income with receipts, categories, reports, tax-ready exports.",
+  "user_stories": [
+    {
+      "id": "US-302",
+      "as_a": "owner",
+      "i_want": "log expenses and income with receipts",
+      "so_that": "I see my home's real cost of ownership",
+      "acceptance": [
+        {
+          "criterion": "Expense/income CRUD with category, amount, date, receipt photo",
+          "test": null
+        },
+        {
+          "criterion": "Monthly/annual summaries",
+          "test": null
+        },
+        {
+          "criterion": "Export CSV for tax filing",
+          "test": null
+        },
+        {
+          "criterion": "Budget vs actual per category",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Costs Dashboard",
+        "layout": "[Summary cards: Month spend, Year spend, Budget vs actual] / [Table: date, category, amount, receipt thumb, delete] / [Export CSV button]",
+        "components": [
+          "@swal/ui: Card, Table, Button, Input, Modal, Toaster",
+          "chart lib"
+        ],
+        "flow": [
+          "Add expense/income (category, amount, date, receipt photo) → totals recompute → CSV export",
+          "Budget per category set in ConfigEditor"
+        ],
+        "states": [
+          "entered",
+          "summarized",
+          "exported",
+          "over-budget"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/costs.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/costs.test.ts"
+    ],
+    "integration": [],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "Expense/income CRUD with category, amount, date, receipt photo",
+      "test": null
+    },
+    {
+      "criterion": "Monthly/annual summaries",
+      "test": null
+    },
+    {
+      "criterion": "Export CSV for tax filing",
+      "test": null
+    },
+    {
+      "criterion": "Budget vs actual per category",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

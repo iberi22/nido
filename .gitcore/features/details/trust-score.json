@@ -1,0 +1,114 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "trust-score",
+  "name": "Cross-app verified trust score",
+  "category": "security",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-024"
+  ],
+  "description": "Trust T1-T4: gov-ID+selfie → linked external sessions (reviews, payments, social) → on-network history → Polygon deposit.",
+  "functional_summary": "Trust T1-T4: gov-ID+selfie → linked external sessions (reviews, payments, social) → on-network history → Polygon deposit.",
+  "user_stories": [
+    {
+      "id": "US-603",
+      "as_a": "user",
+      "i_want": "link sessions from other apps to verify my identity",
+      "so_that": "my trust score is portable and scams are reduced",
+      "acceptance": [
+        {
+          "criterion": "Link providers: gov-ID, payment history, review history, social graph",
+          "test": null
+        },
+        {
+          "criterion": "Each link is an OAuth/API proof, not a manual upload",
+          "test": null
+        },
+        {
+          "criterion": "Trust score T1-T4 computed from links",
+          "test": null
+        },
+        {
+          "criterion": "Score shown with breakdown; user controls visibility",
+          "test": null
+        },
+        {
+          "criterion": "No single source can inflate score",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Trust Score (M5)",
+        "layout": "[Score card: T1-T4 bars with weights] / [Providers list: gov-ID, payments, reviews, social — each Linked/Not] / [Privacy toggles per provider]",
+        "components": [
+          "@swal/ui: Card, Badge, StatusBadge, Button, Table, Toaster"
+        ],
+        "flow": [
+          "User links provider via OAuth → proof verified server-side → score recomputes → breakdown shown → visibility toggles"
+        ],
+        "states": [
+          "no-links",
+          "partial",
+          "verified-t1",
+          "verified-t2",
+          "verified-t3",
+          "verified-t4"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/trust-score.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/trust-score.test.ts"
+    ],
+    "integration": [
+      "test/integration/trust-score.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "Link providers: gov-ID, payment history, review history, social graph",
+      "test": null
+    },
+    {
+      "criterion": "Each link is an OAuth/API proof, not a manual upload",
+      "test": null
+    },
+    {
+      "criterion": "Trust score T1-T4 computed from links",
+      "test": null
+    },
+    {
+      "criterion": "Score shown with breakdown; user controls visibility",
+      "test": null
+    },
+    {
+      "criterion": "No single source can inflate score",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

@@ -1,5 +1,5 @@
 ---
-title: "Implementar Exportación Profesional para Arquitectos (DXF/PDF)"
+title: "Professional Architect Export (DXF/PDF)"
 labels:
   - enhancement
   - architect-tools
@@ -7,22 +7,33 @@ labels:
 assignees: []
 ---
 
-## Descripción
-Habilitar una funcionalidad profesional para compartir el diseño de la casa con arquitectos, permitiendo la interoperabilidad con software CAD (AutoCAD, Revit) y la presentación formal de planos.
+## Description
 
-## Enfoque Técnico Recomendado
-1. **Exportación DXF (Vectorial)**: Generar archivos DXF directamente desde el modelo JSON. Esto permitirá al arquitecto importar el plano sin perder precisión ni escalas. Usaremos `dxf-writer` o una implementación manual de la especificación DXF.
-2. **Plano Técnico PDF**: Exportar un PDF de alta resolución que incluya un "Cajetín Arquitectónico" (Título, Escala 1:50, Fecha, Propietario) similar a la estética blueprint implementada.
-3. **Parametrización JSON**: El archivo JSON servirá como el "modelo fuente" para cualquier modificación posterior por parte del arquitecto si usa herramientas compatibles.
+Enable a professional feature to share the house design with architects, enabling
+interoperability with CAD software (AutoCAD, Revit) and formal presentation of
+floor plans. Maps to NIDO feature `export-cad` (REQ-017, US-104).
 
-## Tareas
-- [ ] Investigar e instalar librería `dxf-writer` o equivalente para Svelte.
-- [ ] Implementar mapeador `JSON -> DXF` (Muros, Zonas, Dimensiones).
-- [ ] Crear componente de "Cajetín" (Title Block) para exportaciones formales.
-- [ ] Implementar exportación PDF usando `html2canvas` + `jsPDF` con DPI alto (300dpi).
-- [ ] Añadir botón "Generar Paquete para Arquitecto" (ZIP con JSON, DXF y PDF).
+## Recommended Technical Approach
 
-## Criterios de Aceptación
-- El archivo DXF abre correctamente en un visor CAD conservando las medidas.
-- El PDF exportado mantiene la escala y es legible en tamaño A1/A2.
-- Se incluye la información del ancho de los muros (15cm) en los metadatos.
+1. **DXF Export (Vector)**: Generate DXF files directly from the JSON model. This
+   lets the architect import the plan without losing precision or scales. Use
+   `dxf-writer` or a manual implementation of the DXF specification.
+2. **Technical PDF**: Export a high-resolution PDF including an Architectural
+   Title Block (Title, Scale 1:50, Date, Owner) matching the blueprint aesthetic
+   already implemented.
+3. **JSON Parametrization**: The JSON file serves as the "source model" for any
+   later modification by the architect using compatible tools.
+
+## Tasks
+
+- [ ] Research and install `dxf-writer` or equivalent for Svelte.
+- [ ] Implement `JSON -> DXF` mapper (Walls, Zones, Dimensions).
+- [ ] Create the Title Block component for formal exports.
+- [ ] Implement PDF export using `html2canvas` + `jsPDF` at high DPI (300dpi).
+- [ ] Add "Generate Architect Package" button (ZIP with JSON, DXF and PDF).
+
+## Acceptance Criteria
+
+- The DXF file opens correctly in a CAD viewer preserving the measurements.
+- The exported PDF keeps the scale and is legible at A1/A2 size.
+- Wall width info (15cm) is included in the metadata.

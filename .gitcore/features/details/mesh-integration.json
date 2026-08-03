@@ -1,0 +1,102 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "mesh-integration",
+  "name": "edge-mesh rental network integration",
+  "category": "core",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-022"
+  ],
+  "description": "edge-mesh namespace swal/nido/{instanceId}: presence, authz, chat, governance, ML-DSA-65 identity.",
+  "functional_summary": "edge-mesh namespace swal/nido/{instanceId}: presence, authz, chat, governance, ML-DSA-65 identity.",
+  "user_stories": [
+    {
+      "id": "US-601",
+      "as_a": "landlord",
+      "i_want": "publish a listing anchored to my floor plan",
+      "so_that": "nearby people can find it",
+      "acceptance": [
+        {
+          "criterion": "Listing: property, floor plan reference, price, availability",
+          "test": null
+        },
+        {
+          "criterion": "Geohash computed from property location",
+          "test": null
+        },
+        {
+          "criterion": "Presence: landlord online indicator",
+          "test": null
+        },
+        {
+          "criterion": "Listing only visible to authorized network radius",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Publish Listing (M5)",
+        "layout": "[Modal: select property, price, availability, radius] / [Geohash badge auto] / [Live status]",
+        "components": [
+          "@swal/ui: Modal, Input, Button, Badge, StatusBadge, Toaster"
+        ],
+        "flow": [
+          "Landlord creates listing linked to plan → geohash computed → presence starts → visible to radius"
+        ],
+        "states": [
+          "draft",
+          "published",
+          "unavailable",
+          "unpublished"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/mesh-integration.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [],
+    "integration": [
+      "test/integration/mesh-integration.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "Listing: property, floor plan reference, price, availability",
+      "test": null
+    },
+    {
+      "criterion": "Geohash computed from property location",
+      "test": null
+    },
+    {
+      "criterion": "Presence: landlord online indicator",
+      "test": null
+    },
+    {
+      "criterion": "Listing only visible to authorized network radius",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

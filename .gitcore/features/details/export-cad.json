@@ -1,0 +1,105 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "export-cad",
+  "name": "Architect export (DXF/PDF/ZIP)",
+  "category": "domain",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-017"
+  ],
+  "description": "Export DXF vector + PDF A1/A2 with title block + JSON source; architect package ZIP.",
+  "functional_summary": "Export DXF vector + PDF A1/A2 with title block + JSON source; architect package ZIP.",
+  "user_stories": [
+    {
+      "id": "US-104",
+      "as_a": "owner",
+      "i_want": "export my plan as DXF/PDF/ZIP for my architect",
+      "so_that": "external CAD workflows work",
+      "acceptance": [
+        {
+          "criterion": "DXF opens in CAD viewer preserving measurements",
+          "test": null
+        },
+        {
+          "criterion": "PDF A1/A2 at 300dpi with title block (scale, date, owner)",
+          "test": null
+        },
+        {
+          "criterion": "ZIP contains JSON + DXF + PDF",
+          "test": null
+        },
+        {
+          "criterion": "Export button in toolbar",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Export Dialog",
+        "layout": "[Modal: format options DXF|PDF|ZIP, paper size A1|A2, scale, title block fields] / [Progress + download link]",
+        "components": [
+          "@swal/ui: Modal, Button, Input, Badge, Toaster"
+        ],
+        "flow": [
+          "Toolbar Export → modal → choose formats → Generate → ZIP with JSON+DXF+PDF downloaded",
+          "PDF includes title block (scale, date, owner)"
+        ],
+        "states": [
+          "configured",
+          "generating",
+          "done",
+          "error"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/export-cad.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/export-cad.test.ts"
+    ],
+    "integration": [
+      "test/integration/export-cad.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "DXF opens in CAD viewer preserving measurements",
+      "test": null
+    },
+    {
+      "criterion": "PDF A1/A2 at 300dpi with title block (scale, date, owner)",
+      "test": null
+    },
+    {
+      "criterion": "ZIP contains JSON + DXF + PDF",
+      "test": null
+    },
+    {
+      "criterion": "Export button in toolbar",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

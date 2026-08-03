@@ -1,0 +1,104 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "norms-validation",
+  "name": "Building norms validation",
+  "category": "domain",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-011"
+  ],
+  "description": "Validate design against NSR-10 / POT rules (stairs, garage, setbacks) with actionable warnings.",
+  "functional_summary": "Validate design against NSR-10 / POT rules (stairs, garage, setbacks) with actionable warnings.",
+  "user_stories": [
+    {
+      "id": "US-103",
+      "as_a": "owner",
+      "i_want": "validate my design against NSR-10/POT norms",
+      "so_that": "construction is compliant",
+      "acceptance": [
+        {
+          "criterion": "Stair rule checked: 2R+H in 620-640mm, tread>=280mm, riser 100-180mm",
+          "test": null
+        },
+        {
+          "criterion": "Garage min width 2.60m / depth 5.00m / independent access 3.20m",
+          "test": null
+        },
+        {
+          "criterion": "Violations listed with severity and fix hints",
+          "test": null
+        },
+        {
+          "criterion": "Validation re-runs on any plan change",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Norms Validation Panel",
+        "layout": "[Right drawer: validation results] / [Rule: status badge + description + fix hint] / [Canvas highlights offending zones in danger color]",
+        "components": [
+          "@swal/ui: Drawer/Modal, StatusBadge, Badge, Card, Button"
+        ],
+        "flow": [
+          "On plan change → norms engine recomputes → rules list with PASS/WARN/FAIL badges",
+          "Click violation → canvas zooms to zone; fix hint shown",
+          "Export validation report"
+        ],
+        "states": [
+          "valid",
+          "violations-warn",
+          "violations-fail",
+          "checking"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/norms-validation.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/norms-validation.test.ts"
+    ],
+    "integration": [],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "Stair rule checked: 2R+H in 620-640mm, tread>=280mm, riser 100-180mm",
+      "test": null
+    },
+    {
+      "criterion": "Garage min width 2.60m / depth 5.00m / independent access 3.20m",
+      "test": null
+    },
+    {
+      "criterion": "Violations listed with severity and fix hints",
+      "test": null
+    },
+    {
+      "criterion": "Validation re-runs on any plan change",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

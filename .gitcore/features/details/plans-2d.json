@@ -1,0 +1,115 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "plans-2d",
+  "name": "2D floor plan editor",
+  "category": "core",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-009"
+  ],
+  "description": "Konva canvas: draw/edit walls, zones, rooms; measurements; floor selector; blueprint aesthetic.",
+  "functional_summary": "Konva canvas: draw/edit walls, zones, rooms; measurements; floor selector; blueprint aesthetic.",
+  "user_stories": [
+    {
+      "id": "US-101",
+      "as_a": "owner",
+      "i_want": "draw and edit my home's floor plan (walls, zones, rooms) in 2D with real measurements",
+      "so_that": "my property is mapped accurately",
+      "acceptance": [
+        {
+          "criterion": "Canvas renders blueprint grid and plan from store",
+          "test": null
+        },
+        {
+          "criterion": "User can add/move/resize wall segments",
+          "test": null
+        },
+        {
+          "criterion": "User can define zones (garage, entrance, rooms) with dimensions",
+          "test": null
+        },
+        {
+          "criterion": "Measurements shown in meters, exportable to data model",
+          "test": null
+        },
+        {
+          "criterion": "State persists in floorPlanStore (runes) and IndexedDB",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Plan Editor (2D)",
+        "layout": "[Toolbar: Select|Wall|Zone|Room|Measure|Validate|Export] / [Canvas 2D blueprint (Konva)] / [Right: FloorSelector + Properties panel]",
+        "components": [
+          "@swal/ui: Button, Tooltip, Tabs, Input, Badge, StatusBadge"
+        ],
+        "flow": [
+          "Select tool Wall → click-drag on canvas to draw segment with live length in meters",
+          "Zone tool → drag rectangle, name it (garage/entrance/room), color from palette",
+          "Properties panel edits x/y/w/h and name; store updates; 3D mirrors"
+        ],
+        "states": [
+          "idle",
+          "drawing",
+          "selected",
+          "validating",
+          "saved-offline"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/plans-2d.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/plans-2d.test.ts"
+    ],
+    "integration": [],
+    "e2e": [
+      "test/e2e/plans-2d.spec.ts"
+    ]
+  },
+  "acceptance": [
+    {
+      "criterion": "Canvas renders blueprint grid and plan from store",
+      "test": null
+    },
+    {
+      "criterion": "User can add/move/resize wall segments",
+      "test": null
+    },
+    {
+      "criterion": "User can define zones (garage, entrance, rooms) with dimensions",
+      "test": null
+    },
+    {
+      "criterion": "Measurements shown in meters, exportable to data model",
+      "test": null
+    },
+    {
+      "criterion": "State persists in floorPlanStore (runes) and IndexedDB",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

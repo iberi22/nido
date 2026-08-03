@@ -1,0 +1,112 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "data-model",
+  "name": "Canonical property data model",
+  "category": "core",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-008"
+  ],
+  "description": "property.schema.json: property/floors/zones/rooms/items/taxes/leases/maintenance/utilities; extends house-data.json.",
+  "functional_summary": "property.schema.json: property/floors/zones/rooms/items/taxes/leases/maintenance/utilities; extends house-data.json.",
+  "user_stories": [
+    {
+      "id": "US-201",
+      "as_a": "owner",
+      "i_want": "define my property type with floors/zones/rooms",
+      "so_that": "everything else anchors to the plan",
+      "acceptance": [
+        {
+          "criterion": "Property types: house, apartment, bodega, construction",
+          "test": null
+        },
+        {
+          "criterion": "Schema validated against property.schema.json",
+          "test": null
+        },
+        {
+          "criterion": "Floors with height_m; zones with position/size/type",
+          "test": null
+        },
+        {
+          "criterion": "Rooms linked to floor+zone with area_m2",
+          "test": null
+        },
+        {
+          "criterion": "house-data.json migrates to schema-valid model",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Property Setup Wizard",
+        "layout": "[Wizard steps: 1 Type (house/apartment/bodega/construction) → 2 Location (city, comuna, estrato) → 3 Floors (add, height) → 4 Review]",
+        "components": [
+          "@swal/ui: Button, Input, Card, Badge, Tabs, Toaster"
+        ],
+        "flow": [
+          "Onboarding creates property → schema validates → floors added with height_m → zones/rooms linked",
+          "house-data.json imported as editable seed"
+        ],
+        "states": [
+          "wizard-step-N",
+          "validated",
+          "saved"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/data-model.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/data-model.test.ts"
+    ],
+    "integration": [
+      "test/integration/data-model.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "Property types: house, apartment, bodega, construction",
+      "test": null
+    },
+    {
+      "criterion": "Schema validated against property.schema.json",
+      "test": null
+    },
+    {
+      "criterion": "Floors with height_m; zones with position/size/type",
+      "test": null
+    },
+    {
+      "criterion": "Rooms linked to floor+zone with area_m2",
+      "test": null
+    },
+    {
+      "criterion": "house-data.json migrates to schema-valid model",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

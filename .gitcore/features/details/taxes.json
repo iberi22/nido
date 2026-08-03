@@ -1,0 +1,110 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "taxes",
+  "name": "Property tax (predial) tracking",
+  "category": "domain",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-015"
+  ],
+  "description": "Predial by jurisdiction (Colombia first): avaluo, rate, installments, due dates, payment calendar.",
+  "functional_summary": "Predial by jurisdiction (Colombia first): avaluo, rate, installments, due dates, payment calendar.",
+  "user_stories": [
+    {
+      "id": "US-304",
+      "as_a": "owner",
+      "i_want": "track my predial tax",
+      "so_that": "I never miss payments",
+      "acceptance": [
+        {
+          "criterion": "Predial config: jurisdiction, avaluo, rate_pct, installments",
+          "test": null
+        },
+        {
+          "criterion": "Payment calendar with due dates",
+          "test": null
+        },
+        {
+          "criterion": "Mark installments paid",
+          "test": null
+        },
+        {
+          "criterion": "Colombia-first: estrato/jurisdiction presets",
+          "test": null
+        },
+        {
+          "criterion": "Reminders before due date",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Taxes (Predial)",
+        "layout": "[Card: jurisdiction, avaluo, rate, total/year] / [Installment calendar: date, amount, paid toggle] / [Reminder settings]",
+        "components": [
+          "@swal/ui: Card, Table, Button, Input, StatusBadge, Toaster"
+        ],
+        "flow": [
+          "Configure jurisdiction/avaluo/rate → installments auto-generated → mark paid → reminder toast N days before due"
+        ],
+        "states": [
+          "configured",
+          "upcoming",
+          "due",
+          "paid"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/taxes.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/taxes.test.ts"
+    ],
+    "integration": [],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "Predial config: jurisdiction, avaluo, rate_pct, installments",
+      "test": null
+    },
+    {
+      "criterion": "Payment calendar with due dates",
+      "test": null
+    },
+    {
+      "criterion": "Mark installments paid",
+      "test": null
+    },
+    {
+      "criterion": "Colombia-first: estrato/jurisdiction presets",
+      "test": null
+    },
+    {
+      "criterion": "Reminders before due date",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

@@ -1,0 +1,113 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "tenant-portal",
+  "name": "Tenant portal",
+  "category": "domain",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-021"
+  ],
+  "description": "Tenant sees lease, pays rent, reports issues, receives receipts; P2P chat with landlord.",
+  "functional_summary": "Tenant sees lease, pays rent, reports issues, receives receipts; P2P chat with landlord.",
+  "user_stories": [
+    {
+      "id": "US-502",
+      "as_a": "tenant",
+      "i_want": "see my lease, pay rent, and report issues in a portal",
+      "so_that": "I have a trusted channel",
+      "acceptance": [
+        {
+          "criterion": "Tenant sees own lease and payment status",
+          "test": null
+        },
+        {
+          "criterion": "Pay rent online (Stripe/Polygon)",
+          "test": null
+        },
+        {
+          "criterion": "Issue reporting with status tracking",
+          "test": null
+        },
+        {
+          "criterion": "P2P chat with landlord (edge-mesh)",
+          "test": null
+        },
+        {
+          "criterion": "Receipts downloadable",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Tenant Portal",
+        "layout": "[Header: my lease + payment status] / [Pay rent button] / [Issues list + report issue] / [Chat with landlord] / [Receipts downloads]",
+        "components": [
+          "@swal/ui: Card, Button, Modal, Input, StatusBadge, Table, Toaster"
+        ],
+        "flow": [
+          "Tenant logs in via invitation → sees lease → pays → receipt → reports issue → status tracked → chat P2P"
+        ],
+        "states": [
+          "lease-active",
+          "payment-due",
+          "payment-made",
+          "issue-open",
+          "issue-resolved"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/tenant-portal.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/tenant-portal.test.ts"
+    ],
+    "integration": [],
+    "e2e": [
+      "test/e2e/tenant-portal.spec.ts"
+    ]
+  },
+  "acceptance": [
+    {
+      "criterion": "Tenant sees own lease and payment status",
+      "test": null
+    },
+    {
+      "criterion": "Pay rent online (Stripe/Polygon)",
+      "test": null
+    },
+    {
+      "criterion": "Issue reporting with status tracking",
+      "test": null
+    },
+    {
+      "criterion": "P2P chat with landlord (edge-mesh)",
+      "test": null
+    },
+    {
+      "criterion": "Receipts downloadable",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

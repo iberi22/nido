@@ -1,0 +1,106 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "plans-3d",
+  "name": "3D viewer",
+  "category": "core",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-010"
+  ],
+  "description": "Three.js lazy-loaded viewer from plan data; code-split to keep bundle small.",
+  "functional_summary": "Three.js lazy-loaded viewer from plan data; code-split to keep bundle small.",
+  "user_stories": [
+    {
+      "id": "US-102",
+      "as_a": "owner",
+      "i_want": "view my plan in 3D",
+      "so_that": "I can visualize spaces before making changes",
+      "acceptance": [
+        {
+          "criterion": "3D scene derives from same plan data as 2D",
+          "test": null
+        },
+        {
+          "criterion": "Camera orbits/zooms; floors switchable",
+          "test": null
+        },
+        {
+          "criterion": "3D module lazy-loaded (code-split)",
+          "test": null
+        },
+        {
+          "criterion": "No state divergence between 2D and 3D",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "3D Viewer",
+        "layout": "[Top: 2D|3D toggle (Tabs)] / [Three.js canvas: orbit controls, floor switch] / [Bottom: floor heights + layer toggles]",
+        "components": [
+          "@swal/ui: Tabs, Button, Badge",
+          "three.js OrbitControls"
+        ],
+        "flow": [
+          "User clicks 3D tab → lazy import Scene3D → scene built from floorPlanStore → orbit/zoom with mouse",
+          "Floor selector changes active floor; walls extrude by height_m"
+        ],
+        "states": [
+          "loading-lazy",
+          "rendered",
+          "switching-floor",
+          "error-3d"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/plans-3d.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/plans-3d.test.ts"
+    ],
+    "integration": [],
+    "e2e": [
+      "test/e2e/plans-3d.spec.ts"
+    ]
+  },
+  "acceptance": [
+    {
+      "criterion": "3D scene derives from same plan data as 2D",
+      "test": null
+    },
+    {
+      "criterion": "Camera orbits/zooms; floors switchable",
+      "test": null
+    },
+    {
+      "criterion": "3D module lazy-loaded (code-split)",
+      "test": null
+    },
+    {
+      "criterion": "No state divergence between 2D and 3D",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}

@@ -1,0 +1,113 @@
+{
+  "schema": "gitcore.feature_detail/v1",
+  "id": "accounts-auth",
+  "name": "Accounts, auth & roles",
+  "category": "core",
+  "status": "planned",
+  "progress_pct": 0,
+  "claimed_pct": 0,
+  "verified_pct": 0,
+  "github_issue": null,
+  "srs_reqs": [
+    "REQ-018"
+  ],
+  "description": "localAuth + recovery seed + WebAuthn; roles ADMIN/PROPIETARIO/INQUILINO/SUPERVISOR; instance isolation.",
+  "functional_summary": "localAuth + recovery seed + WebAuthn; roles ADMIN/PROPIETARIO/INQUILINO/SUPERVISOR; instance isolation.",
+  "user_stories": [
+    {
+      "id": "US-401",
+      "as_a": "owner",
+      "i_want": "create my account offline-first with recovery seed and biometrics",
+      "so_that": "my data is mine",
+      "acceptance": [
+        {
+          "criterion": "localAuth: create account with seed phrase recovery",
+          "test": null
+        },
+        {
+          "criterion": "WebAuthn biometric unlock",
+          "test": null
+        },
+        {
+          "criterion": "Roles assigned (owner default)",
+          "test": null
+        },
+        {
+          "criterion": "instance_id persisted per workspace",
+          "test": null
+        },
+        {
+          "criterion": "No server dependency for account creation",
+          "test": null
+        }
+      ],
+      "design": {
+        "screen": "Account Setup",
+        "layout": "[Modal: create account → show recovery seed (copy, confirm) → optional WebAuthn enroll] / [Role assigned]",
+        "components": [
+          "@swal/ui: Modal, Input, Button, Terminal (seed display), Toaster"
+        ],
+        "flow": [
+          "Create account → seed phrase generated and confirmed → WebAuthn biometric enroll → role OWNER → instance_id created locally"
+        ],
+        "states": [
+          "creating",
+          "seed-shown",
+          "seed-confirmed",
+          "webauthn-enrolled",
+          "ready"
+        ]
+      }
+    }
+  ],
+  "security": {
+    "notes": "",
+    "threats": [],
+    "mitigations": []
+  },
+  "implemented_in": [],
+  "auto_docs": [],
+  "detail_path": ".gitcore/features/details/accounts-auth.json",
+  "sub_features": [],
+  "tests": {
+    "unit": [
+      "test/unit/accounts-auth.test.ts"
+    ],
+    "integration": [
+      "test/integration/accounts-auth.test.ts"
+    ],
+    "e2e": []
+  },
+  "acceptance": [
+    {
+      "criterion": "localAuth: create account with seed phrase recovery",
+      "test": null
+    },
+    {
+      "criterion": "WebAuthn biometric unlock",
+      "test": null
+    },
+    {
+      "criterion": "Roles assigned (owner default)",
+      "test": null
+    },
+    {
+      "criterion": "instance_id persisted per workspace",
+      "test": null
+    },
+    {
+      "criterion": "No server dependency for account creation",
+      "test": null
+    }
+  ],
+  "gaps": [],
+  "decision_ids": [],
+  "microtasks": [],
+  "plan_refs": [
+    "docs/SWAL/NIDO_PLAN.md"
+  ],
+  "last_tested": null,
+  "last_verified": null,
+  "passes": false,
+  "notes": ""
+}
