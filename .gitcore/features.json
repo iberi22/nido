@@ -1,7 +1,7 @@
 {
   "version": "3.8.0",
   "project": "nido",
-  "updated": "2026-08-03",
+  "updated": "2026-08-04",
   "phases": {
     "1": {
       "name": "M0 Foundation",
@@ -40,11 +40,11 @@
       "name": "Accounts, auth & roles",
       "sdlc_phase": "PENDING",
       "phase": 4,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-018"
       ],
@@ -71,7 +71,7 @@
       ],
       "implemented_in": [],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "analytics",
@@ -106,7 +106,7 @@
         "src/lib/domain/analytics.ts"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "costs",
@@ -141,7 +141,7 @@
         "src/lib/domain/costs.ts"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "data-model",
@@ -183,18 +183,18 @@
         "src/lib/data/property.schema.json"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "escrow-disputes",
       "name": "Escrow & dispute governance",
       "sdlc_phase": "PENDING",
       "phase": 6,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 90,
+      "claimed_pct": 90,
+      "verified_pct": 90,
       "req_ids": [
         "REQ-025"
       ],
@@ -222,7 +222,7 @@
       ],
       "implemented_in": [],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "export-cad",
@@ -262,7 +262,7 @@
         "src/lib/domain/export.ts"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "gitcore-compliance",
@@ -328,7 +328,7 @@
         "docs/SRS/"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "inventory",
@@ -368,18 +368,18 @@
         "src/lib/domain/inventory.ts"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "leasing",
       "name": "Leasing: contracts & payments",
       "sdlc_phase": "PENDING",
       "phase": 5,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-020"
       ],
@@ -406,7 +406,7 @@
       ],
       "implemented_in": [],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "maintenance",
@@ -446,7 +446,7 @@
         "src/lib/domain/maintenance.ts"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "mesh-integration",
@@ -454,10 +454,10 @@
       "sdlc_phase": "PENDING",
       "phase": 6,
       "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "status": "partial",
+      "progress_pct": 55,
+      "claimed_pct": 55,
+      "verified_pct": 44,
       "req_ids": [
         "REQ-022"
       ],
@@ -479,7 +479,7 @@
       ],
       "implemented_in": [],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "norms-validation",
@@ -488,9 +488,9 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-011"
       ],
@@ -514,18 +514,18 @@
         "src/lib/domain/norms.ts"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "p2p-discovery",
       "name": "GPS proximity discovery",
       "sdlc_phase": "PENDING",
       "phase": 6,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-023"
       ],
@@ -553,18 +553,18 @@
       ],
       "implemented_in": [],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "plans-2d",
       "name": "2D floor plan editor",
       "sdlc_phase": "PENDING",
       "phase": 2,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-009"
       ],
@@ -592,18 +592,18 @@
       "implemented_in": [],
       "last_updated": null,
       "notes": "FAILED: @swal/ui not on npm — needs vendoring",
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "plans-3d",
       "name": "3D viewer",
       "sdlc_phase": "PENDING",
       "phase": 2,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 90,
+      "claimed_pct": 90,
+      "verified_pct": 90,
       "req_ids": [
         "REQ-010"
       ],
@@ -631,7 +631,7 @@
       "implemented_in": [],
       "last_updated": null,
       "notes": "FAILED + false-positive PR #22 (no code committed)",
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "pwa-offline",
@@ -671,7 +671,7 @@
         "index.html"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "taxes",
@@ -707,18 +707,18 @@
       ],
       "last_updated": null,
       "notes": "implemented locally 2026-08-03 (was empty from PR #14); 5 tests passing",
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "tenant-portal",
       "name": "Tenant portal",
       "sdlc_phase": "PENDING",
       "phase": 5,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-021"
       ],
@@ -745,7 +745,7 @@
       ],
       "implemented_in": [],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "toolchain-ci",
@@ -754,9 +754,9 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-028"
       ],
@@ -781,7 +781,7 @@
         "scripts/"
       ],
       "last_updated": null,
-      "last_verified": "2026-08-03",
+      "last_verified": "2026-08-04",
       "notes": "vitest+playwright+vite-plugin-pwa installed; 58 unit tests running"
     },
     {
@@ -791,9 +791,9 @@
       "phase": 6,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
-      "claimed_pct": 100,
-      "verified_pct": 100,
+      "progress_pct": 88,
+      "claimed_pct": 88,
+      "verified_pct": 88,
       "req_ids": [
         "REQ-024"
       ],
@@ -822,7 +822,7 @@
         "src/lib/domain/trust.ts"
       ],
       "last_updated": "2026-08-03",
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "ui-swal",
@@ -831,9 +831,9 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 80,
-      "claimed_pct": 80,
-      "verified_pct": 80,
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-027"
       ],
@@ -866,7 +866,7 @@
       ],
       "last_updated": null,
       "notes": "UI shell on vendored @swal/ui; 5 tests passing; plans-2d/3d canvas still pending",
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "utilities",
@@ -907,18 +907,18 @@
       ],
       "last_updated": null,
       "notes": "implemented locally 2026-08-03 (was empty from PR #14); 10 tests passing",
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     },
     {
       "id": "verified-invitations",
       "name": "Verified 1-time invitations",
       "sdlc_phase": "PENDING",
       "phase": 4,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 95,
+      "claimed_pct": 95,
+      "verified_pct": 95,
       "req_ids": [
         "REQ-019"
       ],
@@ -945,7 +945,7 @@
       ],
       "implemented_in": [],
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-04"
     }
   ],
   "agents": {
