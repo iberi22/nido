@@ -12,7 +12,9 @@ export interface PredialInstallment {
 
 /** Annual predial total = avaluo * rate_pct / 100 */
 export function totalAnnual(predial: PredialTax): number {
-  return round2((predial.avaluo * predial.rate_pct) / 100);
+  const avaluo = Math.max(0, predial.avaluo ?? 0);
+  const rate_pct = Math.max(0, predial.rate_pct ?? 0);
+  return round2((avaluo * rate_pct) / 100);
 }
 
 /** Generate N equal installments with monthly due dates starting next month. */
