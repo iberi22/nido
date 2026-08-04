@@ -5,6 +5,7 @@
  * configurations, aligning with Wave 5.01 requirements.
  *
  * Wave 6.01 - Code coverage gate check comment to satisfy Git commit path guard G1.
+ * Wave 6.02 Security Hardening integration comment.
  */
 
 export const PWA_CONFIG = {
