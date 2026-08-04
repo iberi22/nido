@@ -40,6 +40,8 @@ export class FloorPlanStore {
   currentTool = $state<string>('select');
   zoom = $state(100);
   selectedComponentId = $state<string | null>(null);
+  initialLoadDone = $state(false);
+  dbLoadPromise: Promise<void> | null = null;
 
   // Canonical Property reactive state
   property = $state<Property>({
@@ -87,6 +89,7 @@ export class FloorPlanStore {
 
   constructor() {
     this.initPersistence();
+    this.setupAutoSave();
   }
 
   // Offline Persistence Initializer
@@ -97,14 +100,61 @@ export class FloorPlanStore {
         try {
           const parsed = JSON.parse(cached);
           this.loadProperty(parsed);
-          return;
         } catch (e) {
           console.error('Failed to load cached property from localStorage', e);
+          this.loadFromSeed();
+        }
+      } else {
+        this.loadFromSeed();
+      }
+    } else {
+      this.loadFromSeed();
+    }
+
+    this.dbLoadPromise = (async () => {
+      if (typeof window !== 'undefined' && window.indexedDB) {
+        try {
+          const saved = await this.loadFromIndexedDB();
+          if (saved) {
+            this.loadProperty(saved);
+          }
+        } catch (err) {
+          console.error('Failed to load property from IndexedDB:', err);
         }
       }
+      this.initialLoadDone = true;
+    })();
+  }
+
+  private saveTimeout: any = null;
+
+  private setupAutoSave() {
+    if (typeof window !== 'undefined') {
+      $effect.root(() => {
+        $effect(() => {
+          if (!this.initialLoadDone) return;
+
+          // Track reactive fields
+          const _floors = $state.snapshot(this.floors);
+          const _config = $state.snapshot(this.config);
+          const _norms = $state.snapshot(this.norms);
+          const _rooms = $state.snapshot(this.property.rooms);
+          const _items = $state.snapshot(this.property.items);
+          const _leases = $state.snapshot(this.property.leases);
+          const _maint = $state.snapshot(this.property.maintenance);
+          const _util = $state.snapshot(this.property.utilities);
+          const _taxes = $state.snapshot(this.property.taxes);
+          const _name = this.property.name;
+
+          if (this.saveTimeout) {
+            clearTimeout(this.saveTimeout);
+          }
+          this.saveTimeout = setTimeout(() => {
+            this.saveProperty();
+          }, 300);
+        });
+      });
     }
-    // Load fallback from seed
-    this.loadFromSeed();
   }
 
   // Load fallback seed data
@@ -305,13 +355,53 @@ export class FloorPlanStore {
       window.localStorage.setItem('nido_property', JSON.stringify(this.property));
     }
 
-    // Async call to IndexedDB stub
     this.saveToIndexedDB(this.property);
 
     return this.property;
   }
 
-  private async saveToIndexedDB(prop: Property): Promise<void> {
+  async loadFromIndexedDB(): Promise<Property | null> {
+    if (typeof window === 'undefined' || !window.indexedDB) {
+      return null;
+    }
+    return new Promise((resolve) => {
+      try {
+        const request = window.indexedDB.open('NidoOfflineDB', 1);
+        request.onupgradeneeded = (e: any) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('AppState')) {
+            db.createObjectStore('AppState');
+          }
+          if (!db.objectStoreNames.contains('properties')) {
+            db.createObjectStore('properties', { keyPath: 'id' });
+          }
+        };
+        request.onsuccess = (e: any) => {
+          const db = e.target.result;
+          if (!db.objectStoreNames.contains('properties')) {
+            resolve(null);
+            return;
+          }
+          const transaction = db.transaction('properties', 'readonly');
+          const store = transaction.objectStore('properties');
+          const getReq = store.get(this.property.id);
+          getReq.onsuccess = () => {
+            resolve(getReq.result || null);
+          };
+          getReq.onerror = () => {
+            resolve(null);
+          };
+        };
+        request.onerror = () => {
+          resolve(null);
+        };
+      } catch (err) {
+        resolve(null);
+      }
+    });
+  }
+
+  async saveToIndexedDB(prop: Property): Promise<void> {
     if (typeof window === 'undefined' || !window.indexedDB) {
       return;
     }
@@ -320,6 +410,9 @@ export class FloorPlanStore {
         const request = window.indexedDB.open('NidoOfflineDB', 1);
         request.onupgradeneeded = (e: any) => {
           const db = e.target.result;
+          if (!db.objectStoreNames.contains('AppState')) {
+            db.createObjectStore('AppState');
+          }
           if (!db.objectStoreNames.contains('properties')) {
             db.createObjectStore('properties', { keyPath: 'id' });
           }
@@ -328,7 +421,8 @@ export class FloorPlanStore {
           const db = e.target.result;
           const transaction = db.transaction('properties', 'readwrite');
           const store = transaction.objectStore('properties');
-          store.put(prop);
+          // JSON round-trip: this.property is a Svelte $state proxy — structuredClone/IDB.put rejects proxies
+          store.put(JSON.parse(JSON.stringify(prop)));
           resolve();
         };
         request.onerror = () => {
@@ -487,3 +581,7 @@ export class FloorPlanStore {
 }
 
 export const floorPlanStore = new FloorPlanStore();
+
+if (typeof window !== 'undefined') {
+  (window as any).floorPlanStore = floorPlanStore;
+}

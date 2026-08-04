@@ -4,6 +4,9 @@ import { loadFromIndexedDB, saveToIndexedDB } from '../domain/db';
 export async function initDatabaseSync() {
   // 1. Load initial state from IndexedDB
   try {
+    if (floorPlanStore.dbLoadPromise) {
+      await floorPlanStore.dbLoadPromise;
+    }
     const saved = await loadFromIndexedDB();
     if (saved) {
       if (saved.currentFloorId && floorPlanStore.floors[saved.currentFloorId]) {
@@ -31,11 +34,14 @@ export async function initDatabaseSync() {
   // Helper to serialize and save current state
   const triggerSave = () => {
     try {
+      // NOTE: $state.snapshot() does NOT unwrap Svelte proxies in plain .ts files
+      // (sync.svelte.ts is not compiled with runes) — structuredClone/IDB.put
+      // rejects the proxies. JSON round-trip guarantees a cloneable plain object.
       const stateToSave = {
         currentFloorId: floorPlanStore.currentFloorId,
         zoom: floorPlanStore.zoom,
-        config: $state.snapshot(floorPlanStore.config),
-        floors: $state.snapshot(floorPlanStore.floors)
+        config: JSON.parse(JSON.stringify(floorPlanStore.config)),
+        floors: JSON.parse(JSON.stringify(floorPlanStore.floors))
       };
       saveToIndexedDB(stateToSave);
     } catch (e) {
