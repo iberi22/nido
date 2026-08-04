@@ -49,37 +49,43 @@ export function buildDXF(property: Property): string {
       switch (comp.type) {
         case 'wall': {
           drawing.setActiveLayer('walls');
-          const x1 = (typeof props.x1 === 'number' ? props.x1 : comp.x) + offsetX;
-          const y1 = typeof props.y1 === 'number' ? props.y1 : comp.y;
-          const x2 = (typeof props.x2 === 'number' ? props.x2 : comp.x + (comp.width || 0.15)) + offsetX;
-          const y2 = typeof props.y2 === 'number' ? props.y2 : comp.y + (comp.height || 0.15);
+          const cx = typeof comp.x === 'number' ? comp.x : 0;
+          const cy = typeof comp.y === 'number' ? comp.y : 0;
+          const x1 = (typeof props.x1 === 'number' ? props.x1 : cx) + offsetX;
+          const y1 = typeof props.y1 === 'number' ? props.y1 : cy;
+          const x2 = (typeof props.x2 === 'number' ? props.x2 : cx + (comp.width || 0.15)) + offsetX;
+          const y2 = typeof props.y2 === 'number' ? props.y2 : cy + (comp.height || 0.15);
           drawing.drawLine(x1, y1, x2, y2);
           break;
         }
 
         case 'zone': {
           drawing.setActiveLayer('zones');
-          const x1 = comp.x + offsetX;
-          const y1 = comp.y;
+          const cx = typeof comp.x === 'number' ? comp.x : 0;
+          const cy = typeof comp.y === 'number' ? comp.y : 0;
+          const x1 = cx + offsetX;
+          const y1 = cy;
           const w = comp.width || 1.0;
           const h = comp.height || 1.0;
           drawing.drawRect(x1, y1, x1 + w, y1 + h);
 
           // Center Label
-          const cx = x1 + w / 2;
-          const cy = y1 + h / 2;
+          const cx_lbl = x1 + w / 2;
+          const cy_lbl = y1 + h / 2;
           drawing.setActiveLayer('labels');
-          drawing.drawText(cx, cy, 0.35, 0, props.name || '', 'center', 'middle');
+          drawing.drawText(cx_lbl, cy_lbl, 0.35, 0, props.name || '', 'center', 'middle');
           break;
         }
 
         case 'stairs': {
           drawing.setActiveLayer('walls');
+          const cx = typeof comp.x === 'number' ? comp.x : 0;
+          const cy = typeof comp.y === 'number' ? comp.y : 0;
           const stairData = props.data || {};
           const subComponents = stairData.components || [];
           for (const sub of subComponents) {
-            const sx = comp.x + (sub.x || 0) + offsetX;
-            const sy = comp.y + (sub.y || 0);
+            const sx = cx + (sub.x || 0) + offsetX;
+            const sy = cy + (sub.y || 0);
             const sw = sub.width || 1.0;
             const sh = sub.height || 1.0;
             drawing.drawRect(sx, sy, sx + sw, sy + sh);
@@ -94,10 +100,12 @@ export function buildDXF(property: Property): string {
 
         case 'dimension': {
           drawing.setActiveLayer('dimensions');
-          const x1 = comp.x + offsetX;
-          const y1 = comp.y;
-          const toX = (typeof props.toX === 'number' ? props.toX : comp.x) + offsetX;
-          const toY = typeof props.toY === 'number' ? props.toY : comp.y;
+          const cx = typeof comp.x === 'number' ? comp.x : 0;
+          const cy = typeof comp.y === 'number' ? comp.y : 0;
+          const x1 = cx + offsetX;
+          const y1 = cy;
+          const toX = (typeof props.toX === 'number' ? props.toX : cx) + offsetX;
+          const toY = typeof props.toY === 'number' ? props.toY : cy;
           drawing.drawLine(x1, y1, toX, toY);
 
           // Midpoint Label
@@ -111,8 +119,10 @@ export function buildDXF(property: Property): string {
         default: {
           // Furniture, Doors, Vehicles, etc.
           drawing.setActiveLayer('furniture');
-          const x1 = comp.x + offsetX;
-          const y1 = comp.y;
+          const cx = typeof comp.x === 'number' ? comp.x : 0;
+          const cy = typeof comp.y === 'number' ? comp.y : 0;
+          const x1 = cx + offsetX;
+          const y1 = cy;
           const w = comp.width || 0.5;
           const h = comp.height || 0.5;
           drawing.drawRect(x1, y1, x1 + w, y1 + h);
@@ -215,8 +225,8 @@ export function buildPDF(
 
       switch (comp.type) {
         case 'zone': {
-          const x = comp.x;
-          const y = comp.y;
+          const x = typeof comp.x === 'number' ? comp.x : 0;
+          const y = typeof comp.y === 'number' ? comp.y : 0;
           const w = comp.width || 1.0;
           const h = comp.height || 1.0;
 
@@ -243,10 +253,12 @@ export function buildPDF(
         }
 
         case 'wall': {
-          const x1 = typeof props.x1 === 'number' ? props.x1 : comp.x;
-          const y1 = typeof props.y1 === 'number' ? props.y1 : comp.y;
-          const x2 = typeof props.x2 === 'number' ? props.x2 : comp.x + (comp.width || 0.15);
-          const y2 = typeof props.y2 === 'number' ? props.y2 : comp.y + (comp.height || 0.15);
+          const cx = typeof comp.x === 'number' ? comp.x : 0;
+          const cy = typeof comp.y === 'number' ? comp.y : 0;
+          const x1 = typeof props.x1 === 'number' ? props.x1 : cx;
+          const y1 = typeof props.y1 === 'number' ? props.y1 : cy;
+          const x2 = typeof props.x2 === 'number' ? props.x2 : cx + (comp.width || 0.15);
+          const y2 = typeof props.y2 === 'number' ? props.y2 : cy + (comp.height || 0.15);
 
           const [wx1, wy1] = toPageCoords(x1, y1);
           const [wx2, wy2] = toPageCoords(x2, y2);
@@ -259,11 +271,13 @@ export function buildPDF(
         }
 
         case 'stairs': {
+          const cx = typeof comp.x === 'number' ? comp.x : 0;
+          const cy = typeof comp.y === 'number' ? comp.y : 0;
           const stairData = props.data || {};
           const subComponents = stairData.components || [];
           for (const sub of subComponents) {
-            const sx = comp.x + (sub.x || 0);
-            const sy = comp.y + (sub.y || 0);
+            const sx = cx + (sub.x || 0);
+            const sy = cy + (sub.y || 0);
             const sw = sub.width || 1.0;
             const sh = sub.height || 1.0;
 
@@ -291,10 +305,12 @@ export function buildPDF(
         }
 
         case 'dimension': {
-          const x1 = comp.x;
-          const y1 = comp.y;
-          const toX = typeof props.toX === 'number' ? props.toX : comp.x;
-          const toY = typeof props.toY === 'number' ? props.toY : comp.y;
+          const cx = typeof comp.x === 'number' ? comp.x : 0;
+          const cy = typeof comp.y === 'number' ? comp.y : 0;
+          const x1 = cx;
+          const y1 = cy;
+          const toX = typeof props.toX === 'number' ? props.toX : cx;
+          const toY = typeof props.toY === 'number' ? props.toY : cy;
 
           const [dx1, dy1] = toPageCoords(x1, y1);
           const [dx2, dy2] = toPageCoords(toX, toY);
@@ -313,8 +329,8 @@ export function buildPDF(
 
         default: {
           // Furniture, Doors, Vehicles, etc.
-          const x = comp.x;
-          const y = comp.y;
+          const x = typeof comp.x === 'number' ? comp.x : 0;
+          const y = typeof comp.y === 'number' ? comp.y : 0;
           const w = comp.width || 0.5;
           const h = comp.height || 0.5;
 
@@ -376,7 +392,7 @@ export function buildPDF(
     doc.text(`PROYECTO: ${property.name || 'NIDO'}`, tbX + 6, tbY + 28);
     doc.text(`UBICACIÓN: ${property.location?.city || 'COMUNA 10, CALI'}`, tbX + 6, tbY + 33);
     doc.text(`NORMA: ${property.norms?.building || property.norms || 'NSR-10'}`, tbX + 6, tbY + 42);
-    doc.text(`ESTRATO: ${property.location?.estrato || 3} | PISOS MÁX: ${(property.floors || []).length}`, tbX + 6, tbY + 46);
+    doc.text(`ESTRATO: ${property.location?.estrato || 3} | PISOS MÁX: ${floorKeys.length}`, tbX + 6, tbY + 46);
 
     // Metadata (Right Column)
     doc.text(`ESCALA: 1:${scale}`, tbX + 86, tbY + 28);

@@ -76,14 +76,40 @@ export function getPaymentStatus(
     leaseInvoices.sort((a, b) => b.dueDate.localeCompare(a.dueDate));
     const latest = leaseInvoices[0];
 
-    // Project next month's due date safely
+    // Project next month's due date safely with date clamping
     let nextDueDateStr = '';
     try {
-      const d = new Date(latest.dueDate + 'T12:00:00');
-      d.setMonth(d.getMonth() + 1);
-      nextDueDateStr = d.toISOString().split('T')[0];
+      const parts = latest.dueDate.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        const day = parseInt(parts[2], 10);
+        if (!isNaN(year) && !isNaN(month) && !isNaN(day)) {
+          let targetMonth = month + 1;
+          let targetYear = year;
+          if (targetMonth > 12) {
+            targetMonth = 1;
+            targetYear += 1;
+          }
+          const maxDays = new Date(targetYear, targetMonth, 0).getDate();
+          const targetDay = Math.min(day, maxDays);
+          const paddedMonth = String(targetMonth).padStart(2, '0');
+          const paddedDay = String(targetDay).padStart(2, '0');
+          nextDueDateStr = `${targetYear}-${paddedMonth}-${paddedDay}`;
+        } else {
+          throw new Error('Invalid numbers');
+        }
+      } else {
+        throw new Error('Invalid format');
+      }
     } catch {
-      nextDueDateStr = latest.dueDate;
+      try {
+        const d = new Date(latest.dueDate + 'T12:00:00');
+        d.setMonth(d.getMonth() + 1);
+        nextDueDateStr = d.toISOString().split('T')[0];
+      } catch {
+        nextDueDateStr = latest.dueDate;
+      }
     }
 
     return {

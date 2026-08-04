@@ -11,7 +11,8 @@ import {
   clearLocalStorage,
   enrollBiometric,
   authenticateBiometric,
-  isWebAuthnAvailable
+  isWebAuthnAvailable,
+  requireRole
 } from "../../src/lib/domain/accounts";
 
 // NIDO — integration tests for feature: accounts-auth
@@ -184,5 +185,97 @@ describe("US-401 Integration: Account creation, offline persistence, and workspa
       expect(loaded).toBeDefined();
       expect(loaded?.name).toBe("Offline Owner");
     }
+  });
+
+  it("acceptance 6: full account lifecycle integration flow", () => {
+    // create -> confirm seed -> role assign -> permission check
+    let account = createAccount("Full Lifecycle Owner");
+    expect(account).toBeDefined();
+
+    // mixed case and whitespace trimming confirmation
+    const trimmedAndCased = `  ${account.seedPhrase.toUpperCase()}   `;
+    expect(confirmSeed(account, trimmedAndCased)).toBe(true);
+
+    // assign supervisor role
+    account = assignRole(account, "supervisor");
+    expect(account.role).toBe("supervisor");
+
+    // supervisor can access supervisor level or inquilino level, but not propietario or admin
+    expect(requireRole(account, "supervisor")).toBe(true);
+    expect(requireRole(account, "inquilino")).toBe(true);
+    expect(requireRole(account, "propietario")).toEqual(false);
+    expect(requireRole(account, "admin")).toEqual(false);
+  });
+
+  it("acceptance 7: unauthorized role access denied in RBAC flow", () => {
+    let account = createAccount("Lower Privileges User");
+    account = assignRole(account, "inquilino");
+
+    // inquilino should be denied from supervisor, propietario, and admin actions
+    expect(requireRole(account, "supervisor")).toEqual(false);
+    expect(requireRole(account, "propietario")).toEqual(false);
+    expect(requireRole(account, "admin")).toEqual(false);
+  });
+
+  it("acceptance 8: recovery phrase mismatch rejected with multiple test vectors", () => {
+    const account = createAccount("Xavier Recovery Test");
+
+    // Completely different words
+    expect(confirmSeed(account, "apple banana orange grape watermelon cherry lemon pear strawberry blueberry raspberry pineapple")).toEqual(false);
+
+    // Missing words
+    const fewerWords = account.seedPhrase.split(" ").slice(0, 10).join(" ");
+    expect(confirmSeed(account, fewerWords)).toEqual(false);
+
+    // Extra words
+    expect(confirmSeed(account, account.seedPhrase + " extra")).toEqual(false);
+
+    // Empty/whitespace-only input
+    expect(confirmSeed(account, "")).toEqual(false);
+    expect(confirmSeed(account, "   ")).toEqual(false);
+  });
+
+  it("acceptance 9: WebAuthn enrollment with empty/invalid username throws error", async () => {
+    await expect(enrollBiometric("")).rejects.toThrow("Username must be provided");
+  });
+
+  it("acceptance 10: WebAuthn authentication with empty credential ID returns false/falsy", async () => {
+    const success = await authenticateBiometric("");
+    expect(success).toEqual(false);
+  });
+
+  it("acceptance 11: role hierarchy validation covering all RBAC levels", () => {
+    const accountAdmin = assignRole(createAccount("Admin User"), "admin");
+    const accountPropietario = assignRole(createAccount("Propietario User"), "propietario");
+    const accountSupervisor = assignRole(createAccount("Supervisor User"), "supervisor");
+    const accountInquilino = assignRole(createAccount("Inquilino User"), "inquilino");
+
+    // Admin permissions
+    expect(requireRole(accountAdmin, "admin")).toBe(true);
+    expect(requireRole(accountAdmin, "propietario")).toBe(true);
+    expect(requireRole(accountAdmin, "supervisor")).toBe(true);
+    expect(requireRole(accountAdmin, "inquilino")).toBe(true);
+
+    // Propietario permissions
+    expect(requireRole(accountPropietario, "admin")).toEqual(false);
+    expect(requireRole(accountPropietario, "propietario")).toBe(true);
+    expect(requireRole(accountPropietario, "supervisor")).toBe(true);
+    expect(requireRole(accountPropietario, "inquilino")).toBe(true);
+
+    // Supervisor permissions
+    expect(requireRole(accountSupervisor, "admin")).toEqual(false);
+    expect(requireRole(accountSupervisor, "propietario")).toEqual(false);
+    expect(requireRole(accountSupervisor, "supervisor")).toBe(true);
+    expect(requireRole(accountSupervisor, "inquilino")).toBe(true);
+
+    // Inquilino permissions
+    expect(requireRole(accountInquilino, "admin")).toEqual(false);
+    expect(requireRole(accountInquilino, "propietario")).toEqual(false);
+    expect(requireRole(accountInquilino, "supervisor")).toEqual(false);
+    expect(requireRole(accountInquilino, "inquilino")).toBe(true);
+
+    // Null/undefined checks
+    expect(requireRole(null, "inquilino")).toEqual(false);
+    expect(requireRole(undefined, "inquilino")).toEqual(false);
   });
 });

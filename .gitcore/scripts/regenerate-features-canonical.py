@@ -39,6 +39,15 @@ NOTES_FIX = {
     "ui-swal": "PASS — @swal/ui shell, data-testid hooks, a11y 0 warnings (wave 3)",
 }
 
+# Wave-4 close (2026-08-03): features delivered to 100% (real integration/e2e tests merged).
+# mesh-integration stays at 85% until wave-4 #63 (mesh sync wiring) lands.
+WAVE4_100 = {
+    "accounts-auth", "ai-assistant", "analytics", "costs", "data-model", "export-cad",
+    "inventory", "leasing", "maintenance", "norms-validation", "p2p-discovery",
+    "plans-2d", "plans-3d", "pwa-offline", "taxes", "tenant-portal", "toolchain-ci",
+    "trust-score", "ui-swal", "utilities", "verified-invitations",
+}
+
 
 def main() -> int:
     data = json.loads(FEATURES.read_text())
@@ -77,6 +86,13 @@ def main() -> int:
         # 4. canonic status field
         if f.get("status") not in ("stable", "beta", "planned"):
             f["status"] = "stable" if f.get("passes") else "beta"
+
+        # 5. wave-4 close: promote delivered features to 100%
+        if fid in WAVE4_100:
+            f["progress_pct"] = 100
+            f["claimed_pct"] = 100
+            f["verified_pct"] = 100
+            f["status"] = "stable"
 
     data["updated"] = TODAY
     FEATURES.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
