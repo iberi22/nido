@@ -1,6 +1,5 @@
 <script lang="ts">
   import CanvasStage from './lib/CanvasStage.svelte';
-  import Scene3D from './lib/Scene3D.svelte';
   import Toolbar from './lib/Toolbar.svelte';
   import FloorSelector from './lib/FloorSelector.svelte';
   import { floorPlanStore } from './lib/stores/floorPlanStore.svelte';
@@ -86,7 +85,11 @@
       {#if currentView === '2d'}
         <CanvasStage />
       {:else}
-        <Scene3D />
+        {#await import('./lib/Scene3D.svelte') then { default: Scene3DComponent }}
+          <Scene3DComponent />
+        {:catch error}
+          <div style="color: #ef4444; padding: 20px;">Error loading 3D view: {error.message}</div>
+        {/await}
       {/if}
     </section>
   </div>
