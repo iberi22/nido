@@ -7,6 +7,8 @@ import { initDatabaseSync } from './lib/stores/sync.svelte';
 import { listingsInRadius } from './lib/domain/discovery';
 import { computeTrustScore } from './lib/domain/trust';
 import { subscribeToPush, requestPushPermission } from './lib/push';
+import { createMeshClient } from './lib/domain/mesh';
+import { InMemoryRelay } from './lib/mesh/relay';
 
 // Wave 5 #84 — PWA update flow: vite-plugin-pwa registerSW (autoUpdate, config from #83).
 // The `virtual:pwa-register` module is injected at build/dev time only, so it is
@@ -53,6 +55,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
+<<<<<<< HEAD
 // Wire manual enable-push button if permission is default (guarded, non-blocking)
 if (typeof document !== 'undefined') {
   window.addEventListener('load', () => {
@@ -96,6 +99,8 @@ if (typeof document !== 'undefined') {
 // Expose for testing/E2E verification inside the browser (wave 4 #64)
 if (typeof window !== 'undefined') {
   (window as any).nidoDiscovery = { listingsInRadius, computeTrustScore };
+  (window as any).createMeshClient = createMeshClient;
+  (window as any).InMemoryRelay = InMemoryRelay;
 }
 
 // Offline fallback handler (wave 4 #68)
