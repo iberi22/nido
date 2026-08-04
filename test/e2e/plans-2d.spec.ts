@@ -115,4 +115,59 @@ test.describe("US-101: draw and edit my home's floor plan (walls, zones, rooms) 
     await expect(wallThicknessInput).toHaveValue("0.25");
     await expect(scaleInput).toHaveValue("60");
   });
+
+  test("acceptance 5: reload restores drawn walls from store and IndexedDB", async ({ page }) => {
+    // 1. Get initial wall count
+    const initialWallCount = await page.evaluate(() => {
+      const store = (window as any).floorPlanStore;
+      return store ? store.floors['ground'].components.filter((c: any) => c.type === 'wall').length : 0;
+    });
+
+    // 2. Add a wall directly via the store
+    await page.evaluate(() => {
+      const store = (window as any).floorPlanStore;
+      store.addComponent({
+        id: 'e2e-persisted-wall',
+        type: 'wall',
+        x: 1,
+        y: 2,
+        width: 3,
+        height: 0.15,
+        layer: 'structure',
+        properties: {
+          x1: 1, y1: 2, x2: 4, y2: 2,
+          thickness: 0.15,
+          note: 'E2E Persisted Wall'
+        }
+      });
+    });
+
+    // 3. Confirm that the store added the new wall component
+    const intermediateWallCount = await page.evaluate(() => {
+      const store = (window as any).floorPlanStore;
+      return store.floors['ground'].components.filter((c: any) => c.type === 'wall').length;
+    });
+    expect(intermediateWallCount).toEqual(initialWallCount + 1);
+
+    // 4. Wait for the debounced save to complete (300ms + buffer)
+    await page.waitForTimeout(500);
+
+    // 5. Reload the page to test persistence
+    await page.reload();
+
+    // Wait for brand title NIDO to ensure hydration is completed
+    const brand = page.locator(".brand-title");
+    await expect(brand).toContainText(/NIDO/i);
+
+    // Verify the floor selector is visible
+    const floorSelector = page.locator(".floor-selector");
+    await expect(floorSelector).toBeVisible();
+
+    // 6. Confirm that the wall persists after reload
+    const postReloadWallCount = await page.evaluate(() => {
+      const store = (window as any).floorPlanStore;
+      return store.floors['ground'].components.filter((c: any) => c.type === 'wall').length;
+    });
+    expect(postReloadWallCount).toEqual(initialWallCount + 1);
+  });
 });
