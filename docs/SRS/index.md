@@ -6,7 +6,7 @@
 
 | Document | Completeness | Estado |
 |----------|:-----------:|--------|
-| [REQUIREMENTS.md](./REQUIREMENTS.md) | 100% (28 REQ-IDs, 19 user stories) | draft |
+| [REQUIREMENTS.md](./REQUIREMENTS.md) | 100% (48 REQ-IDs, 20 user stories) | draft |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | 100% | draft |
 | [../decisions/](../decisions/) ADRs | 100% (5 ADRs) | draft |
 
@@ -21,6 +21,8 @@
 | REQ-020 – REQ-021 | M4 — Leasing (contracts/payments, tenant portal) |
 | REQ-022 – REQ-025 | M5 — P2P network (mesh, GPS discovery, trust score, escrow/disputes) |
 | REQ-027 – REQ-028 | Cross-phase — UI on @swal/ui, toolchain/CI |
+| REQ-029 – REQ-047 | Per-feature requirements (wave 2 mapping) |
+| REQ-048 | AI home assistant (wave 3) |
 
 ## Sources of truth
 

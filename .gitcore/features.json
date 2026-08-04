@@ -1,7 +1,7 @@
 {
   "version": "3.8.0",
   "project": "nido",
-  "updated": "2026-08-04",
+  "updated": "2026-08-03",
   "phases": {
     "1": {
       "name": "M0 Foundation",
@@ -72,6 +72,42 @@
       "implemented_in": [],
       "last_updated": null,
       "last_verified": "2026-08-04"
+    },
+    {
+      "id": "ai-assistant",
+      "name": "AI home assistant",
+      "sdlc_phase": "PENDING",
+      "phase": 3,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 85,
+      "claimed_pct": 85,
+      "verified_pct": 85,
+      "req_ids": [
+        "REQ-048"
+      ],
+      "user_stories": [
+        "US-306"
+      ],
+      "tests": [
+        "test/unit/ai-skills.test.ts"
+      ],
+      "evidence": [
+        {
+          "type": "test",
+          "path": "test/unit/ai-skills.test.ts"
+        },
+        {
+          "type": "srs_req",
+          "req_id": "REQ-048"
+        }
+      ],
+      "implemented_in": [
+        "src/lib/domain/ai-skills.ts",
+        "src/lib/AIChat.svelte"
+      ],
+      "last_updated": null,
+      "last_verified": "2026-08-03"
     },
     {
       "id": "analytics",
@@ -192,9 +228,9 @@
       "phase": 6,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-025"
       ],
@@ -220,9 +256,12 @@
           "req_id": "REQ-025"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": [
+        "src/lib/domain/escrow.ts",
+        "src/lib/domain/polygon-client.ts"
+      ],
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-03"
     },
     {
       "id": "export-cad",
@@ -453,11 +492,11 @@
       "name": "edge-mesh rental network integration",
       "sdlc_phase": "PENDING",
       "phase": 6,
-      "passes": false,
-      "status": "partial",
-      "progress_pct": 55,
-      "claimed_pct": 55,
-      "verified_pct": 44,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 85,
+      "claimed_pct": 85,
+      "verified_pct": 85,
       "req_ids": [
         "REQ-022"
       ],
@@ -477,9 +516,12 @@
           "req_id": "REQ-022"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": [
+        "src/lib/domain/mesh.ts",
+        "src/lib/vendor/edge-mesh/"
+      ],
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-03"
     },
     {
       "id": "norms-validation",

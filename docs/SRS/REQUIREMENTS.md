@@ -1041,3 +1041,16 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **Files:** *(see .gitcore/features.json feature verified-invitations)*
 
 *Feature: `verified-invitations` · status: planned*
+
+## REQ-048: AI home assistant (feature ai-assistant)
+
+- **Category:** Functional
+- **Priority:** P3
+- **SRS Status:** `active`
+- **Files:** *(see .gitcore/features.json feature ai-assistant)*
+
+*Feature: `ai-assistant` · status: stable*
+
+**User story (US-306):** As a homeowner, I want an in-app AI assistant so I can
+ask questions about my home (maintenance suggestions, inventory lookups, cost
+queries) without leaving NIDO.
