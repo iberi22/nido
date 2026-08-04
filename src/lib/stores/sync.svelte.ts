@@ -4,6 +4,9 @@ import { loadFromIndexedDB, saveToIndexedDB } from '../domain/db';
 export async function initDatabaseSync() {
   // 1. Load initial state from IndexedDB
   try {
+    if (floorPlanStore.dbLoadPromise) {
+      await floorPlanStore.dbLoadPromise;
+    }
     const saved = await loadFromIndexedDB();
     if (saved) {
       if (saved.currentFloorId && floorPlanStore.floors[saved.currentFloorId]) {
