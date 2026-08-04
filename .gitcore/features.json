@@ -42,9 +42,9 @@
       "phase": 4,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-018"
       ],
@@ -82,9 +82,9 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 85,
-      "claimed_pct": 85,
-      "verified_pct": 85,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-048"
       ],
@@ -117,9 +117,9 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-026"
       ],
@@ -152,9 +152,9 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-013"
       ],
@@ -187,9 +187,9 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-008"
       ],
@@ -268,9 +268,9 @@
       "phase": 4,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-017"
       ],
@@ -371,9 +371,9 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-012"
       ],
@@ -411,9 +411,9 @@
       "phase": 5,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-020"
       ],
@@ -451,9 +451,9 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-016"
       ],
@@ -526,9 +526,9 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-011"
       ],
@@ -561,9 +561,9 @@
       "phase": 6,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-023"
       ],
@@ -602,9 +602,9 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-009"
       ],
@@ -642,9 +642,9 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-010"
       ],
@@ -682,9 +682,9 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-025"
       ],
@@ -720,9 +720,9 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-015"
       ],
@@ -755,9 +755,9 @@
       "phase": 5,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-021"
       ],
@@ -795,9 +795,9 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-028"
       ],
@@ -828,9 +828,9 @@
       "phase": 6,
       "passes": true,
       "status": "stable",
-      "progress_pct": 88,
-      "claimed_pct": 88,
-      "verified_pct": 88,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-024"
       ],
@@ -868,9 +868,9 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-027"
       ],
@@ -908,9 +908,9 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 90,
-      "claimed_pct": 90,
-      "verified_pct": 90,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-014"
       ],
@@ -948,9 +948,9 @@
       "phase": 4,
       "passes": true,
       "status": "stable",
-      "progress_pct": 95,
-      "claimed_pct": 95,
-      "verified_pct": 95,
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-019"
       ],
