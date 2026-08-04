@@ -878,7 +878,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature accounts-auth)*
 
-*Feature: `accounts-auth` · status: planned*
+*Feature: `accounts-auth` · status: stable*
 
 ## REQ-030: Costs & income tracking (feature costs)
 
@@ -905,7 +905,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature escrow-disputes)*
 
-*Feature: `escrow-disputes` · status: planned*
+*Feature: `escrow-disputes` · status: stable*
 
 ## REQ-033: Architect export (DXF/PDF/ZIP) (feature export-cad)
 
@@ -932,7 +932,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature leasing)*
 
-*Feature: `leasing` · status: planned*
+*Feature: `leasing` · status: stable*
 
 ## REQ-036: edge-mesh rental network integration (feature mesh-integration)
 
@@ -941,7 +941,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature mesh-integration)*
 
-*Feature: `mesh-integration` · status: planned*
+*Feature: `mesh-integration` · status: stable*
 
 ## REQ-037: Building norms validation (feature norms-validation)
 
@@ -959,7 +959,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature p2p-discovery)*
 
-*Feature: `p2p-discovery` · status: planned*
+*Feature: `p2p-discovery` · status: stable*
 
 ## REQ-039: 2D floor plan editor (feature plans-2d)
 
@@ -968,7 +968,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature plans-2d)*
 
-*Feature: `plans-2d` · status: planned*
+*Feature: `plans-2d` · status: stable*
 
 ## REQ-040: 3D viewer (feature plans-3d)
 
@@ -977,7 +977,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature plans-3d)*
 
-*Feature: `plans-3d` · status: planned*
+*Feature: `plans-3d` · status: stable*
 
 ## REQ-041: PWA offline-first (feature pwa-offline)
 
@@ -1004,7 +1004,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature tenant-portal)*
 
-*Feature: `tenant-portal` · status: planned*
+*Feature: `tenant-portal` · status: stable*
 
 ## REQ-044: Toolchain & local CI (feature toolchain-ci)
 
@@ -1022,7 +1022,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature trust-score)*
 
-*Feature: `trust-score` · status: planned*
+*Feature: `trust-score` · status: stable*
 
 ## REQ-046: UI on @swal/ui (feature ui-swal)
 
@@ -1031,7 +1031,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature ui-swal)*
 
-*Feature: `ui-swal` · status: planned*
+*Feature: `ui-swal` · status: stable*
 
 ## REQ-047: Verified 1-time invitations (feature verified-invitations)
 
@@ -1040,7 +1040,7 @@ Toolchain: Vitest + @testing-library/svelte + Playwright + Biome; verify.sh prod
 - **SRS Status:** `active`
 - **Files:** *(see .gitcore/features.json feature verified-invitations)*
 
-*Feature: `verified-invitations` · status: planned*
+*Feature: `verified-invitations` · status: stable*
 
 ## REQ-048: AI home assistant (feature ai-assistant)
 

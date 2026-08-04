@@ -6,9 +6,9 @@
 
 | Document | Completeness | Estado |
 |----------|:-----------:|--------|
-| [REQUIREMENTS.md](./REQUIREMENTS.md) | 100% (48 REQ-IDs, 20 user stories) | draft |
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | 100% | draft |
-| [../decisions/](../decisions/) ADRs | 100% (5 ADRs) | draft |
+| [REQUIREMENTS.md](./REQUIREMENTS.md) | 100% (48 REQ-IDs, 20 user stories) | implemented — 24/24 features stable, 100% |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | 100% | stable |
+| [../decisions/](../decisions/) ADRs | 100% (5 ADRs) | stable |
 
 ## REQ-ID index
 
