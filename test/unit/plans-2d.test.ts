@@ -21,9 +21,9 @@ describe("US-101: draw and edit my home's floor plan (walls, zones, rooms) in 2D
     expect(floor.name).toContain("PLANTA BAJA");
     expect(floor.components.length).toBeGreaterThan(0);
 
-    // Verify grid configuration and colors
-    expect(floorPlanStore.config.colors.blueprint_bg).toBe("#1e3a5f");
-    expect(floorPlanStore.config.colors.blueprint_line).toBe("#87ceeb");
+    // Verify grid configuration and colors (Hive Dark design-system tokens)
+    expect(floorPlanStore.config.colors.blueprint_bg).toBe("#020617");
+    expect(floorPlanStore.config.colors.blueprint_line).toBe("#0f172a");
   });
 
   it("acceptance 2: User can add/move/resize wall segments", () => {
