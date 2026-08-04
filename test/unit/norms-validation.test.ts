@@ -36,7 +36,7 @@ describe('norms validation engine', () => {
       };
 
       const resultTooLow = validateStairs(zoneTooLow);
-      expect(resultTooLow.pass).toBe(false);
+      expect(resultTooLow.pass).toEqual(false);
       expect(resultTooLow.severity).toBe('fail');
       expect(resultTooLow.message).toContain('Riser height');
 
@@ -51,7 +51,7 @@ describe('norms validation engine', () => {
       };
 
       const resultTooHigh = validateStairs(zoneTooHigh);
-      expect(resultTooHigh.pass).toBe(false);
+      expect(resultTooHigh.pass).toEqual(false);
       expect(resultTooHigh.severity).toBe('fail');
       expect(resultTooHigh.message).toContain('Riser height');
     });
@@ -68,7 +68,7 @@ describe('norms validation engine', () => {
       };
 
       const result = validateStairs(zone);
-      expect(result.pass).toBe(false);
+      expect(result.pass).toEqual(false);
       expect(result.severity).toBe('fail');
       expect(result.message).toContain('Tread width');
     });
@@ -97,7 +97,7 @@ describe('norms validation engine', () => {
       };
 
       const result = validateStairs(zoneFormulaHigh);
-      expect(result.pass).toBe(false);
+      expect(result.pass).toEqual(false);
       expect(result.severity).toBe('fail');
       expect(result.message).toContain('formula');
     });
@@ -134,7 +134,7 @@ describe('norms validation engine', () => {
       };
 
       const result = validateGarage(zone);
-      expect(result.pass).toBe(false);
+      expect(result.pass).toEqual(false);
       expect(result.severity).toBe('fail');
       expect(result.message).toContain('width');
     });
@@ -152,7 +152,7 @@ describe('norms validation engine', () => {
       };
 
       const result = validateGarage(zone);
-      expect(result.pass).toBe(false);
+      expect(result.pass).toEqual(false);
       expect(result.severity).toBe('fail');
       expect(result.message).toContain('depth');
     });
@@ -170,7 +170,7 @@ describe('norms validation engine', () => {
       };
 
       const result = validateGarage(zone);
-      expect(result.pass).toBe(false);
+      expect(result.pass).toEqual(false);
       expect(result.severity).toBe('fail');
       expect(result.message).toContain('access width');
     });
@@ -208,6 +208,90 @@ describe('norms validation engine', () => {
       const combinedMessage = garageViolations.map(v => v.message).join(' ');
       expect(combinedMessage).toContain('width');
       expect(combinedMessage).toContain('access width');
+    });
+
+    it('should fail stair width check if a component is below NSR-10 minimum width', () => {
+      const zone = {
+        id: 'entrance',
+        name: 'INGRESO',
+        type: 'staircase',
+        stairs: {
+          type: 'L',
+          totalSteps: 23,
+          riser_mm: 174,
+          tread_mm: 280,
+          totalRise_m: 4.0,
+          components: [
+            {
+              id: 'run1',
+              width: 0.85, // Below the 0.90m default limit
+              height: 4.2
+            }
+          ]
+        },
+        properties: {
+          norms: {
+            NSR10_stairs: {
+              minWidth_m: 0.90
+            }
+          }
+        }
+      };
+
+      const result = validateStairs(zone);
+      expect(result.pass).toEqual(false);
+      expect(result.severity).toEqual('fail');
+      expect(result.message).toContain('below the minimum NSR-10 stairs limit');
+    });
+
+    it('should pass stair width check if components meet or exceed the NSR-10 minimum width', () => {
+      const zone = {
+        id: 'entrance',
+        name: 'INGRESO',
+        type: 'staircase',
+        stairs: {
+          type: 'L',
+          totalSteps: 23,
+          riser_mm: 174,
+          tread_mm: 280,
+          totalRise_m: 4.0,
+          components: [
+            {
+              id: 'run1',
+              width: 0.95, // Above the 0.90m limit
+              height: 4.2
+            }
+          ]
+        },
+        properties: {
+          norms: {
+            NSR10_stairs: {
+              minWidth_m: 0.90
+            }
+          }
+        }
+      };
+
+      const result = validateStairs(zone);
+      expect(result.pass).toEqual(true);
+      expect(result.severity).toEqual('pass');
+    });
+
+    it('should produce warning violation if global wall thickness is less than 0.10m', () => {
+      const badProperty = {
+        ...houseData,
+        id: 'bad-wall-property',
+        name: 'Bad Wall Property',
+        config: {
+          wallThickness: 0.08
+        }
+      };
+
+      const violations = validateProperty(badProperty);
+      const wallViolation = violations.find(v => v.ruleId === 'global_config_wall_thickness');
+      expect(wallViolation).toBeDefined();
+      expect(wallViolation?.severity).toEqual('warn');
+      expect(wallViolation?.message).toContain('below the recommended minimum of 0.10m');
     });
   });
 });
