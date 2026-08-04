@@ -45,6 +45,18 @@ export function validateStairs(zone: Zone): ValidationResult {
     hints.push(`Adjust riser or tread so that 2R + H is between 620mm and 640mm.`);
   }
 
+  // Stair width rule: zone with stairs components must have part.width >= NSR10_stairs.minWidth_m
+  const minWidthM = zone.properties?.norms?.NSR10_stairs?.minWidth_m ?? 0.90;
+  const components = (zone.stairs as any)?.components ?? zone.properties?.components ?? zone.properties?.data?.components;
+  if (Array.isArray(components)) {
+    components.forEach((part: any, idx: number) => {
+      if (part.width !== undefined && part.width < minWidthM) {
+        errors.push(`Stair component ${part.id || idx} width of ${part.width}m is below the minimum NSR-10 stairs limit of ${minWidthM}m.`);
+        hints.push(`Increase stair component ${part.id || idx} width to at least ${minWidthM}m.`);
+      }
+    });
+  }
+
   if (errors.length > 0) {
     return {
       pass: false,
@@ -194,11 +206,33 @@ function getZonesFromFloor(floor: any): Zone[] {
 
 export function validateProperty(property: Property): Violation[] {
   const violations: Violation[] = [];
+
+  // Global config rule: wallThickness >= 0.10m warning if below
+  const config = property.config;
+  if (config && typeof config === 'object') {
+    const wallThickness = config.wallThickness;
+    if (wallThickness !== undefined && wallThickness < 0.10) {
+      violations.push({
+        ruleId: 'global_config_wall_thickness',
+        zoneId: 'global',
+        severity: 'warn',
+        message: `Wall thickness (${wallThickness}m) is below the recommended minimum of 0.10m.`,
+        fixHint: 'Increase wall thickness to at least 0.10m.'
+      });
+    }
+  }
+
   const floors = getFloorsFromProperty(property);
 
   for (const floor of floors) {
     const zones = getZonesFromFloor(floor);
     for (const zone of zones) {
+      if (property.norms) {
+        zone.properties = {
+          ...zone.properties,
+          norms: property.norms
+        };
+      }
       for (const rule of RULES) {
         const result = rule.validate(zone);
         if (result) {
