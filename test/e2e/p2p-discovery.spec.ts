@@ -22,9 +22,9 @@ test.describe("US-601: publish a listing anchored to my floor plan", () => {
   });
 
   test("acceptance 3: Presence: landlord online indicator", async ({ page }) => {
-    // Check local presence badge in header via aria-label of status badge
-    const isVisible = await page.locator(".swal-status-badge[aria-label='healthy']").isVisible();
-    expect(isVisible).toBe(true);
+    // Check local presence badge in header via aria-label of status badge (auto-wait for mount)
+    const badge = page.locator(".swal-status-badge[aria-label='healthy']");
+    await expect(badge).toBeVisible();
   });
 
   test("acceptance 4: Listing only visible to authorized network radius", async ({ page }) => {
