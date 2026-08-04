@@ -14,10 +14,13 @@ npx vitest run
 echo "==> Step 3: E2E Tests (npx playwright test)"
 npx playwright test
 
-echo "==> Step 4: Build Gate (npm run build)"
+echo "==> Step 4: Security Scan (bash scripts/verify-security.sh)"
+bash scripts/verify-security.sh
+
+echo "==> Step 5: Build Gate (npm run build)"
 npm run build
 
-echo "==> Step 5: Generating state-report.json"
+echo "==> Step 6: Generating state-report.json"
 # Feature status snapshot
 python3 - <<'PY'
 import json, os, datetime

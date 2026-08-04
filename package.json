@@ -13,6 +13,7 @@
     "test:integration": "vitest run test/integration",
     "test:e2e": "playwright test",
     "test:watch": "vitest",
+    "security": "bash scripts/verify-security.sh",
     "deploy": "bash scripts/deploy-cloudflare.sh"
   },
   "devDependencies": {

@@ -3,6 +3,8 @@
  *
  * This module defines details of the PWA service worker caching and manifest
  * configurations, aligning with Wave 5.01 requirements.
+ *
+ * Wave 6.02 Security Hardening integration comment.
  */
 
 export const PWA_CONFIG = {
