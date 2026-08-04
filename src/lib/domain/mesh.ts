@@ -1,15 +1,26 @@
 // NIDO — edge-mesh integration layer (REQ-004, REQ-022, REQ-023)
 //
-// Wraps the edge-mesh core (vendored in wave 3 — M5 scope). This module
-// provides the typed application surface: namespace isolation, presence,
-// authorization, and chat. The real edge-mesh transport (WebRTC/Yjs) is
-// wired in wave 3; until then, functions are pure state transitions so the
-// domain can be tested offline.
+// Typed application surface over vendored @iberi22/edge-mesh: namespace
+// isolation, presence, authorization, Yjs chat, and ML-DSA-65 identity.
+// Uses InMemoryStorage (storageBackend: "mem") so tests/CI stay offline —
+// no WebRTC/PeerJS until EdgeMesh.iniciar() is called by a live host.
+
+import {
+  ChatChannel,
+  EdgeMesh,
+  MeshPresence,
+  TIPO_CANAL,
+  bytesAHex,
+  createPostQuantumIdentity,
+  generateKeypair,
+  type NodoId,
+} from "@iberi22/edge-mesh";
+import { ml_dsa65 } from "@noble/post-quantum/ml-dsa.js";
 
 export interface MeshPeer {
   id: string;
   name: string;
-  presence: 'online' | 'offline' | 'away';
+  presence: "online" | "offline" | "away";
   lastSeen?: string; // ISO date
 }
 
@@ -26,7 +37,7 @@ export interface MeshClient {
   namespace: string;
   peers: MeshPeer[];
   messages: MeshMessage[];
-  publishPresence(presence: MeshPeer['presence']): void;
+  publishPresence(presence: MeshPeer["presence"]): void;
   sendChatMessage(to: string, text: string): MeshMessage;
   authzCheck(resource: string, action: string): boolean;
 }
@@ -36,43 +47,107 @@ export interface MeshState {
   peers: Record<string, MeshPeer>;
   messages: MeshMessage[];
   online: boolean;
-  authzRules: Record<string, string[]>; // resource -> allowed actions
+  authzRules: Record<string, string[]>; // resource -> allowed roles
 }
 
-const MESH_NAMESPACE = 'swal/nido';
+const MESH_NAMESPACE = "swal/nido";
+const SELF_PEER_ID = "self";
+/** Long-lived grants for role-based authz seeded into NamespaceAuthorizer. */
+const AUTHZ_GRANT_TTL_MS = 1000 * 60 * 60 * 24 * 365 * 100;
+
+const DEFAULT_AUTHZ_RULES: Record<string, string[]> = {
+  "plan:read": ["admin", "propietario", "supervisor", "inquilino"],
+  "plan:write": ["admin", "propietario"],
+  "lease:read": ["admin", "propietario", "inquilino"],
+  "lease:write": ["admin", "propietario"],
+  "dispute:vote": ["admin", "propietario", "inquilino", "supervisor"],
+};
+
+function asNodoId(id: string): NodoId {
+  return id as NodoId;
+}
+
+/** Module-level ML-DSA-65 identity for sync signWithIdentity (public API is sync). */
+const signingIdentity = createPostQuantumIdentity(
+  asNodoId("nido-signer"),
+  generateKeypair("maestra"),
+);
+
+function seedAuthz(mesh: EdgeMesh, namespace: string, rules: Record<string, string[]>): void {
+  for (const [resource, roles] of Object.entries(rules)) {
+    for (const role of roles) {
+      mesh.authorizer.concederCapacidad(
+        namespace,
+        asNodoId(role),
+        resource,
+        AUTHZ_GRANT_TTL_MS,
+      );
+    }
+  }
+}
 
 /** Create the isolated mesh namespace for an instance (REQ-004). */
 export function createMeshClient(instanceId: string): MeshClient {
+  const namespace = `${MESH_NAMESPACE}/${instanceId}`;
+  const nodoId = asNodoId(`nido-${instanceId}`);
+
+  // Real EdgeMesh with in-memory storage — no PeerJS until iniciar().
+  const mesh = new EdgeMesh({
+    nodoId,
+    storageBackend: "mem",
+    defaultSyncNamespace: namespace,
+    requireAuthz: false,
+  });
+
+  const authzRules = { ...DEFAULT_AUTHZ_RULES };
+  seedAuthz(mesh, namespace, authzRules);
+
+  const chat = new ChatChannel(
+    nodoId,
+    `${namespace}/chat`,
+    mesh.yjsAdapter,
+    TIPO_CANAL.PUBLICO,
+  );
+
   const state: MeshState = {
     instanceId,
     peers: {},
     messages: [],
     online: false,
-    authzRules: {
-      'plan:read': ['admin', 'propietario', 'supervisor', 'inquilino'],
-      'plan:write': ['admin', 'propietario'],
-      'lease:read': ['admin', 'propietario', 'inquilino'],
-      'lease:write': ['admin', 'propietario'],
-      'dispute:vote': ['admin', 'propietario', 'inquilino', 'supervisor'],
-    },
+    authzRules,
   };
 
   return {
-    get instanceId() { return state.instanceId; },
-    get namespace() { return `${MESH_NAMESPACE}/${instanceId}`; },
-    get peers() { return Object.values(state.peers); },
-    get messages() { return [...state.messages]; },
-    publishPresence(presence: MeshPeer['presence']) {
-      state.online = presence !== 'offline';
-      const me: MeshPeer = state.peers['self'] ?? { id: 'self', name: 'me', presence: 'offline' };
+    get instanceId() {
+      return state.instanceId;
+    },
+    get namespace() {
+      return namespace;
+    },
+    get peers() {
+      return Object.values(state.peers);
+    },
+    get messages() {
+      return [...state.messages];
+    },
+    publishPresence(presence: MeshPeer["presence"]) {
+      state.online = presence !== "offline";
+      MeshPresence.setOnline(SELF_PEER_ID, state.online);
+      const me: MeshPeer = state.peers[SELF_PEER_ID] ?? {
+        id: SELF_PEER_ID,
+        name: "me",
+        presence: "offline",
+      };
       me.presence = presence;
       me.lastSeen = new Date().toISOString();
-      state.peers['self'] = me;
+      state.peers[SELF_PEER_ID] = me;
     },
     sendChatMessage(to: string, text: string): MeshMessage {
+      // Yjs CRDT write via ChatChannel (sync local apply; no network without iniciar).
+      void chat.sendMessage(text, undefined, { to });
       const msg: MeshMessage = {
         id: crypto.randomUUID(),
-        from: 'self',
+        from: SELF_PEER_ID,
         to,
         text,
         createdAt: new Date().toISOString(),
@@ -81,15 +156,19 @@ export function createMeshClient(instanceId: string): MeshClient {
       return msg;
     },
     authzCheck(resource: string, role: string): boolean {
-      if (role === 'admin') return true; // instance owner: full access
-      const allowed = state.authzRules[resource] ?? [];
-      return allowed.includes(role);
+      // Instance owner: full access (matches NamespaceAuthorizer admin short-circuit).
+      if (role === "admin") return true;
+      return mesh.authorizer.verificarCapacidad(
+        namespace,
+        asNodoId(role),
+        resource,
+      );
     },
   };
 }
 
 /** Presence heartbeat helper. */
-export function publishPresence(client: MeshClient, presence: MeshPeer['presence']): void {
+export function publishPresence(client: MeshClient, presence: MeshPeer["presence"]): void {
   client.publishPresence(presence);
 }
 
@@ -98,13 +177,14 @@ export function authzCheck(client: MeshClient, resource: string, action: string)
   return client.authzCheck(resource, action);
 }
 
-/** Sign payload with post-quantum identity — typed stub until edge-mesh ML-DSA-65 lands (wave 3). */
+/** Sign payload with real ML-DSA-65 (@noble/post-quantum via edge-mesh identity keypair). */
 export function signWithIdentity(payload: string): string {
-  // TODO(wave-3): replace with edge-mesh ML-DSA-65 signing
-  return `stub-signature:${payload.length}`;
+  const datos = new TextEncoder().encode(payload);
+  const firma = ml_dsa65.sign(datos, signingIdentity.keypair.parPrivado);
+  return bytesAHex(firma);
 }
 
-/** Chat message via Yjs — typed surface; transport wired in wave 3. */
+/** Chat message via Yjs ChatChannel — typed surface over edge-mesh transport. */
 export function sendChatMessage(client: MeshClient, peerId: string, text: string): MeshMessage {
   return client.sendChatMessage(peerId, text);
 }

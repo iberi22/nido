@@ -52,13 +52,15 @@ describe("US-601: publish a listing anchored to my floor plan", () => {
     expect(authzCheck(client, "unknown:resource", "admin")).toBe(true);
   });
 
-  it("acceptance 5: chat message + post-quantum signature stub", () => {
+  it("acceptance 5: chat message + real ML-DSA-65 signature", () => {
     const client = createMeshClient("inst-1");
     const msg = sendChatMessage(client, "peer-9", "Hola, me interesa el arriendo");
     expect(msg.to).toBe("peer-9");
     expect(msg.text).toContain("interesa");
     expect(msg.id).toBeTruthy();
     const sig = signWithIdentity("payload-data");
-    expect(sig).toMatch(/^stub-signature:/);
+    expect(sig).not.toMatch(/^stub-signature:/);
+    expect(sig).toMatch(/^[0-9a-f]+$/i);
+    expect(sig.length).toBeGreaterThan(64);
   });
 });
