@@ -238,6 +238,26 @@ export async function isWebAuthnAvailable(): Promise<boolean> {
 }
 
 /**
+ * Verifies if an account has the required role based on role privilege hierarchy.
+ * Hierarchy from highest to lowest: admin > propietario > supervisor > inquilino.
+ * An account with higher or equal role is authorized.
+ */
+export function requireRole(account: Account | null | undefined, requiredRole: Role): boolean {
+  if (!account) {
+    return false;
+  }
+  const hierarchy: Record<Role, number> = {
+    admin: 4,
+    propietario: 3,
+    supervisor: 2,
+    inquilino: 1,
+  };
+  const accountLevel = hierarchy[account.role] ?? 0;
+  const requiredLevel = hierarchy[requiredRole] ?? 0;
+  return accountLevel >= requiredLevel;
+}
+
+/**
  * Enrolls a platform biometric credential via WebAuthn registration (startRegistration).
  * Offline-first: builds PublicKeyCredentialCreationOptions locally (no server).
  */
