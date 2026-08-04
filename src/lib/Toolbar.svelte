@@ -4,7 +4,10 @@
 
   const tools = [
     { id: 'select', icon: '🖱️', label: 'Select' },
-    { id: 'dimension', icon: '📏', label: 'Measure' },
+    { id: 'wall', icon: '🧱', label: 'Wall' },
+    { id: 'zone', icon: '🟩', label: 'Zone' },
+    { id: 'room', icon: '📍', label: 'Room' },
+    { id: 'measure', icon: '📏', label: 'Measure' },
     { id: 'delete', icon: '🗑️', label: 'Delete', danger: true }
   ];
 
@@ -33,7 +36,7 @@
   <div class="tool-grid">
     {#each tools as tool}
       <Button
-        variant={tool.danger ? 'danger' : 'ghost'}
+        variant={floorPlanStore.currentTool === tool.id ? 'primary' : (tool.danger ? 'danger' : 'ghost')}
         size="sm"
         onclick={() => selectTool(tool.id)}
         title={tool.label}
@@ -46,7 +49,7 @@
 
   <div class="separator"></div>
 
-  <h3 class="panel-title">📚 Library</h3>
+  <h3 class="panel-title">📚 Library (Drag & Drop)</h3>
   <div class="tool-grid">
     {#each libraryItems as item}
       <Button

@@ -10,16 +10,16 @@
   },
   "norms": {
     "NSR10_stairs": {
-      "minWidth_m": 0.90,
+      "minWidth_m": 0.9,
       "tread_min_mm": 280,
       "riser_min_mm": 100,
       "riser_max_mm": 180,
       "formula": "2R + H = 620-640mm"
     },
     "POT_garage": {
-      "minWidth_m": 2.60,
-      "minDepth_m": 5.00,
-      "accessWidth_independent_m": 3.20
+      "minWidth_m": 2.6,
+      "minDepth_m": 5.0,
+      "accessWidth_independent_m": 3.2
     }
   },
   "config": {
@@ -31,13 +31,16 @@
       "margin": 100
     },
     "colors": {
-      "blueprint_bg": "#1e3a5f",
-      "blueprint_line": "#87ceeb",
-      "blueprint_text": "#e0f4ff",
-      "accent": "#4dd0e1",
-      "highlight": "#ffd54f",
-      "wall_fill": "rgba(135, 206, 235, 0.25)",
-      "zone_fill": "rgba(135, 206, 235, 0.06)"
+      "blueprint_bg": "#020617",
+      "blueprint_line": "#0f172a",
+      "blueprint_text": "#f1f5f9",
+      "accent": "#06b6d4",
+      "accent_muted": "rgba(6, 182, 212, 0.15)",
+      "highlight": "#f97316",
+      "wall_fill": "rgba(6, 182, 212, 0.25)",
+      "zone_fill": "rgba(6, 182, 212, 0.06)",
+      "selection": "#f97316",
+      "danger": "#ef4444"
     }
   },
   "floors": [
@@ -50,21 +53,30 @@
         {
           "id": "garage",
           "name": "GARAJE /\nPARQUEO",
-          "x": 0, "y": 0, "width": 2.5, "height": 6,
+          "x": 0,
+          "y": 0,
+          "width": 2.5,
+          "height": 6,
           "type": "garage",
           "color": "rgba(135, 206, 235, 0.08)"
         },
         {
           "id": "entrance",
           "name": "INGRESO",
-          "x": 2.5, "y": 0, "width": 3.5, "height": 6,
+          "x": 2.5,
+          "y": 0,
+          "width": 3.5,
+          "height": 6,
           "type": "staircase",
           "color": "rgba(135, 206, 235, 0.05)"
         },
         {
           "id": "motoParking",
           "name": "ZONA MOTOS",
-          "x": 2.5, "y": 1.6, "width": 1.6, "height": 4.2,
+          "x": 2.5,
+          "y": 1.6,
+          "width": 1.6,
+          "height": 4.2,
           "type": "motoParking",
           "color": "rgba(77, 208, 225, 0.12)"
         },
@@ -72,21 +84,41 @@
           "id": "warehouse",
           "name": "BODEGA / ESPACIO ALMACENAJE",
           "subtitle": "~100m² - SISTEMA VIGAS IPE",
-          "x": 0, "y": 6, "width": 6, "height": 18,
+          "x": 0,
+          "y": 6,
+          "width": 6,
+          "height": 18,
           "type": "warehouse",
           "color": "rgba(135, 206, 235, 0.03)"
         },
         {
           "id": "patio",
           "name": "PATIO VENTILACIÓN",
-          "x": 0, "y": 24, "width": 6, "height": 2,
+          "x": 0,
+          "y": 24,
+          "width": 6,
+          "height": 2,
           "type": "patio",
           "color": "rgba(77, 208, 225, 0.08)"
         }
       ],
       "walls": [
-        { "id": "divider_front", "x1": 2.5, "y1": 0, "x2": 2.5, "y2": 6, "note": "Divisor Garage/Escaleras" },
-        { "id": "back_front_zone", "x1": 0, "y1": 6, "x2": 6, "y2": 6, "note": "Separación zona frontal/bodega" }
+        {
+          "id": "divider_front",
+          "x1": 2.5,
+          "y1": 0,
+          "x2": 2.5,
+          "y2": 6,
+          "note": "Divisor Garage/Escaleras"
+        },
+        {
+          "id": "back_front_zone",
+          "x1": 0,
+          "y1": 6,
+          "x2": 6,
+          "y2": 6,
+          "note": "Separación zona frontal/bodega"
+        }
       ],
       "stairs": {
         "type": "L",
@@ -97,8 +129,10 @@
         "components": [
           {
             "id": "run1",
-            "x": 4.1, "y": 1.6,
-            "width": 0.90, "height": 4.2,
+            "x": 4.1,
+            "y": 1.6,
+            "width": 0.9,
+            "height": 4.2,
             "steps": 15,
             "orientation": "vertical",
             "arrowDir": "up",
@@ -106,16 +140,20 @@
           },
           {
             "id": "landing",
-            "x": 3.1, "y": 1.0,
-            "width": 1.90, "height": 0.60,
+            "x": 3.1,
+            "y": 1.0,
+            "width": 1.9,
+            "height": 0.6,
             "steps": 0,
             "orientation": "none",
             "label": "DESCANSO"
           },
           {
             "id": "run2",
-            "x": 3.1, "y": 0.15,
-            "width": 1.90, "height": 0.85,
+            "x": 3.1,
+            "y": 0.15,
+            "width": 1.9,
+            "height": 0.85,
             "steps": 8,
             "orientation": "horizontal",
             "arrowDir": "right",
@@ -124,24 +162,164 @@
         ]
       },
       "elements": [
-        { "type": "garage_door", "x": 0.15, "y": 0, "width": 2.2, "note": "Puerta garaje basculante" },
-        { "type": "pedestrian_door", "x": 2.75, "y": 0, "width": 0.90, "note": "Puerta peatonal" },
-        { "type": "sliding_door", "x": 4.8, "y": 0, "width": 1.0, "note": "Puerta corrediza frontal" },
-        { "type": "sliding_door", "x": 2.5, "y": 6.1, "width": 1.0, "note": "Puerta corrediza a bodega" },
-        { "type": "car", "x": 0.3, "y": 1.5, "width": 1.8, "height": 4.2, "note": "Espacio vehículo" },
-        { "type": "motorcycle", "x": 2.65, "y": 2.2, "width": 0.60, "height": 1.8, "note": "Moto 1" },
-        { "type": "motorcycle", "x": 3.40, "y": 2.2, "width": 0.60, "height": 1.8, "note": "Moto 2" },
-        { "type": "motorcycle", "x": 2.65, "y": 4.1, "width": 0.60, "height": 1.8, "note": "Moto 3" },
-        { "type": "motorcycle", "x": 3.40, "y": 4.1, "width": 0.60, "height": 1.8, "note": "Moto 4" }
+        {
+          "type": "garage_door",
+          "x": 0.15,
+          "y": 0,
+          "width": 2.2,
+          "note": "Puerta garaje basculante"
+        },
+        {
+          "type": "pedestrian_door",
+          "x": 2.75,
+          "y": 0,
+          "width": 0.9,
+          "note": "Puerta peatonal"
+        },
+        {
+          "type": "sliding_door",
+          "x": 4.8,
+          "y": 0,
+          "width": 1.0,
+          "note": "Puerta corrediza frontal"
+        },
+        {
+          "type": "sliding_door",
+          "x": 2.5,
+          "y": 6.1,
+          "width": 1.0,
+          "note": "Puerta corrediza a bodega"
+        },
+        {
+          "type": "car",
+          "x": 0.3,
+          "y": 1.5,
+          "width": 1.8,
+          "height": 4.2,
+          "note": "Espacio vehículo"
+        },
+        {
+          "type": "motorcycle",
+          "x": 2.65,
+          "y": 2.2,
+          "width": 0.6,
+          "height": 1.8,
+          "note": "Moto 1"
+        },
+        {
+          "type": "motorcycle",
+          "x": 3.4,
+          "y": 2.2,
+          "width": 0.6,
+          "height": 1.8,
+          "note": "Moto 2"
+        },
+        {
+          "type": "motorcycle",
+          "x": 2.65,
+          "y": 4.1,
+          "width": 0.6,
+          "height": 1.8,
+          "note": "Moto 3"
+        },
+        {
+          "type": "motorcycle",
+          "x": 3.4,
+          "y": 4.1,
+          "width": 0.6,
+          "height": 1.8,
+          "note": "Moto 4"
+        }
       ],
       "dimensions": [
-        { "from": [0, -0.2], "to": [2.5, -0.2], "label": "2,5m", "side": "bottom" },
-        { "from": [2.5, -0.2], "to": [6, -0.2], "label": "3,5m", "side": "bottom" },
-        { "from": [-0.2, 0], "to": [-0.2, 6], "label": "6m", "side": "left" },
-        { "from": [6.2, 6], "to": [6.2, 26], "label": "25m", "side": "right", "note": "~100m²" },
-        { "from": [2.5, 1.4], "to": [4.1, 1.4], "label": "1,6m", "side": "bottom", "note": "Motos" },
-        { "from": [4.1, 1.4], "to": [5.0, 1.4], "label": "0,9m", "side": "bottom", "note": "Escalera" },
-        { "from": [2.5, 6.3], "to": [3.5, 6.3], "label": "1,0m", "side": "bottom", "note": "P. Bodega" }
+        {
+          "from": [
+            0,
+            -0.2
+          ],
+          "to": [
+            2.5,
+            -0.2
+          ],
+          "label": "2,5m",
+          "side": "bottom"
+        },
+        {
+          "from": [
+            2.5,
+            -0.2
+          ],
+          "to": [
+            6,
+            -0.2
+          ],
+          "label": "3,5m",
+          "side": "bottom"
+        },
+        {
+          "from": [
+            -0.2,
+            0
+          ],
+          "to": [
+            -0.2,
+            6
+          ],
+          "label": "6m",
+          "side": "left"
+        },
+        {
+          "from": [
+            6.2,
+            6
+          ],
+          "to": [
+            6.2,
+            26
+          ],
+          "label": "25m",
+          "side": "right",
+          "note": "~100m²"
+        },
+        {
+          "from": [
+            2.5,
+            1.4
+          ],
+          "to": [
+            4.1,
+            1.4
+          ],
+          "label": "1,6m",
+          "side": "bottom",
+          "note": "Motos"
+        },
+        {
+          "from": [
+            4.1,
+            1.4
+          ],
+          "to": [
+            5.0,
+            1.4
+          ],
+          "label": "0,9m",
+          "side": "bottom",
+          "note": "Escalera"
+        },
+        {
+          "from": [
+            2.5,
+            6.3
+          ],
+          "to": [
+            3.5,
+            6.3
+          ],
+          "label": "1,0m",
+          "side": "bottom",
+          "note": "P. Bodega"
+        }
       ]
     },
     {
@@ -150,11 +328,52 @@
       "subtitle": "ESTILO JAPONÉS COMPACTO - ALTURA 2.8M",
       "height_m": 2.8,
       "zones": [
-        { "id": "corridor", "name": "PASILLO CENTRAL", "x": 2.5, "y": 0, "width": 1.2, "height": 24, "type": "corridor", "color": "rgba(135, 206, 235, 0.05)" },
-        { "id": "apt1", "name": "APTO 1", "x": 0, "y": 0, "width": 2.5, "height": 8, "type": "apartment" },
-        { "id": "apt2", "name": "APTO 2", "x": 3.7, "y": 0, "width": 2.3, "height": 8, "type": "apartment" },
-        { "id": "apt3", "name": "APTO 3", "x": 0, "y": 8, "width": 2.5, "height": 8, "type": "apartment" },
-        { "id": "apt4", "name": "APTO 4", "x": 3.7, "y": 8, "width": 2.3, "height": 8, "type": "apartment" }
+        {
+          "id": "corridor",
+          "name": "PASILLO CENTRAL",
+          "x": 2.5,
+          "y": 0,
+          "width": 1.2,
+          "height": 24,
+          "type": "corridor",
+          "color": "rgba(135, 206, 235, 0.05)"
+        },
+        {
+          "id": "apt1",
+          "name": "APTO 1",
+          "x": 0,
+          "y": 0,
+          "width": 2.5,
+          "height": 8,
+          "type": "apartment"
+        },
+        {
+          "id": "apt2",
+          "name": "APTO 2",
+          "x": 3.7,
+          "y": 0,
+          "width": 2.3,
+          "height": 8,
+          "type": "apartment"
+        },
+        {
+          "id": "apt3",
+          "name": "APTO 3",
+          "x": 0,
+          "y": 8,
+          "width": 2.5,
+          "height": 8,
+          "type": "apartment"
+        },
+        {
+          "id": "apt4",
+          "name": "APTO 4",
+          "x": 3.7,
+          "y": 8,
+          "width": 2.3,
+          "height": 8,
+          "type": "apartment"
+        }
       ],
       "stairs": {
         "type": "L",
@@ -165,24 +384,30 @@
         "components": [
           {
             "id": "run1",
-            "x": 4.1, "y": 1.6,
-            "width": 0.90, "height": 3.2,
+            "x": 4.1,
+            "y": 1.6,
+            "width": 0.9,
+            "height": 3.2,
             "steps": 11,
             "orientation": "vertical",
             "arrowDir": "up"
           },
           {
             "id": "landing",
-            "x": 3.1, "y": 1.0,
-            "width": 1.90, "height": 0.60,
+            "x": 3.1,
+            "y": 1.0,
+            "width": 1.9,
+            "height": 0.6,
             "steps": 0,
             "orientation": "none",
             "label": "DESCANSO"
           },
           {
             "id": "run2",
-            "x": 3.1, "y": 0.15,
-            "width": 1.90, "height": 0.85,
+            "x": 3.1,
+            "y": 0.15,
+            "width": 1.9,
+            "height": 0.85,
             "steps": 5,
             "orientation": "horizontal",
             "arrowDir": "right"
@@ -204,10 +429,42 @@
       "subtitle": "ÁREA SOCIAL ABIERTA - PANELES SOLARES OPCIONALES",
       "height_m": 0,
       "zones": [
-        { "id": "bbq", "name": "ZONA BBQ", "x": 0, "y": 0, "width": 3, "height": 4, "type": "social" },
-        { "id": "laundry", "name": "LAVANDERÍA", "x": 3, "y": 0, "width": 3, "height": 4, "type": "utility" },
-        { "id": "social_area", "name": "ÁREA SOCIAL LIBRE", "x": 0, "y": 4, "width": 6, "height": 20, "type": "social" },
-        { "id": "patio_roof", "name": "PATIO", "x": 0, "y": 24, "width": 6, "height": 2, "type": "patio" }
+        {
+          "id": "bbq",
+          "name": "ZONA BBQ",
+          "x": 0,
+          "y": 0,
+          "width": 3,
+          "height": 4,
+          "type": "social"
+        },
+        {
+          "id": "laundry",
+          "name": "LAVANDERÍA",
+          "x": 3,
+          "y": 0,
+          "width": 3,
+          "height": 4,
+          "type": "utility"
+        },
+        {
+          "id": "social_area",
+          "name": "ÁREA SOCIAL LIBRE",
+          "x": 0,
+          "y": 4,
+          "width": 6,
+          "height": 20,
+          "type": "social"
+        },
+        {
+          "id": "patio_roof",
+          "name": "PATIO",
+          "x": 0,
+          "y": 24,
+          "width": 6,
+          "height": 2,
+          "type": "patio"
+        }
       ],
       "elements": []
     }
