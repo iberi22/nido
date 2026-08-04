@@ -53,6 +53,7 @@ export function spendingByCategory(transactions: Transaction[]): SpendingCategor
 
 /**
  * Calculates utility consumption pattern metrics (average, min, max, delta).
+ * Helps properties understand resources usages and plan maintenance.
  */
 export function utilityConsumptionPattern(
   utility: Utility,

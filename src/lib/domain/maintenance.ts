@@ -60,7 +60,7 @@ export function createSchedule(itemId: string, interval_days: number, lastDone: 
 export function computeNextDue(schedule: Pick<Schedule, 'lastDone' | 'interval_days'>): Date {
   const lastDoneTime = normalizeToMidnight(schedule.lastDone).getTime();
   const nextDueTime = lastDoneTime + schedule.interval_days * 86400000;
-  return new Date(nextDueTime);
+  return normalizeToMidnight(new Date(nextDueTime));
 }
 
 /**
