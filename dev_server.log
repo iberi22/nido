@@ -1,0 +1,19 @@
+
+> floor-plan-designer-svelte@0.0.0 dev
+> vite --host 0.0.0.0 --port 3000
+
+4:57:46 AM [vite-plugin-svelte] !!! Support for vite 8 beta in vite-plugin-svelte is experimental (rolldown: 1.2.2, vite: 8.2.0) !!!
+	See https://github.com/sveltejs/vite-plugin-svelte/issues/1143 for a list of known issues and to report feedback.
+4:57:46 AM [vite] (client) Forced re-optimization of dependencies
+
+  VITE v8.2.0  ready in 645 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: http://192.168.0.2:3000/  eth0
+[vite:css][postcss] @import must precede all other statements (besides @charset or empty @layer)
+243 |
+244 |  /* Clases utilitarias de color */
+245 |  @import './colors.css';
+    |  ^^^^^^^^^^^^^^^^^^^^^^^
+246 |
+4:58:26 AM [vite] (client) dependencies optimized: three, three/addons/controls/OrbitControls.js
