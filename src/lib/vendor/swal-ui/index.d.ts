@@ -14,10 +14,11 @@ declare module '@swal/ui' {
     draggable?: boolean;
     title?: string;
     children?: unknown;
+    'data-testid'?: string;
   }> {}
   export class Card extends SvelteComponent<{ variant?: 'default' | 'surface' | 'elevated' | 'glass'; hoverable?: boolean }> {}
-  export class Badge extends SvelteComponent<{ variant?: 'success' | 'warning' | 'danger' | 'info' | 'orange' | 'neutral'; pulse?: boolean; dot?: boolean }> {}
-  export class Input extends SvelteComponent<{ label?: string; type?: string; error?: string; value?: unknown }> {}
+  export class Badge extends SvelteComponent<{ variant?: 'success' | 'warning' | 'danger' | 'info' | 'orange' | 'neutral'; pulse?: boolean; dot?: boolean; size?: 'sm' | 'md' }> {}
+  export class Input extends SvelteComponent<{ label?: string; type?: string; error?: string; value?: unknown; placeholder?: string; 'data-testid'?: string }> {}
   export class Table extends SvelteComponent<Record<string, never>> {}
   export class Tabs extends SvelteComponent<{ value?: string }> {}
   export class Skeleton extends SvelteComponent<{ variant?: 'text' | 'card' | 'circle' }> {}
