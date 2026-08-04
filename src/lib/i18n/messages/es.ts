@@ -1,4 +1,33 @@
 export const es = {
+  app: {
+    title: 'NIDO',
+    subtitle: 'Administración Inteligente de Hogares',
+    badge: 'Casa 3 Pisos',
+    local: 'Local'
+  },
+  global: {
+    plans: 'Planos',
+    inventory: 'Inventario',
+    taxes: 'Impuestos',
+    maintenance: 'Mantenimiento'
+  },
+  btn: {
+    export: 'Exportar',
+    aiChat: '🤖 Chat de IA'
+  },
+  lang: {
+    en: 'Inglés',
+    es: 'Español'
+  },
+  onboarding: {
+    welcome: 'Bienvenido a NIDO',
+    step1: 'Dibujar un muro: Comienza a dibujar las paredes de tu plano directamente en el lienzo 2D.',
+    step2: 'Guardar sin conexión: Todos los cambios se guardan localmente de forma automática.',
+    step3: 'Red: Sincroniza actualizaciones y publica tu presencia en tiempo real.',
+    next: 'Siguiente',
+    prev: 'Anterior',
+    dismiss: 'Descartar'
+  },
   tabs: {
     plan: 'Planos',
     inventory: 'Inventario',
@@ -8,6 +37,8 @@ export const es = {
   view: {
     v2d: '2D',
     v3d: '3D',
+    '2d': '2D',
+    '3d': '3D',
     export: 'Exportar',
     aiChat: '🤖 Chat de IA'
   },

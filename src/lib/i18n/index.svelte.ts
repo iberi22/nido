@@ -17,6 +17,13 @@ export const currentLang = {
 };
 
 /**
+ * Returns the current active language code.
+ */
+export function getLang(): SupportedLang {
+  return _currentLang;
+}
+
+/**
  * Changes the current language.
  */
 export function setLang(lang: SupportedLang) {

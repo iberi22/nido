@@ -7,6 +7,8 @@
   import OfflineBanner from './lib/OfflineBanner.svelte';
   import MeshPanel from './lib/MeshPanel.svelte';
   import AdminPanel from './lib/AdminPanel.svelte';
+  import Onboarding from './lib/Onboarding.svelte';
+  import { t, setLang, getLang } from './lib/i18n/index.svelte';
   import { createMeshClient, type MeshClient } from './lib/domain/mesh';
   import { EdgeHiveClient } from './lib/maloca/client';
   import { isPro } from './lib/maloca/tier';
@@ -19,6 +21,7 @@
   let activeTab = $state('plan');
   let exportStatus = $state<'idle' | 'done' | 'error'>('idle');
   let showAIChat = $state(true);
+  let showOnboarding = $state(false);
 
   // Wave 5 #92 — Shell integration: DI clients created ONCE and passed via props.
   let instanceId = $state('');
@@ -28,6 +31,16 @@
     getTier: () => Promise<{ isPro: boolean; name?: string }>;
     refresh: () => Promise<void>;
   } | null>(null);
+
+  $effect(() => {
+    if (typeof localStorage !== 'undefined') {
+      const seen = localStorage.getItem('nido_onboarding_seen');
+      const isAutomation = navigator.userAgent.includes('HeadlessChrome') || navigator.webdriver;
+      if (seen !== 'true' && !isAutomation) {
+        showOnboarding = true;
+      }
+    }
+  });
 
   $effect(() => {
     // Guard: clients are created once per mount (instanceId persists the workspace).
@@ -54,12 +67,12 @@
     };
   });
 
-  const tabs = [
-    { id: 'plan', label: 'Plans' },
-    { id: 'inventory', label: 'Inventory' },
-    { id: 'taxes', label: 'Taxes' },
-    { id: 'maintenance', label: 'Maintenance' }
-  ] as const;
+  const tabs = $derived([
+    { id: 'plan', label: t('global.plans') },
+    { id: 'inventory', label: t('global.inventory') },
+    { id: 'taxes', label: t('global.taxes') },
+    { id: 'maintenance', label: t('global.maintenance') }
+  ]);
 
   function handleExport() {
     try {
@@ -87,11 +100,11 @@
     <div class="topbar-left">
       <span class="logo-mark" aria-hidden="true">🏠</span>
       <div class="brand">
-        <h1 class="brand-title">NIDO</h1>
-        <span class="brand-sub">Intelligent Home Administration</span>
+        <h1 class="brand-title">{t('app.title')}</h1>
+        <span class="brand-sub">{t('app.subtitle')}</span>
       </div>
-      <Badge variant="info">Casa 3 Pisos</Badge>
-      <StatusBadge status="healthy">Local</StatusBadge>
+      <Badge variant="info">{t('app.badge')}</Badge>
+      <StatusBadge status="healthy">{t('app.local')}</StatusBadge>
     </div>
 
     <div class="topbar-center">
@@ -113,6 +126,18 @@
     </div>
 
     <div class="topbar-right" role="group" aria-label="View mode">
+      <div class="lang-selector-wrapper">
+        <select
+          value={getLang()}
+          onchange={(e) => setLang((e.target as HTMLSelectElement).value)}
+          data-testid="language-selector"
+          class="swal-select"
+        >
+          <option value="en">{t('lang.en')}</option>
+          <option value="es">{t('lang.es')}</option>
+        </select>
+      </div>
+
       <Button
         variant={currentView === '2d' ? 'primary' : 'ghost'}
         size="sm"
@@ -123,7 +148,7 @@
           'data-testid': 'view-2d'
         }}
       >
-        2D
+        {t('view.2d')}
       </Button>
       <Button
         variant={currentView === '3d' ? 'primary' : 'ghost'}
@@ -135,7 +160,7 @@
           'data-testid': 'view-3d'
         }}
       >
-        3D
+        {t('view.3d')}
       </Button>
       <Button
         variant="primary"
@@ -146,7 +171,7 @@
           'data-testid': 'export-json'
         }}
       >
-        Export
+        {t('btn.export')}
       </Button>
       <Button
         variant={showAIChat ? 'primary' : 'ghost'}
@@ -158,10 +183,14 @@
           'data-testid': 'toggle-ai-chat'
         }}
       >
-        🤖 AI Chat
+        {t('btn.aiChat')}
       </Button>
     </div>
   </header>
+
+  {#if showOnboarding}
+    <Onboarding ondismiss={() => (showOnboarding = false)} />
+  {/if}
 
   <div class="nido-content">
     <aside class="nido-sidebar">
@@ -263,7 +292,21 @@
     color: var(--swal-accent, #06b6d4); opacity: 1;
     background: var(--swal-accent-muted, rgba(6, 182, 212, 0.15));
   }
-  .topbar-right { display: flex; gap: 6px; }
+  .topbar-right { display: flex; gap: 6px; align-items: center; }
+  .swal-select {
+    background: var(--swal-surface, #0f172a);
+    border: 1px solid var(--swal-border, rgba(255, 255, 255, 0.12));
+    color: var(--swal-text, #f1f5f9);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+  .swal-select:hover {
+    border-color: var(--swal-accent, #06b6d4);
+  }
   .nido-content { display: flex; flex: 1; min-height: 0; }
   .nido-sidebar {
     width: 280px; padding: 12px; display: flex; flex-direction: column; gap: 12px;

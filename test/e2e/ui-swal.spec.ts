@@ -6,6 +6,9 @@ import { test, expect } from "@playwright/test";
 
 test.describe("US-101: NIDO shell on @swal/ui", () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('nido_onboarding_seen', 'true');
+    });
     await page.goto("/");
   });
 

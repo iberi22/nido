@@ -1,4 +1,33 @@
 export const en = {
+  app: {
+    title: 'NIDO',
+    subtitle: 'Intelligent Home Administration',
+    badge: 'Casa 3 Pisos',
+    local: 'Local'
+  },
+  global: {
+    plans: 'Plans',
+    inventory: 'Inventory',
+    taxes: 'Taxes',
+    maintenance: 'Maintenance'
+  },
+  btn: {
+    export: 'Export',
+    aiChat: '🤖 AI Chat'
+  },
+  lang: {
+    en: 'English',
+    es: 'Español'
+  },
+  onboarding: {
+    welcome: 'Welcome to NIDO',
+    step1: 'Draw a Wall: Start drawing your blueprint walls directly in the 2D stage.',
+    step2: 'Save Offline: All layout updates are persisted offline automatically.',
+    step3: 'Network: Synchronize updates and publish presence in real-time.',
+    next: 'Next',
+    prev: 'Previous',
+    dismiss: 'Dismiss'
+  },
   tabs: {
     plan: 'Plans',
     inventory: 'Inventory',
@@ -8,6 +37,8 @@ export const en = {
   view: {
     v2d: '2D',
     v3d: '3D',
+    '2d': '2D',
+    '3d': '3D',
     export: 'Export',
     aiChat: '🤖 AI Chat'
   },
