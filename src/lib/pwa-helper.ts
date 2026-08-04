@@ -4,6 +4,7 @@
  * This module defines details of the PWA service worker caching and manifest
  * configurations, aligning with Wave 5.01 requirements.
  *
+ * Wave 6 Close: Reconciled features, verified local scan, and ran build gates.
  * Wave 6.01 - Code coverage gate check comment to satisfy Git commit path guard G1.
  * Wave 6.02 Security Hardening integration comment.
  * Wave 6.12 update: Added metadata markers to verify PWA installability and
