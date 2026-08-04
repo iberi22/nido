@@ -122,6 +122,25 @@ describe("US-603: link sessions from other apps to verify my identity - Integrat
     // Let's verify our list still has the hidden review provider links marked visible = false.
     const hiddenReview = links.find(l => l.provider === "review-history");
     expect(hiddenReview).toBeDefined();
-    expect(hiddenReview?.visible).toBe(false);
+    expect(hiddenReview?.visible).toEqual(false);
+
+    // Visibility is UI privacy only — score/tier still include verified hidden links
+    const afterHide = computeTrustScore(links, history, { cap: 40 });
+    expect(afterHide.breakdown.reviews).toBe(25);
+    expect(afterHide.score).toBe(95);
+    expect(afterHide.tier).toBe("T4");
+  });
+
+  it("acceptance 3: rejecting manual proof mid-flow keeps tier at T0", () => {
+    const links: TrustLink[] = [];
+    expect(() =>
+      addLink(links, { provider: "gov-id", proof: "cedula-scan.pdf" })
+    ).toThrow(/Manual upload/);
+    expect(links).toHaveLength(0);
+
+    const history: TrustHistory = { completedRentals: 0, polygonDepositActive: false };
+    const res = computeTrustScore(links, history);
+    expect(res.tier).toBe("T0");
+    expect(res.score).toBe(0);
   });
 });

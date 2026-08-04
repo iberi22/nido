@@ -17,12 +17,14 @@ describe("gitcore-compliance", () => {
     expect(manifest.schema).toMatch(/gitcore-manifest/);
   });
 
-  it("features.json is valid and has stable + planned features", () => {
+  it("features.json is valid and has stable features (wave 2: 0 planned)", () => {
     const features = JSON.parse(readFileSync(join(ROOT, ".gitcore/features.json"), "utf8"));
     expect(features.features.length).toBeGreaterThanOrEqual(20);
     const statuses = features.features.map((f: any) => f.status);
     expect(statuses).toContain("stable");
-    expect(statuses).toContain("planned");
+    // Waves 1–2 closed: features are stable or partial — no planned leftovers
+    expect(statuses.every((s: string) => s === "stable" || s === "partial")).toBe(true);
+    expect(statuses).toContain("partial"); // mesh-integration still partial
     // Every feature has an id
     for (const f of features.features) {
       expect(typeof f.id).toBe("string");

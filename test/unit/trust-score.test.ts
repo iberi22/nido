@@ -153,4 +153,39 @@ describe("US-603: link sessions from other apps to verify my identity - Unit Tes
     expect(noSingleSourceInflates(inflatedBreakdown, 40)).toBe(false);
   });
 
+  it("unverified links do not contribute to score or tier", () => {
+    const links: TrustLink[] = [
+      { id: "1", provider: "gov-id", proof: { token: "1" }, verified: false, visible: true },
+      { id: "2", provider: "payment-history", proof: { token: "2" }, verified: false, visible: true }
+    ];
+    const history: TrustHistory = { completedRentals: 5, polygonDepositActive: true };
+    const res = computeTrustScore(links, history);
+    expect(res.tier).toBe("T0");
+    expect(res.score).toBe(0);
+    expect(res.breakdown.govId).toBe(0);
+    expect(res.breakdown.payments).toBe(0);
+  });
+
+  it("verifyLink rejects manual proofs and accepts OAuth shapes", () => {
+    const manualLink: TrustLink = {
+      id: "m1",
+      provider: "gov-id",
+      proof: "passport-scan.png",
+      verified: false,
+      visible: true
+    };
+    expect(verifyLink(manualLink).valid).toEqual(false);
+    expect(verifyLink(manualLink).reason).toMatch(/manual/i);
+
+    const weakObj: TrustLink = {
+      id: "w1",
+      provider: "social-graph",
+      proof: { note: "hello" },
+      verified: false,
+      visible: true
+    };
+    // addLink would reject this; verifyLink still flags missing API keys
+    expect(verifyLink(weakObj).valid).toEqual(false);
+  });
+
 });

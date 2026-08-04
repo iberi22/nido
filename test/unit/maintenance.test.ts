@@ -4,7 +4,10 @@ import {
   computeNextDue,
   isOverdue,
   daysUntilDue,
-  normalizeToMidnight
+  normalizeToMidnight,
+  createWorkOrder,
+  updateWorkOrderStatus,
+  listMaintenanceHistory
 } from '../../src/lib/domain/maintenance';
 
 describe('Maintenance Schedule Calculations', () => {
@@ -65,5 +68,36 @@ describe('Maintenance Schedule Calculations', () => {
 
     // Today is Aug 15, -4 days until due (overdue)
     expect(daysUntilDue(schedule, new Date(2026, 7, 15))).toBe(-4);
+  });
+
+  it('should create work orders from schedules and track status flow', () => {
+    const schedule = createSchedule('boiler-1', 90, new Date(2026, 0, 1));
+    let wo = createWorkOrder(schedule, { assignee: 'tech-a', notes: 'annual service' });
+
+    expect(wo.scheduleId).toBe(schedule.id);
+    expect(wo.itemId).toBe('boiler-1');
+    expect(wo.status).toBe('open');
+
+    wo = updateWorkOrderStatus(wo, 'in_progress');
+    expect(wo.status).toBe('in_progress');
+    expect(wo.updatedAt).toBeInstanceOf(Date);
+
+    wo = updateWorkOrderStatus(wo, 'done');
+    expect(wo.status).toBe('done');
+
+    const property = { id: 'p1', name: 'Casa', workOrders: [wo] };
+    expect(listMaintenanceHistory(property, 'boiler-1')).toHaveLength(1);
+    expect(listMaintenanceHistory(property, 'other')).toHaveLength(0);
+  });
+
+  it('should allow manual work orders without a schedule', () => {
+    const wo = createWorkOrder(null, {
+      assignee: 'tech-b',
+      notes: 'ad-hoc fix',
+      itemId: 'faucet-2'
+    });
+    expect(wo.scheduleId).toBeNull();
+    expect(wo.itemId).toBe('faucet-2');
+    expect(wo.status).toBe('open');
   });
 });

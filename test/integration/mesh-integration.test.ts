@@ -46,10 +46,15 @@ describe("US-601: publish a listing anchored to my floor plan", () => {
     expect(authzCheck(client, "plan:read", "admin")).toBe(true);
     expect(authzCheck(client, "plan:write", "admin")).toBe(true);
     // A tenant role can read but NOT write plans
-    expect(authzCheck(client, "plan:write", "inquilino")).toBe(false);
+    expect(authzCheck(client, "plan:write", "inquilino")).toEqual(false);
     expect(authzCheck(client, "plan:read", "inquilino")).toBe(true);
+    // Lease write denied for tenant; dispute vote allowed
+    expect(authzCheck(client, "lease:write", "inquilino")).toEqual(false);
+    expect(authzCheck(client, "lease:read", "inquilino")).toBe(true);
+    expect(authzCheck(client, "dispute:vote", "inquilino")).toBe(true);
     // Unknown resource defaults to admin-only
     expect(authzCheck(client, "unknown:resource", "admin")).toBe(true);
+    expect(authzCheck(client, "unknown:resource", "inquilino")).toEqual(false);
   });
 
   it("acceptance 5: chat message + real ML-DSA-65 signature", () => {
