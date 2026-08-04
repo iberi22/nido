@@ -29,6 +29,9 @@ export interface TokenStore {
   save?: () => void;
 }
 
+// Chained verified invitation to OAuth proof flow.
+// This supports high-trust onboarding for invited users.
+
 /**
  * Generates a URL-safe 1-time token of 24 bytes using crypto random bytes and base64url format.
  */
