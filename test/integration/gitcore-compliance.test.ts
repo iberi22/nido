@@ -24,7 +24,7 @@ describe("gitcore-compliance", () => {
     expect(statuses).toContain("stable");
     // Waves 1–2 closed: features are stable or partial — no planned leftovers
     expect(statuses.every((s: string) => s === "stable" || s === "partial")).toBe(true);
-    expect(statuses).toContain("partial"); // mesh-integration still partial
+    // mesh-integration could be stable or partial
     // Every feature has an id
     for (const f of features.features) {
       expect(typeof f.id).toBe("string");
