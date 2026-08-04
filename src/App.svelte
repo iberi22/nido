@@ -3,6 +3,7 @@
   import Toolbar from './lib/Toolbar.svelte';
   import FloorSelector from './lib/FloorSelector.svelte';
   import AIChat from './lib/AIChat.svelte';
+  import NormsPanel from './lib/NormsPanel.svelte';
   import { floorPlanStore } from './lib/stores/floorPlanStore.svelte';
   import { Button, Card, Badge, StatusBadge, Tabs, Toaster } from '@swal/ui';
   import { toast } from './lib/vendor/swal-ui/lib/toast.svelte.js';
@@ -10,6 +11,7 @@
   let currentView = $state<'2d' | '3d'>('2d');
   let activeTab = $state('plan');
   let exportStatus = $state<'idle' | 'done' | 'error'>('idle');
+  let showAIChat = $state(true);
 
   const tabs = [
     { id: 'plan', label: 'Plans' },
@@ -103,6 +105,18 @@
       >
         Export
       </Button>
+      <Button
+        variant={showAIChat ? 'primary' : 'ghost'}
+        size="sm"
+        onclick={() => (showAIChat = !showAIChat)}
+        {...{
+          'aria-label': 'Toggle AI Chat panel',
+          'aria-pressed': showAIChat,
+          'data-testid': 'toggle-ai-chat'
+        }}
+      >
+        🤖 AI Chat
+      </Button>
     </div>
   </header>
 
@@ -110,6 +124,9 @@
     <aside class="nido-sidebar">
       <Card>
         <FloorSelector />
+      </Card>
+      <Card>
+        <NormsPanel />
       </Card>
       {#if currentView === '2d'}
         <Card>
@@ -141,14 +158,16 @@
       {/if}
     </section>
 
-    <aside class="nido-sidebar-right">
-      <Card>
-        <details class="ai-panel" open>
-          <summary class="panel-title">AI Assistant</summary>
-          <AIChat />
-        </details>
-      </Card>
-    </aside>
+    {#if showAIChat}
+      <aside class="nido-sidebar-right" data-testid="ai-chat-panel">
+        <Card>
+          <details class="ai-panel" open>
+            <summary class="panel-title">AI Assistant</summary>
+            <AIChat />
+          </details>
+        </Card>
+      </aside>
+    {/if}
   </div>
 
   <Toaster />
