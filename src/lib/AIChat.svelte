@@ -35,7 +35,7 @@
 
 <div class="ai-chat">
   <p class="hint">e.g. addWall x=2 y=3 width=5 height=0.15</p>
-  <form class="row" onsubmit={handleSubmit}>
+  <form class="row" onsubmit={handleSubmit} aria-label="AI Assistant panel">
     <Input label="Command" bind:value={command} />
     <Button variant="primary" size="sm" type="submit">Send</Button>
   </form>
