@@ -9,8 +9,8 @@ test.describe("US-101: draw and edit my home's floor plan (walls, zones, rooms) 
   });
 
   test("acceptance 1: Canvas renders blueprint grid and floor plan selector", async ({ page }) => {
-    // Check that the page loads correctly and has title floor-plan-designer-svelte
-    await expect(page).toHaveTitle(/floor-plan-designer-svelte/i);
+    // Check that the page loads correctly and has title NIDO
+    await expect(page).toHaveTitle(/NIDO/i);
 
     // Verify brand title NIDO is present on page
     const brand = page.locator(".brand-title");

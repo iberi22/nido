@@ -28,9 +28,9 @@ test.describe("US-601: publish a listing anchored to my floor plan", () => {
   });
 
   test("acceptance 4: Listing only visible to authorized network radius", async ({ page }) => {
-    // Ensure shell layout container is rendered
-    const shellCount = await page.locator(".nido-shell").count();
-    expect(shellCount).toBe(1);
+    // Ensure shell layout container is rendered (auto-wait for Svelte mount)
+    const shell = page.locator(".nido-shell");
+    await expect(shell).toBeVisible();
   });
 });
 
@@ -58,21 +58,20 @@ test.describe("US-602: discover listings near me by GPS", () => {
   });
 
   test("acceptance 2: Listings within radius (geohash neighbors)", async ({ page }) => {
-    // Validate layout and sidebar for upcoming discovery list
-    const sidebarCount = await page.locator(".nido-sidebar").count();
-    expect(sidebarCount).toBe(1);
+    // Validate layout and sidebar for upcoming discovery list (auto-wait for mount)
+    const sidebar = page.locator(".nido-sidebar");
+    await expect(sidebar).toBeVisible();
   });
 
   test("acceptance 3: Sort by distance and trust score", async ({ page }) => {
-    // Assert the tabs are rendered properly
-    const tabs = await page.locator(".swal-tab").count();
-    expect(tabs).toBeGreaterThan(0);
+    // Assert the tabs are rendered properly (auto-wait for mount)
+    await expect(page.locator(".swal-tab").first()).toBeVisible();
   });
 
   test("acceptance 4: Anonymous browsing until interest confirmed", async ({ page }) => {
-    // Main layout contains design section
-    const mainSection = await page.locator(".nido-main").count();
-    expect(mainSection).toBe(1);
+    // Main layout contains design section (auto-wait for mount)
+    const mainSection = page.locator(".nido-main");
+    await expect(mainSection).toBeVisible();
   });
 
   test("acceptance 5: No fake listings: listing requires plan anchor + geohash match", async ({ page }) => {
