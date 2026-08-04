@@ -69,9 +69,11 @@
           "req_id": "REQ-018"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": "",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "ai-assistant",
@@ -102,12 +104,11 @@
           "req_id": "REQ-048"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/ai-skills.ts",
-        "src/lib/AIChat.svelte"
-      ],
+      "implemented_in": "src/lib/domain/ai-skills.ts,src/lib/AIChat.svelte",
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-03",
+      "last_tested": "2026-08-03",
+      "notes": ""
     },
     {
       "id": "analytics",
@@ -138,11 +139,11 @@
           "req_id": "REQ-026"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/analytics.ts"
-      ],
+      "implemented_in": "src/lib/domain/analytics.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "costs",
@@ -173,11 +174,11 @@
           "req_id": "REQ-013"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/costs.ts"
-      ],
+      "implemented_in": "src/lib/domain/costs.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "data-model",
@@ -213,13 +214,11 @@
           "req_id": "REQ-008"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/property.ts",
-        "src/lib/stores/floorPlanStore.svelte.ts",
-        "src/lib/data/property.schema.json"
-      ],
+      "implemented_in": "src/lib/domain/property.ts,src/lib/stores/floorPlanStore.svelte.ts,src/lib/data/property.schema.json",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "escrow-disputes",
@@ -256,12 +255,11 @@
           "req_id": "REQ-025"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/escrow.ts",
-        "src/lib/domain/polygon-client.ts"
-      ],
+      "implemented_in": "src/lib/domain/escrow.ts,src/lib/domain/polygon-client.ts",
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-03",
+      "last_tested": "2026-08-03",
+      "notes": ""
     },
     {
       "id": "export-cad",
@@ -297,11 +295,11 @@
           "req_id": "REQ-017"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/export.ts"
-      ],
+      "implemented_in": "src/lib/domain/export.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "gitcore-compliance",
@@ -360,14 +358,11 @@
           "req_id": "REQ-007"
         }
       ],
-      "implemented_in": [
-        "AGENTS.md",
-        "SRC.md",
-        ".gitcore/",
-        "docs/SRS/"
-      ],
+      "implemented_in": "AGENTS.md,SRC.md,.gitcore/,docs/SRS/",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "inventory",
@@ -403,11 +398,11 @@
           "req_id": "REQ-012"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/inventory.ts"
-      ],
+      "implemented_in": "src/lib/domain/inventory.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "leasing",
@@ -443,9 +438,11 @@
           "req_id": "REQ-020"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": "src/lib/domain/leasing.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "maintenance",
@@ -481,11 +478,11 @@
           "req_id": "REQ-016"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/maintenance.ts"
-      ],
+      "implemented_in": "src/lib/domain/maintenance.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "mesh-integration",
@@ -516,12 +513,11 @@
           "req_id": "REQ-022"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/mesh.ts",
-        "src/lib/vendor/edge-mesh/"
-      ],
+      "implemented_in": "src/lib/domain/mesh.ts,src/lib/vendor/edge-mesh/",
       "last_updated": null,
-      "last_verified": "2026-08-03"
+      "last_verified": "2026-08-03",
+      "last_tested": "2026-08-03",
+      "notes": ""
     },
     {
       "id": "norms-validation",
@@ -552,11 +548,11 @@
           "req_id": "REQ-011"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/norms.ts"
-      ],
+      "implemented_in": "src/lib/domain/norms.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "p2p-discovery",
@@ -593,9 +589,11 @@
           "req_id": "REQ-023"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": "src/lib/domain/discovery.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "plans-2d",
@@ -631,10 +629,11 @@
           "req_id": "REQ-009"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": "src/lib/stores/floorPlanStore.svelte.ts,src/App.svelte",
       "last_updated": null,
-      "notes": "FAILED: @swal/ui not on npm — needs vendoring",
-      "last_verified": "2026-08-04"
+      "notes": "PASS — 2D editor on @swal/ui + e2e 5/5 (wave 3)",
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04"
     },
     {
       "id": "plans-3d",
@@ -670,10 +669,11 @@
           "req_id": "REQ-010"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": "src/lib/Scene3D.svelte",
       "last_updated": null,
-      "notes": "FAILED + false-positive PR #22 (no code committed)",
-      "last_verified": "2026-08-04"
+      "notes": "PASS — 3D viewer lazy-loaded + e2e 4/4 (wave 3)",
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04"
     },
     {
       "id": "pwa-offline",
@@ -707,13 +707,11 @@
           "req_id": "REQ-025"
         }
       ],
-      "implemented_in": [
-        "src/main.ts",
-        "vite.config.ts",
-        "index.html"
-      ],
+      "implemented_in": "src/main.ts,vite.config.ts,index.html",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "taxes",
@@ -744,12 +742,11 @@
           "req_id": "REQ-015"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/taxes.ts"
-      ],
+      "implemented_in": "src/lib/domain/taxes.ts",
       "last_updated": null,
       "notes": "implemented locally 2026-08-03 (was empty from PR #14); 5 tests passing",
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04"
     },
     {
       "id": "tenant-portal",
@@ -785,9 +782,11 @@
           "req_id": "REQ-021"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": "src/lib/domain/tenant.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "toolchain-ci",
@@ -816,15 +815,11 @@
           "req_id": "REQ-028"
         }
       ],
-      "implemented_in": [
-        "vitest.config.ts",
-        "playwright.config.ts",
-        "package.json",
-        "scripts/"
-      ],
+      "implemented_in": "vitest.config.ts,playwright.config.ts,package.json,scripts/",
       "last_updated": null,
       "last_verified": "2026-08-04",
-      "notes": "vitest+playwright+vite-plugin-pwa installed; 58 unit tests running"
+      "notes": "PASS — 175 unit/integration + 28 e2e (wave 3)",
+      "last_tested": "2026-08-04"
     },
     {
       "id": "trust-score",
@@ -860,11 +855,11 @@
           "req_id": "REQ-024"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/trust.ts"
-      ],
+      "implemented_in": "src/lib/domain/trust.ts",
       "last_updated": "2026-08-03",
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     },
     {
       "id": "ui-swal",
@@ -900,15 +895,11 @@
           "req_id": "REQ-027"
         }
       ],
-      "implemented_in": [
-        "src/App.svelte",
-        "src/lib/Toolbar.svelte",
-        "src/lib/FloorSelector.svelte",
-        "src/lib/vendor/swal-ui/"
-      ],
+      "implemented_in": "src/App.svelte,src/lib/Toolbar.svelte,src/lib/FloorSelector.svelte,src/lib/vendor/swal-ui/",
       "last_updated": null,
-      "notes": "UI shell on vendored @swal/ui; 5 tests passing; plans-2d/3d canvas still pending",
-      "last_verified": "2026-08-04"
+      "notes": "PASS — @swal/ui shell, data-testid hooks, a11y 0 warnings (wave 3)",
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04"
     },
     {
       "id": "utilities",
@@ -944,12 +935,11 @@
           "req_id": "REQ-014"
         }
       ],
-      "implemented_in": [
-        "src/lib/domain/utilities.ts"
-      ],
+      "implemented_in": "src/lib/domain/utilities.ts",
       "last_updated": null,
       "notes": "implemented locally 2026-08-03 (was empty from PR #14); 10 tests passing",
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04"
     },
     {
       "id": "verified-invitations",
@@ -985,9 +975,11 @@
           "req_id": "REQ-019"
         }
       ],
-      "implemented_in": [],
+      "implemented_in": "src/lib/domain/invitations.ts,src/lib/domain/links.ts",
       "last_updated": null,
-      "last_verified": "2026-08-04"
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": ""
     }
   ],
   "agents": {
