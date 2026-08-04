@@ -1,3 +1,13 @@
+import {
+  startRegistration,
+  startAuthentication,
+  bufferToBase64URLString,
+} from '@simplewebauthn/browser';
+import type {
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+} from '@simplewebauthn/browser';
+
 export type Role = 'admin' | 'propietario' | 'inquilino' | 'supervisor';
 
 export interface Account {
@@ -165,46 +175,140 @@ export function clearLocalStorage(): void {
   }
 }
 
+/** Typed error when WebAuthn cannot run (missing API or non-secure context). */
+export class WebAuthnUnavailableError extends Error {
+  readonly code = 'WEBAUTHN_UNAVAILABLE' as const;
+
+  constructor(message = 'WebAuthn is unavailable in this environment') {
+    super(message);
+    this.name = 'WebAuthnUnavailableError';
+  }
+}
+
+function isSecureWebAuthnContext(): boolean {
+  // Allow when isSecureContext is unknown (SSR/tests); block only when explicitly insecure.
+  if (typeof window !== 'undefined' && window.isSecureContext === false) {
+    return false;
+  }
+  return true;
+}
+
+function randomBase64URL(byteLength = 32): string {
+  const bytes = new Uint8Array(byteLength);
+  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < byteLength; i++) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
+  return bufferToBase64URLString(uint8ToArrayBuffer(bytes));
+}
+
+function encodeUserId(username: string): string {
+  return bufferToBase64URLString(uint8ToArrayBuffer(new TextEncoder().encode(username)));
+}
+
+function uint8ToArrayBuffer(bytes: Uint8Array): ArrayBuffer {
+  return bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+}
+
+function relyingPartyId(): string {
+  if (typeof window !== 'undefined' && window.location?.hostname) {
+    return window.location.hostname;
+  }
+  return 'localhost';
+}
+
 /**
- * Checks if WebAuthn platform authenticator credentials capabilities exist locally.
+ * Checks if WebAuthn credentials API exists locally (navigator.credentials).
  */
 export async function isWebAuthnAvailable(): Promise<boolean> {
-  // TODO: Fully implement WebAuthn utilizing @simplewebauthn/browser in a future wave
-  if (typeof window !== 'undefined' && window.PublicKeyCredential) {
-    // Perform robust runtime support validation
-    if (typeof window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable === 'function') {
-      try {
-        return await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-      } catch (e) {
-        return false;
-      }
+  try {
+    if (typeof navigator === 'undefined' || !navigator.credentials) {
+      return false;
+    }
+    if (!isSecureWebAuthnContext()) {
+      return false;
     }
     return true;
+  } catch {
+    return false;
   }
-  return false;
 }
 
 /**
- * Enrolls a platform biometric credential (WebAuthn stub).
+ * Enrolls a platform biometric credential via WebAuthn registration (startRegistration).
+ * Offline-first: builds PublicKeyCredentialCreationOptions locally (no server).
  */
 export async function enrollBiometric(username: string): Promise<string> {
-  // TODO: Replace with complete @simplewebauthn/browser options payload registration flows
   if (!username) {
-    throw new Error("Username must be provided for biometric enrollment");
+    throw new Error('Username must be provided for biometric enrollment');
   }
-  const mockCredId = typeof crypto !== 'undefined' && crypto.randomUUID
-    ? 'cred_' + crypto.randomUUID()
-    : 'cred_' + Math.random().toString(36).substring(2);
-  return mockCredId;
+
+  if (!(await isWebAuthnAvailable())) {
+    throw new WebAuthnUnavailableError();
+  }
+
+  const optionsJSON: PublicKeyCredentialCreationOptionsJSON = {
+    rp: {
+      name: 'NIDO',
+      id: relyingPartyId(),
+    },
+    user: {
+      id: encodeUserId(username),
+      name: username,
+      displayName: username,
+    },
+    challenge: randomBase64URL(32),
+    pubKeyCredParams: [
+      { type: 'public-key', alg: -7 },
+      { type: 'public-key', alg: -257 },
+    ],
+    timeout: 60_000,
+    authenticatorSelection: {
+      authenticatorAttachment: 'platform',
+      userVerification: 'preferred',
+      residentKey: 'preferred',
+    },
+    attestation: 'none',
+  };
+
+  const credential = await startRegistration({ optionsJSON });
+  return credential.id;
 }
 
 /**
- * Authenticates user credentials using biometrics (WebAuthn stub).
+ * Authenticates via WebAuthn assertion (startAuthentication) for a stored credential id.
+ * Returns false on missing id, unavailable API, or failed assertion — never throws for soft failures.
  */
 export async function authenticateBiometric(credentialId: string): Promise<boolean> {
-  // TODO: Replace with full @simplewebauthn/browser verification process
   if (!credentialId) {
     return false;
   }
-  return credentialId.startsWith('cred_');
+
+  if (!(await isWebAuthnAvailable())) {
+    return false;
+  }
+
+  const optionsJSON: PublicKeyCredentialRequestOptionsJSON = {
+    challenge: randomBase64URL(32),
+    timeout: 60_000,
+    rpId: relyingPartyId(),
+    allowCredentials: [
+      {
+        id: credentialId,
+        type: 'public-key',
+        transports: ['internal'],
+      },
+    ],
+    userVerification: 'preferred',
+  };
+
+  try {
+    const assertion = await startAuthentication({ optionsJSON });
+    return typeof assertion.id === 'string' && assertion.id.length > 0;
+  } catch {
+    return false;
+  }
 }

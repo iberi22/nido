@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   createAccount,
   confirmSeed,
@@ -10,17 +10,76 @@ import {
   loadInstanceFromLocalStorage,
   clearLocalStorage,
   enrollBiometric,
-  authenticateBiometric
+  authenticateBiometric,
+  isWebAuthnAvailable
 } from "../../src/lib/domain/accounts";
 
 // NIDO — integration tests for feature: accounts-auth
 // User stories under test: US-401
 // Contract: acceptance criteria from docs/SRS/REQUIREMENTS.md.
 
+// Must be valid Base64URL — startAuthentication decodes allowCredentials.id
+const MOCK_CRED_ID = "bW9jay1jcmVkLWlkLWFiYzEyMw";
+
+function bufferFromString(value: string): ArrayBuffer {
+  return new TextEncoder().encode(value).buffer;
+}
+
+function stubWebAuthn(): {
+  create: ReturnType<typeof vi.fn>;
+  get: ReturnType<typeof vi.fn>;
+} {
+  const create = vi.fn(async () => ({
+    id: MOCK_CRED_ID,
+    rawId: bufferFromString(MOCK_CRED_ID),
+    type: "public-key",
+    authenticatorAttachment: "platform",
+    getClientExtensionResults: () => ({}),
+    response: {
+      clientDataJSON: bufferFromString("client-data"),
+      attestationObject: bufferFromString("attestation"),
+      getTransports: () => ["internal"]
+    }
+  }));
+
+  const get = vi.fn(async () => ({
+    id: MOCK_CRED_ID,
+    rawId: bufferFromString(MOCK_CRED_ID),
+    type: "public-key",
+    authenticatorAttachment: "platform",
+    getClientExtensionResults: () => ({}),
+    response: {
+      clientDataJSON: bufferFromString("client-data"),
+      authenticatorData: bufferFromString("auth-data"),
+      signature: bufferFromString("signature"),
+      userHandle: null
+    }
+  }));
+
+  vi.stubGlobal("PublicKeyCredential", class PublicKeyCredential {});
+  vi.stubGlobal("navigator", {
+    ...navigator,
+    credentials: { create, get }
+  });
+
+  Object.defineProperty(window, "isSecureContext", {
+    configurable: true,
+    get: () => true
+  });
+
+  return { create, get };
+}
+
 describe("US-401 Integration: Account creation, offline persistence, and workspace isolation", () => {
+  let credentials: ReturnType<typeof stubWebAuthn>;
+
   beforeEach(() => {
-    // Clear mock localStorage or variables if any
     clearLocalStorage();
+    credentials = stubWebAuthn();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it("acceptance 1: localAuth: complete registration, seed phrase verification & backup flow", () => {
@@ -52,18 +111,20 @@ describe("US-401 Integration: Account creation, offline persistence, and workspa
   });
 
   it("acceptance 2: WebAuthn biometric enroll and verify integrated flow", async () => {
+    expect(await isWebAuthnAvailable()).toBe(true);
+
     const username = "Xavier";
     const credId = await enrollBiometric(username);
-    expect(credId).toBeDefined();
+    expect(credId).toBe(MOCK_CRED_ID);
+    expect(credentials.create).toHaveBeenCalledOnce();
 
     // Verify authentication succeeds with the enrolled credential
     const authenticated = await authenticateBiometric(credId);
     expect(authenticated).toBe(true);
+    expect(credentials.get).toHaveBeenCalledOnce();
 
-    // Verify arbitrary credentials fail authentication
-    const fakeAuth = await authenticateBiometric("cred_fake_id_123");
-    expect(fakeAuth).toBe(true); // Since stub prefix-matches "cred_"
-
+    // Verify assertion failure path returns false (no crash)
+    credentials.get.mockRejectedValueOnce(new Error("NotAllowedError"));
     const badAuth = await authenticateBiometric("some_other_id");
     expect(badAuth).toBeFalsy();
   });

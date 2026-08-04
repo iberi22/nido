@@ -37,6 +37,7 @@
     "vite": "^8.0.0-beta.13"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "13.3.0",
     "@swal/ui": "file:src/lib/vendor/swal-ui",
     "dxf-writer": "1.18.4",
     "html2canvas": "1.4.1",
