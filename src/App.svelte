@@ -2,6 +2,7 @@
   import CanvasStage from './lib/CanvasStage.svelte';
   import Toolbar from './lib/Toolbar.svelte';
   import FloorSelector from './lib/FloorSelector.svelte';
+  import AIChat from './lib/AIChat.svelte';
   import { floorPlanStore } from './lib/stores/floorPlanStore.svelte';
   import { Button, Card, Badge, StatusBadge, Tabs, Toaster } from '@swal/ui';
   import { toast } from './lib/vendor/swal-ui/lib/toast.svelte.js';
@@ -92,6 +93,15 @@
         {/await}
       {/if}
     </section>
+
+    <aside class="nido-sidebar-right">
+      <Card>
+        <details class="ai-panel" open>
+          <summary class="panel-title">AI Assistant</summary>
+          <AIChat />
+        </details>
+      </Card>
+    </aside>
   </div>
 
   <Toaster />
@@ -146,4 +156,14 @@
     color: var(--swal-text, #f1f5f9); border-radius: 6px; padding: 6px 8px; font-size: 13px;
   }
   .nido-main { flex: 1; min-width: 0; background: var(--swal-void, #000); position: relative; }
+  .nido-sidebar-right {
+    width: 280px; padding: 12px; display: flex; flex-direction: column; gap: 12px;
+    background: var(--swal-elevated, #0f172a); border-left: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));
+    overflow-y: auto;
+  }
+  .ai-panel { color: var(--swal-text, #f1f5f9); }
+  .ai-panel summary {
+    cursor: pointer; margin-bottom: 8px; list-style: none;
+  }
+  .ai-panel summary::-webkit-details-marker { display: none; }
 </style>
