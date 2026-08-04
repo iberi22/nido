@@ -6,6 +6,7 @@ import {
   budgetVsActual,
   nextDueDate,
   isDueSoon,
+  splitBill,
   UTILITY_TYPES,
 } from "../../src/lib/domain/utilities";
 import type { Utility, Property } from "../../src/lib/domain/property";
@@ -71,5 +72,22 @@ describe("US-303: utilities administration", () => {
 
   it("acceptance 5: UTILITY_TYPES covers water/energy/gas/internet", () => {
     expect(UTILITY_TYPES).toEqual(["water", "energy", "gas", "internet"]);
+  });
+
+  it("acceptance 6: splitBill shares sum to total (incl. remainder)", () => {
+    const shares = splitBill(100000, 3);
+    expect(shares).toHaveLength(3);
+    expect(shares.reduce((a, b) => a + b, 0)).toBeCloseTo(100000, 2);
+    expect(splitBill(100, 0)).toEqual([]);
+    expect(splitBill(85000, 1)).toEqual([85000]);
+  });
+
+  it("budgetVsActual under-budget path", () => {
+    const readings: UtilityReading[] = [
+      { utilityId: "u1", value: 20000, date: "2026-08-01" },
+    ];
+    const s = budgetVsActual(util, readings);
+    expect(s.over).toEqual(false);
+    expect(s.diff).toBeCloseTo(80000, 2);
   });
 });

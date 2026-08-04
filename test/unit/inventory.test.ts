@@ -180,4 +180,39 @@ describe('Inventory Domain Service Unit Tests', () => {
     expect(warrantyStatus(itemOk)).toBe('ok');
     expect(warrantyStatus(itemNoWarranty)).toBe('ok');
   });
+
+  test('CRUD round-trip preserves preset id and is immutable for missing ids', () => {
+    const withId = addItem(mockProperty, {
+      id: 'preset-99',
+      roomId: 'room-2',
+      name: 'Lamp',
+      category: 'Lighting',
+      value: 40
+    });
+    expect(withId.items?.find((i) => i.id === 'preset-99')?.name).toBe('Lamp');
+    expect(mockProperty.items).toHaveLength(3); // original unchanged
+
+    const noOpUpdate = updateItem(mockProperty, 'missing-id', { value: 1 });
+    expect(noOpUpdate.items).toEqual(mockProperty.items);
+
+    const noOpRemove = removeItem(mockProperty, 'missing-id');
+    expect(noOpRemove.items).toHaveLength(3);
+
+    const empty: Property = { id: 'p-empty', name: 'Empty' };
+    expect(listItemsByRoom(empty, 'room-1')).toEqual([]);
+    expect(totalValueByProperty(empty)).toBe(0);
+  });
+
+  test('warranty helpers ignore invalid dates', () => {
+    const bad: Item = {
+      id: 'bad',
+      roomId: 'r1',
+      name: 'Broken',
+      category: 'Cat',
+      value: 1,
+      warrantyUntil: 'not-a-date'
+    };
+    expect(isWarrantyExpiring(bad, 30)).toEqual(false);
+    expect(warrantyStatus(bad)).toBe('ok');
+  });
 });

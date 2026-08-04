@@ -71,4 +71,20 @@ describe('Inventory Offline-First Sync Queue Integration Tests', () => {
     queue.clear();
     expect(queue.getQueue()).toHaveLength(0);
   });
+
+  test('should retain operations when syncFn throws', async () => {
+    const queue = new SyncQueue();
+    queue.enqueue('add', 'item-1', { name: 'Toaster' });
+    queue.enqueue('remove', 'item-2');
+
+    const syncFn = vi.fn()
+      .mockResolvedValueOnce(true)
+      .mockRejectedValueOnce(new Error('network down'));
+
+    const result = await queue.process(syncFn);
+    expect(result.success).toEqual(false);
+    expect(result.processedCount).toBe(1);
+    expect(queue.getQueue()).toHaveLength(1);
+    expect(queue.getQueue()[0].action).toBe('remove');
+  });
 });

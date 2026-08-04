@@ -120,4 +120,52 @@ describe('Nido Canonical Data Model Unit Tests', () => {
     expect(propertySchema.required).toContain('location');
     expect(propertySchema.required).toContain('floors');
   });
+
+  test('should reject null/non-object property and nested floor/zone errors', () => {
+    expect(validateProperty(null).valid).toEqual(false);
+    expect(validateProperty(null).errors).toContain('Property must be a non-null object');
+
+    const badFloor: Property = {
+      ...validProperty,
+      floors: [
+        {
+          id: '',
+          name: '',
+          zones: [{ id: 'z1', name: 'Sala', type: 'social', x: 0, y: 0, width: 4, height: 5 }]
+        }
+      ]
+    };
+    const floorResult = validateProperty(badFloor);
+    expect(floorResult.valid).toEqual(false);
+    expect(floorResult.errors.some((e) => e.includes('non-empty string id'))).toEqual(true);
+    expect(floorResult.errors.some((e) => e.includes('non-empty string name'))).toEqual(true);
+  });
+
+  test('should reject invalid utility type and incomplete location', () => {
+    const badUtil: Property = {
+      ...validProperty,
+      utilities: [
+        {
+          id: 'u-bad',
+          type: 'fiber' as any,
+          provider: 'X',
+          account: '1',
+          dueDay: 1,
+          budget: 10
+        }
+      ]
+    };
+    const utilResult = validateProperty(badUtil);
+    expect(utilResult.valid).toEqual(false);
+    expect(utilResult.errors.some((e) => e.includes('valid type: water, energy, gas, internet'))).toEqual(true);
+
+    const badLoc: any = {
+      ...validProperty,
+      location: { city: '', comuna: '10', estrato: 'three' }
+    };
+    const locResult = validateProperty(badLoc);
+    expect(locResult.valid).toEqual(false);
+    expect(locResult.errors).toContain('Location city must be a non-empty string');
+    expect(locResult.errors).toContain('Location estrato must be a number');
+  });
 });
