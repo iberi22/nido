@@ -163,11 +163,20 @@ test.describe("US-101: draw and edit my home's floor plan (walls, zones, rooms) 
     const floorSelector = page.locator(".floor-selector");
     await expect(floorSelector).toBeVisible();
 
-    // 6. Confirm that the wall persists after reload
-    const postReloadWallCount = await page.evaluate(() => {
-      const store = (window as any).floorPlanStore;
-      return store.floors['ground'].components.filter((c: any) => c.type === 'wall').length;
-    });
-    expect(postReloadWallCount).toEqual(initialWallCount + 1);
+    // 6. Confirm that the wall persists after reload (auto-wait: the IndexedDB
+    // load is async — poll in the browser until the restored count matches,
+    // never assert against a snapshot taken before hydration completes).
+    await expect
+      .poll(
+        () =>
+          page.evaluate(() => {
+            const store = (window as any).floorPlanStore;
+            return store
+              ? store.floors['ground'].components.filter((c: any) => c.type === 'wall').length
+              : -1;
+          }),
+        { timeout: 5000 }
+      )
+      .toEqual(initialWallCount + 1);
   });
 });
