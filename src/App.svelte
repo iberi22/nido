@@ -4,6 +4,13 @@
   import FloorSelector from './lib/FloorSelector.svelte';
   import AIChat from './lib/AIChat.svelte';
   import NormsPanel from './lib/NormsPanel.svelte';
+  import OfflineBanner from './lib/OfflineBanner.svelte';
+  import MeshPanel from './lib/MeshPanel.svelte';
+  import AdminPanel from './lib/AdminPanel.svelte';
+  import { createMeshClient, type MeshClient } from './lib/domain/mesh';
+  import { EdgeHiveClient } from './lib/maloca/client';
+  import { isPro } from './lib/maloca/tier';
+  import { generateInstanceId } from './lib/maloca/instance';
   import { floorPlanStore } from './lib/stores/floorPlanStore.svelte';
   import { Button, Card, Badge, StatusBadge, Tabs, Toaster } from '@swal/ui';
   import { toast } from './lib/vendor/swal-ui/lib/toast.svelte.js';
@@ -12,6 +19,40 @@
   let activeTab = $state('plan');
   let exportStatus = $state<'idle' | 'done' | 'error'>('idle');
   let showAIChat = $state(true);
+
+  // Wave 5 #92 — Shell integration: DI clients created ONCE and passed via props.
+  let instanceId = $state('');
+  let meshClient = $state<MeshClient | null>(null);
+  let adminClient = $state<{
+    getInstanceId: () => string;
+    getTier: () => Promise<{ isPro: boolean; name?: string }>;
+    refresh: () => Promise<void>;
+  } | null>(null);
+
+  $effect(() => {
+    // Guard: clients are created once per mount (instanceId persists the workspace).
+    if (instanceId) return;
+    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem('nido:instanceId') : null;
+    instanceId = stored || generateInstanceId();
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('nido:instanceId', instanceId);
+    }
+
+    meshClient = createMeshClient(instanceId);
+
+    // Maloca client (Wave 5 #06): edge-hive adapter wired into AdminPanel.
+    const hive = new EdgeHiveClient();
+    adminClient = {
+      getInstanceId: () => instanceId,
+      getTier: async () => {
+        const node = await hive.getNodeStatus();
+        return { isPro: isPro(node), name: node.active ? 'Pro Tier' : undefined };
+      },
+      refresh: async () => {
+        await hive.syncInstance(instanceId, {});
+      },
+    };
+  });
 
   const tabs = [
     { id: 'plan', label: 'Plans' },
@@ -40,6 +81,8 @@
 </script>
 
 <main class="nido-shell">
+  <OfflineBanner />
+
   <header class="nido-topbar">
     <div class="topbar-left">
       <span class="logo-mark" aria-hidden="true">🏠</span>
@@ -142,6 +185,16 @@
             <label for="scale">Scale (px/m)</label>
             <input id="scale" type="number" bind:value={floorPlanStore.config.scale} />
           </div>
+        </Card>
+      {/if}
+      {#if meshClient}
+        <Card>
+          <MeshPanel client={meshClient} />
+        </Card>
+      {/if}
+      {#if adminClient}
+        <Card>
+          <AdminPanel client={adminClient} />
         </Card>
       {/if}
     </aside>
