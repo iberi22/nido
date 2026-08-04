@@ -47,7 +47,20 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+        importScripts: ['sw-push-listener.js'],
         runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.includes('/api/queue-sync'),
+            handler: 'NetworkOnly',
+            options: {
+              backgroundSync: {
+                name: 'nido-sync-queue',
+                options: {
+                  maxRetentionTime: 24 * 60 // 24 hours (in minutes)
+                }
+              }
+            }
+          },
           {
             urlPattern: ({ url }) => url.pathname === '/',
             handler: 'NetworkFirst',
@@ -85,4 +98,27 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/three') || id.includes('three.module')) {
+            return 'vendor-three';
+          }
+          if (id.includes('node_modules/konva') || id.includes('konva/')) {
+            return 'vendor-konva';
+          }
+          if (id.includes('vendor/edge-mesh') || id.includes('edge-mesh/')) {
+            return 'vendor-mesh';
+          }
+          if (id.includes('vendor/swal-ui') || id.includes('swal-ui/')) {
+            return 'vendor-swal-ui';
+          }
+          if (id.includes('node_modules/svelte') || id.includes('@sveltejs')) {
+            return 'vendor-svelte';
+          }
+        }
+      }
+    }
+  }
 })
