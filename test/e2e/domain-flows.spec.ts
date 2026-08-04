@@ -198,9 +198,9 @@ describe("NIDO Domain Flows & User Stories Coverage Suite", () => {
     expect(updatedPredial.paidIndexes).toContain(1);
 
     // 5. Domain logic for US-305 Preventive Maintenance
-    const lastDoneDate = new Date("2026-05-10");
+    const lastDoneDate = new Date(2026, 4, 10); // local calendar day 2026-05-10 (tz-independent)
     const nextDue = computeNextDue({ lastDone: lastDoneDate, interval_days: 90 }); // 90-day interval
-    expect(nextDue.getDate()).toBe(8); // normal timezone normalized date offset
+    expect(nextDue.getDate()).toBe(8); // local 2026-05-10 + 90d = local 2026-08-08
 
     const wo = createWorkOrder(null, {
       itemId: "item-elevator",
