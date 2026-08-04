@@ -23,14 +23,14 @@ describe('PWA Registration and Offline Support', () => {
     expect(configContent).toContain('pwa-512x512.png');
   });
 
-  it('verifies the service worker registration code path is configured with correct sw.js URL', () => {
+  it('verifies the service worker registration code path is configured via vite-plugin-pwa', () => {
     const mainPath = join(ROOT, 'src', 'main.ts');
     expect(existsSync(mainPath)).toEqual(true);
 
     const mainContent = readFileSync(mainPath, 'utf8');
-    // Assert the registration path uses the real URL /sw.js
-    expect(mainContent).toContain("navigator.serviceWorker.register('/sw.js')");
-    expect(mainContent).toContain("'serviceWorker' in navigator");
+    // Assert the registration uses vite-plugin-pwa's registerSW
+    expect(mainContent).toContain('registerSW');
+    expect(mainContent).toContain('virtual:pwa-register');
   });
 
   it('verifies offline fallback handler is registered and exists in main.ts', () => {
