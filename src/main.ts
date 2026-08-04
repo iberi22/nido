@@ -39,9 +39,14 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
+import { createMeshClient } from './lib/domain/mesh';
+import { InMemoryRelay } from './lib/mesh/relay';
+
 // Expose for testing/E2E verification inside the browser (wave 4 #64)
 if (typeof window !== 'undefined') {
   (window as any).nidoDiscovery = { listingsInRadius, computeTrustScore };
+  (window as any).createMeshClient = createMeshClient;
+  (window as any).InMemoryRelay = InMemoryRelay;
 }
 
 // Offline fallback handler (wave 4 #68)
