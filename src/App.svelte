@@ -9,8 +9,14 @@
 
   let currentView = $state<'2d' | '3d'>('2d');
   let activeTab = $state('plan');
-  let showExport = $state(false);
   let exportStatus = $state<'idle' | 'done' | 'error'>('idle');
+
+  const tabs = [
+    { id: 'plan', label: 'Plans' },
+    { id: 'inventory', label: 'Inventory' },
+    { id: 'taxes', label: 'Taxes' },
+    { id: 'maintenance', label: 'Maintenance' }
+  ] as const;
 
   function handleExport() {
     try {
@@ -34,7 +40,7 @@
 <main class="nido-shell">
   <header class="nido-topbar">
     <div class="topbar-left">
-      <span class="logo-mark">🏠</span>
+      <span class="logo-mark" aria-hidden="true">🏠</span>
       <div class="brand">
         <h1 class="brand-title">NIDO</h1>
         <span class="brand-sub">Intelligent Home Administration</span>
@@ -45,17 +51,58 @@
 
     <div class="topbar-center">
       <Tabs bind:value={activeTab}>
-        <button class="swal-tab" class:active={activeTab === 'plan'} onclick={() => (activeTab = 'plan')}>Plans</button>
-        <button class="swal-tab" class:active={activeTab === 'inventory'} onclick={() => (activeTab = 'inventory')}>Inventory</button>
-        <button class="swal-tab" class:active={activeTab === 'taxes'} onclick={() => (activeTab = 'taxes')}>Taxes</button>
-        <button class="swal-tab" class:active={activeTab === 'maintenance'} onclick={() => (activeTab = 'maintenance')}>Maintenance</button>
+        {#each tabs as tab}
+          <button
+            class="swal-tab"
+            class:active={activeTab === tab.id}
+            role="tab"
+            aria-selected={activeTab === tab.id}
+            aria-label={tab.label}
+            data-testid={`tab-${tab.id}`}
+            onclick={() => (activeTab = tab.id)}
+          >
+            {tab.label}
+          </button>
+        {/each}
       </Tabs>
     </div>
 
-    <div class="topbar-right">
-      <Button variant="ghost" size="sm" onclick={() => (currentView = '2d')}>2D</Button>
-      <Button variant="ghost" size="sm" onclick={() => (currentView = '3d')}>3D</Button>
-      <Button variant="primary" size="sm" onclick={handleExport}>Export</Button>
+    <div class="topbar-right" role="group" aria-label="View mode">
+      <Button
+        variant={currentView === '2d' ? 'primary' : 'ghost'}
+        size="sm"
+        onclick={() => (currentView = '2d')}
+        {...{
+          'aria-pressed': currentView === '2d',
+          'aria-label': '2D plan view',
+          'data-testid': 'view-2d'
+        }}
+      >
+        2D
+      </Button>
+      <Button
+        variant={currentView === '3d' ? 'primary' : 'ghost'}
+        size="sm"
+        onclick={() => (currentView = '3d')}
+        {...{
+          'aria-pressed': currentView === '3d',
+          'aria-label': '3D view',
+          'data-testid': 'view-3d'
+        }}
+      >
+        3D
+      </Button>
+      <Button
+        variant="primary"
+        size="sm"
+        onclick={handleExport}
+        {...{
+          'aria-label': 'Export property JSON',
+          'data-testid': 'export-json'
+        }}
+      >
+        Export
+      </Button>
     </div>
   </header>
 
@@ -89,7 +136,7 @@
         {#await import('./lib/Scene3D.svelte') then { default: Scene3DComponent }}
           <Scene3DComponent />
         {:catch error}
-          <div style="color: #ef4444; padding: 20px;">Error loading 3D view: {error.message}</div>
+          <div class="view-error">Error loading 3D view: {error.message}</div>
         {/await}
       {/if}
     </section>
@@ -133,29 +180,36 @@
   .topbar-left { display: flex; align-items: center; gap: 10px; }
   .logo-mark { font-size: 22px; }
   .brand-title { margin: 0; font-size: 16px; font-weight: 600; }
-  .brand-sub { font-size: 11px; color: var(--swal-text-secondary, #94a3b8); }
+  /* Secondary on elevated: use text token for AA contrast on small type */
+  .brand-sub { font-size: 11px; color: var(--swal-text, #f1f5f9); opacity: 0.85; }
   .topbar-center { display: flex; gap: 4px; }
   .swal-tab {
-    background: transparent; border: none; color: var(--swal-text-secondary, #94a3b8);
+    background: transparent; border: none; color: var(--swal-text, #f1f5f9); opacity: 0.75;
     padding: 6px 12px; cursor: pointer; border-radius: 6px; font-size: 13px;
   }
-  .swal-tab.active, .swal-tab:hover { color: var(--swal-accent, #06b6d4); background: rgba(6, 182, 212, 0.1); }
+  .swal-tab.active, .swal-tab:hover {
+    color: var(--swal-accent, #06b6d4); opacity: 1;
+    background: var(--swal-accent-muted, rgba(6, 182, 212, 0.15));
+  }
   .topbar-right { display: flex; gap: 6px; }
-  .swal-active { box-shadow: 0 0 10px rgba(6, 182, 212, 0.4); }
   .nido-content { display: flex; flex: 1; min-height: 0; }
   .nido-sidebar {
     width: 280px; padding: 12px; display: flex; flex-direction: column; gap: 12px;
     background: var(--swal-elevated, #0f172a); border-right: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));
     overflow-y: auto;
   }
-  .panel-title { margin: 0 0 8px; font-size: 13px; color: var(--swal-text-secondary, #94a3b8); }
+  .panel-title { margin: 0 0 8px; font-size: 13px; color: var(--swal-text, #f1f5f9); opacity: 0.85; }
   .param-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
-  .param-group label { font-size: 12px; color: var(--swal-text-secondary, #94a3b8); }
+  .param-group label { font-size: 12px; color: var(--swal-text, #f1f5f9); opacity: 0.85; }
   .param-group input {
     background: var(--swal-surface, rgba(15, 23, 42, 0.8)); border: 1px solid var(--swal-border, rgba(255, 255, 255, 0.12));
     color: var(--swal-text, #f1f5f9); border-radius: 6px; padding: 6px 8px; font-size: 13px;
   }
-  .nido-main { flex: 1; min-width: 0; background: var(--swal-void, #000); position: relative; }
+  .nido-main { flex: 1; min-width: 0; background: var(--swal-void, #000000); position: relative; }
+  .view-error {
+    color: var(--swal-danger, #ef4444);
+    padding: 20px;
+  }
   .nido-sidebar-right {
     width: 280px; padding: 12px; display: flex; flex-direction: column; gap: 12px;
     background: var(--swal-elevated, #0f172a); border-left: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));

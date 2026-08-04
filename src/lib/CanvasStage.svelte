@@ -99,9 +99,9 @@
     tr = new Konva.Transformer({
       anchorSize: 8,
       borderDash: [4, 4],
-      borderStroke: '#3b82f6',
-      anchorStroke: '#3b82f6',
-      anchorFill: '#ffffff',
+      borderStroke: C.accent,
+      anchorStroke: C.accent,
+      anchorFill: C.blueprint_text,
       rotateEnabled: true,
       enabledAnchors: ['top-left', 'top-right', 'bottom-left', 'bottom-right']
     });
@@ -395,7 +395,7 @@
       if (tool === 'wall') {
         layer.add(new Konva.Line({
           points: [x1, y1, x2, y2],
-          stroke: C.accent || '#4dd0e1',
+          stroke: C.accent,
           strokeWidth: config.wallThickness * SCALE,
           opacity: 0.7
         }));
@@ -405,7 +405,7 @@
           text: `${dist.toFixed(2)}m (Wall)`,
           fontSize: 12,
           fontFamily: 'Consolas',
-          fill: C.blueprint_text || '#e0f4ff',
+          fill: C.blueprint_text,
           fontStyle: 'bold'
         }));
       } else if (tool === 'zone') {
@@ -414,8 +414,8 @@
           y: Math.min(y1, y2),
           width: Math.abs(x2 - x1),
           height: Math.abs(y2 - y1),
-          fill: C.zone_fill || 'rgba(135, 206, 235, 0.06)',
-          stroke: C.accent || '#4dd0e1',
+          fill: C.zone_fill,
+          stroke: C.accent,
           strokeWidth: 1.5,
           dash: [4, 4]
         }));
@@ -427,12 +427,12 @@
           text: `${zw.toFixed(2)}m x ${zh.toFixed(2)}m (Zone)`,
           fontSize: 11,
           fontFamily: 'Consolas',
-          fill: C.blueprint_text || '#e0f4ff'
+          fill: C.blueprint_text
         }));
       } else if (tool === 'measure' || tool === 'dimension') {
         layer.add(new Konva.Line({
           points: [x1, y1, x2, y2],
-          stroke: C.highlight || '#ffd54f',
+          stroke: C.highlight,
           strokeWidth: 1.5,
           dash: [6, 3]
         }));
@@ -442,7 +442,7 @@
           text: `${dist.toFixed(2)}m`,
           fontSize: 12,
           fontFamily: 'Consolas',
-          fill: C.blueprint_text || '#e0f4ff',
+          fill: C.blueprint_text,
           fontStyle: 'bold'
         }));
       }
@@ -512,7 +512,7 @@
       case 'room':
         group.add(new Konva.Rect({
           width: cw, height: ch,
-          fill: 'rgba(77, 208, 225, 0.1)',
+          fill: C.accent_muted,
           stroke: isSelected ? C.highlight : C.accent,
           strokeWidth: isSelected ? 2 : 1.5,
           cornerRadius: 6
@@ -560,7 +560,7 @@
              group.add(new Konva.Rect({
                x: px, y: py, width: pw, height: ph,
                stroke: C.blueprint_line, strokeWidth: 1,
-               fill: part.id === 'landing' ? 'rgba(135, 206, 235, 0.15)' : 'rgba(135, 206, 235, 0.05)'
+               fill: part.id === 'landing' ? C.accent_muted : C.zone_fill
              }));
 
              if (part.steps) {
@@ -621,7 +621,7 @@
       default:
         group.add(new Konva.Rect({
           width: cw, height: ch,
-          stroke: 'red', strokeWidth: 1
+          stroke: C.danger, strokeWidth: 1
         }));
     }
 
@@ -701,10 +701,10 @@
      ondrop={handleDrop}
      ondragover={handleDragOver}
      role="application">
-  <div class="canvas-toolbar">
-    <button onclick={() => floorPlanStore.zoomIn()}>🔍+</button>
-    <button onclick={() => floorPlanStore.zoomOut()}>🔍−</button>
-    <button onclick={() => floorPlanStore.resetZoom()}>🔄</button>
+  <div class="canvas-toolbar" role="toolbar" aria-label="Canvas zoom controls">
+    <button type="button" aria-label="Zoom in" data-testid="zoom-in" onclick={() => floorPlanStore.zoomIn()}>🔍+</button>
+    <button type="button" aria-label="Zoom out" data-testid="zoom-out" onclick={() => floorPlanStore.zoomOut()}>🔍−</button>
+    <button type="button" aria-label="Reset zoom" data-testid="zoom-reset" onclick={() => floorPlanStore.resetZoom()}>🔄</button>
     <span class="zoom-level">{floorPlanStore.zoom}%</span>
     <span class="floor-name">{floorData.name}</span>
   </div>
@@ -740,7 +740,7 @@
   }
   .canvas-toolbar button:hover { background: var(--swal-accent-muted, rgba(6, 182, 212, 0.15)); border-color: var(--swal-accent, #06b6d4); }
   .zoom-level {
-    margin-left: 12px; font-weight: 600; color: var(--swal-text-secondary, #94a3b8);
+    margin-left: 12px; font-weight: 600; color: var(--swal-text, #f1f5f9); opacity: 0.85;
     font-size: 14px; font-family: 'Consolas', monospace;
   }
   .floor-name {
