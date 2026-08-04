@@ -8,8 +8,8 @@ echo "==> NIDO verify — Running Full CI Gate"
 echo "==> Step 1: Type Checking (npm run check)"
 npm run check
 
-echo "==> Step 2: Unit/Integration Tests (npx vitest run)"
-npx vitest run
+echo "==> Step 2: Unit/Integration Tests & Coverage (npm run test:coverage)"
+npm run test:coverage
 
 echo "==> Step 3: E2E Tests (npx playwright test)"
 npx playwright test
