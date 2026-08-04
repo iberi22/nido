@@ -1,3 +1,5 @@
+import { verifyProofStructure } from './links';
+
 export type TrustProvider = 'gov-id' | 'payment-history' | 'review-history' | 'social-graph';
 
 export interface TrustLink {
@@ -66,10 +68,16 @@ export function isManualUpload(proof: unknown): boolean {
     if (keys.some(k => manualKeys.some(mk => k.includes(mk)))) {
       return true;
     }
+    // In-house OAuth link proofs: proofId + claims + verifiedAt
+    if (keys.includes('proofid') && keys.includes('claims') && keys.includes('verifiedat')) {
+      return false;
+    }
+
     // Also, must have some OAuth/API typical keys to be verified as OAuth/API proof
     const apiKeys = [
       'token', 'access', 'oauth', 'session', 'signature', 'jwt', 'auth', 'api',
-      'client', 'secret', 'key', 'issuer', 'proof_id', 'credential', 'payload', 'hash'
+      'client', 'secret', 'key', 'issuer', 'proof_id', 'proofid', 'credential',
+      'payload', 'hash', 'claims', 'verifiedat'
     ];
     const hasApiKey = keys.some(k => apiKeys.some(ak => k.includes(ak)));
     if (!hasApiKey) {
@@ -103,28 +111,31 @@ export function addLink(
 }
 
 /**
- * Verifies a link proof (OAuth/API validation stub for M5, real implementation in M5.5).
+ * Verifies a link proof via real structural OAuth link-proof checks (links.verifyProof).
  */
 export function verifyLink(link: TrustLink): { valid: boolean; reason?: string } {
   if (isManualUpload(link.proof)) {
     return { valid: false, reason: 'Proof is a manual file/image upload' };
   }
 
-  // Check expected shapes for M5 proof validation
-  if (link.proof && typeof link.proof === 'object') {
-    const keys = Object.keys(link.proof as object).map(k => k.toLowerCase());
-    const hasTokenOrSig = keys.some(k =>
-      k.includes('token') ||
-      k.includes('access') ||
-      k.includes('oauth') ||
-      k.includes('session') ||
-      k.includes('signature') ||
-      k.includes('credential') ||
-      k.includes('payload')
-    );
-    if (!hasTokenOrSig) {
-      return { valid: false, reason: 'Proof lacks OAuth/API tokens, sessions, or signature attributes' };
-    }
+  if (!link.proof || typeof link.proof !== 'object') {
+    return { valid: false, reason: 'Proof missing or invalid' };
+  }
+
+  const proof = link.proof as Record<string, unknown>;
+
+  if (typeof proof.proofId !== 'string' || proof.proofId.length === 0) {
+    return { valid: false, reason: 'Proof missing proofId' };
+  }
+  if (!proof.claims || typeof proof.claims !== 'object') {
+    return { valid: false, reason: 'Proof missing claims' };
+  }
+  if (typeof proof.verifiedAt !== 'string' || Number.isNaN(Date.parse(proof.verifiedAt))) {
+    return { valid: false, reason: 'Proof missing verifiedAt' };
+  }
+
+  if (!verifyProofStructure(proof, link.provider)) {
+    return { valid: false, reason: 'Proof failed structural verification for provider' };
   }
 
   return { valid: true };
@@ -169,8 +180,8 @@ export function computeTrustScore(
   const threshold = config?.completedRentalsThreshold ?? 3;
   const contributionCap = config?.cap ?? 40;
 
-  // 1. Gather verified links
-  const verifiedLinks = links.filter(l => l.verified);
+  // 1. Gather verified links only (unverified excluded from score + tier)
+  const verifiedLinks = links.filter((l) => l.verified === true);
   const hasVerifiedGovId = verifiedLinks.some(l => l.provider === 'gov-id');
   const hasVerifiedPayments = verifiedLinks.some(l => l.provider === 'payment-history');
   const hasVerifiedReviews = verifiedLinks.some(l => l.provider === 'review-history');
