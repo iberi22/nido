@@ -13,6 +13,9 @@
  * 3. POST /api/v1/instance/sync
  *    Payload: { instanceId: string, state: any }
  *    Response: { success: boolean, updatedAt: string }
+ *
+ * This client is thoroughly verified using in-process mock HTTP integration tests
+ * (see test/integration/maloca-live.test.ts).
  */
 
 export interface AccountStatus {
@@ -88,6 +91,9 @@ export class EdgeHiveClient {
 
   async syncInstance(instanceId: string, state: any): Promise<SyncResponse> {
     try {
+      if (!instanceId) {
+        throw new Error("instanceId must not be empty");
+      }
       const response = await this.customFetch(`${this.baseUrl}/api/v1/instance/sync`, {
         method: "POST",
         headers: {
