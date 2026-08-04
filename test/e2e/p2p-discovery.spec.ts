@@ -79,4 +79,78 @@ test.describe("US-602: discover listings near me by GPS", () => {
     const brandSub = await page.textContent(".brand-sub");
     expect(brandSub).toContain("Intelligent Home Administration");
   });
+
+  test("acceptance 6: Trust-filtered listing view asserts only verified listings are processed", async ({ page }) => {
+    // Ensure the main brand title is visible on the page
+    const brandTitle = page.locator(".brand-title");
+    await expect(brandTitle).toBeVisible();
+
+    // Run the domain trust-filtering inside the browser context using window.nidoDiscovery
+    const filteredIds = await page.evaluate(async () => {
+      const mockListings = [
+        {
+          id: "listing-verified",
+          propertyId: "p1",
+          landlordId: "landlord-verified",
+          price: 1000,
+          availability: true,
+          geohash: "d6w8qz",
+          planAnchor: "floor-1"
+        },
+        {
+          id: "listing-unverified",
+          propertyId: "p2",
+          landlordId: "landlord-unverified",
+          price: 1100,
+          availability: true,
+          geohash: "d6w8qy",
+          planAnchor: "floor-1"
+        }
+      ];
+
+      const verifiedLinks = [
+        {
+          id: "link-gov",
+          provider: "gov-id" as const,
+          proof: {
+            proofId: "proof-123",
+            claims: { sub: "verified-landlord" },
+            verifiedAt: new Date().toISOString()
+          },
+          verified: true,
+          visible: true
+        }
+      ];
+
+      const verifiedHistory = { completedRentals: 0, polygonDepositActive: false };
+
+      // Use the exposed APIs inside the browser window
+      const nido = (window as any).nidoDiscovery;
+      if (!nido) {
+        throw new Error("window.nidoDiscovery is not defined in the browser page context");
+      }
+
+      const scoreVerified = nido.computeTrustScore(verifiedLinks, verifiedHistory).score;
+      const scoreUnverified = nido.computeTrustScore([], verifiedHistory).score;
+
+      const trustScores: Record<string, number> = {
+        "landlord-verified": scoreVerified,
+        "landlord-unverified": scoreUnverified
+      };
+
+      const inRadius = nido.listingsInRadius(mockListings, "d6w8qz", 1200);
+      const trustThreshold = 30;
+
+      const trustFiltered = inRadius.filter((listing: any) => {
+        const score = trustScores[listing.landlordId || ""] ?? 0;
+        return score >= trustThreshold;
+      });
+
+      return trustFiltered.map((l: any) => l.id);
+    });
+
+    // Assert that only the verified landlord's listing passed the filter in the browser
+    expect(filteredIds).toHaveLength(1);
+    expect(filteredIds[0]).toBe("listing-verified");
+  });
 });
