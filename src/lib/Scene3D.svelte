@@ -321,7 +321,7 @@
 
   .control-group h4 {
     margin: 0 0 8px 0;
-    color: #38bdf8;
+    color: var(--swal-accent, #06b6d4);
     font-size: 14px;
     font-weight: 600;
   }
@@ -329,14 +329,15 @@
   .control-group p {
     margin: 4px 0;
     font-size: 11px;
-    color: #94a3b8;
+    color: var(--swal-text, #f1f5f9);
+    opacity: 0.85;
   }
 
   .active-info {
     margin-top: 10px;
     padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));
     font-size: 11px;
-    color: #e2e8f0;
+    color: var(--swal-text, #f1f5f9);
   }
 </style>

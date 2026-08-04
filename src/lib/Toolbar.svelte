@@ -29,19 +29,36 @@
     e.dataTransfer?.setData('application/json', type);
     e.dataTransfer!.effectAllowed = 'copy';
   }
+
+  function toolAttrs(tool: (typeof tools)[number]) {
+    return {
+      title: tool.label,
+      'aria-label': tool.label,
+      'aria-pressed': floorPlanStore.currentTool === tool.id,
+      'data-testid': `tool-${tool.id}`
+    };
+  }
+
+  function libraryAttrs(item: (typeof libraryItems)[number]) {
+    return {
+      title: item.label,
+      'aria-label': `Drag ${item.label}`,
+      'data-testid': `library-${item.type}`
+    };
+  }
 </script>
 
 <div class="toolbar">
   <h3 class="panel-title">✏️ Tools</h3>
-  <div class="tool-grid">
+  <div class="tool-grid" role="toolbar" aria-label="Drawing tools">
     {#each tools as tool}
       <Button
         variant={floorPlanStore.currentTool === tool.id ? 'primary' : (tool.danger ? 'danger' : 'ghost')}
         size="sm"
         onclick={() => selectTool(tool.id)}
-        title={tool.label}
+        {...toolAttrs(tool)}
       >
-        <span class="icon">{tool.icon}</span>
+        <span class="icon" aria-hidden="true">{tool.icon}</span>
         <span class="label">{tool.label}</span>
       </Button>
     {/each}
@@ -50,16 +67,16 @@
   <div class="separator"></div>
 
   <h3 class="panel-title">📚 Library (Drag & Drop)</h3>
-  <div class="tool-grid">
+  <div class="tool-grid" role="list" aria-label="Component library">
     {#each libraryItems as item}
       <Button
         variant="ghost"
         size="sm"
         draggable={true}
-        ondragstart={(e) => handleDragStart(e, item.type)}
-        title={item.label}
+        ondragstart={(e: DragEvent) => handleDragStart(e, item.type)}
+        {...libraryAttrs(item)}
       >
-        <span class="icon">{item.icon}</span>
+        <span class="icon" aria-hidden="true">{item.icon}</span>
         <span class="label">{item.label}</span>
       </Button>
     {/each}
@@ -68,7 +85,7 @@
 
 <style>
   .toolbar { display: flex; flex-direction: column; gap: 8px; }
-  .panel-title { margin: 0 0 4px; font-size: 13px; color: var(--swal-text-secondary, #94a3b8); }
+  .panel-title { margin: 0 0 4px; font-size: 13px; color: var(--swal-text, #f1f5f9); opacity: 0.85; }
   .tool-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
   .icon { font-size: 14px; }
   .label { font-size: 11px; }
