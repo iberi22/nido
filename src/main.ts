@@ -55,7 +55,6 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
-<<<<<<< HEAD
 // Wire manual enable-push button if permission is default (guarded, non-blocking)
 if (typeof document !== 'undefined') {
   window.addEventListener('load', () => {
