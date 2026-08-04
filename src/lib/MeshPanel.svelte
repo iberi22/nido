@@ -82,6 +82,8 @@
               class:selected={selectedPeerId === peer.id}
               onclick={() => selectedPeerId = peer.id}
               data-testid={`peer-item-${peer.id}`}
+              aria-pressed={selectedPeerId === peer.id}
+              aria-label={`Chat with ${peer.name}, currently ${peer.presence}`}
             >
               <div class="peer-info">
                 <span class="peer-name">{peer.name}</span>
@@ -112,7 +114,7 @@
           </div>
         </div>
 
-        <div class="chat-messages" data-testid="chat-messages">
+        <div class="chat-messages" data-testid="chat-messages" role="log" aria-label="Chat messages history">
           {#if activeMessages.length === 0}
             <div class="empty-chat">No messages yet. Say hello!</div>
           {:else}
@@ -128,15 +130,16 @@
           {/if}
         </div>
 
-        <form class="chat-form" onsubmit={handleSend}>
+        <form class="chat-form" onsubmit={handleSend} aria-label="Send direct message">
           <div class="input-container">
             <Input
               bind:value={messageText}
               placeholder="Type a secure message..."
               data-testid="chat-input"
+              {...{ 'aria-label': 'Secure chat message text' }}
             />
           </div>
-          <Button variant="primary" type="submit" data-testid="chat-send-btn">
+          <Button variant="primary" type="submit" {...{ 'data-testid': 'chat-send-btn', 'aria-label': 'Send message' }}>
             Send
           </Button>
         </form>
