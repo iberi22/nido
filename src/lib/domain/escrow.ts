@@ -1,4 +1,8 @@
 import type { Lease } from "./property";
+import {
+  getDefaultPolygonClient,
+  type PolygonClient
+} from "./polygon-client";
 
 export type EscrowStatus =
   | "funded"
@@ -15,7 +19,7 @@ export interface Escrow {
   leaseId: string;
   amount: number;
   status: EscrowStatus;
-  contractAddress?: string; // Polygon contract address or stub
+  contractAddress?: string; // Polygon contract address (from client / testnet)
   fundedAt?: string;
   lockedAt?: string;
   releasedAmount?: number;
@@ -67,15 +71,23 @@ function generateId(prefix: string): string {
 
 /**
  * Creates a new Escrow in 'funded' state.
+ * Optional PolygonClient performs the on-chain create (Amoy testnet / manual deploy).
+ * State transitions remain pure; the client only supplies the contract address / tx.
  */
-export function createEscrow(lease: Pick<Lease, "id"> & { landlord?: string; tenantName?: string }, depositAmount: number): Escrow {
+export async function createEscrow(
+  lease: Pick<Lease, "id"> & { landlord?: string; tenantName?: string },
+  depositAmount: number,
+  client: PolygonClient = getDefaultPolygonClient()
+): Promise<Escrow> {
+  const contractAddress = await client.createEscrowContract(lease.id, depositAmount);
+
   const escrow: Escrow = {
     id: generateId("escrow"),
     leaseId: lease.id,
     amount: depositAmount,
     status: "funded",
     releasedAmount: 0,
-    contractAddress: "0x" + Math.random().toString(16).substring(2, 42).padStart(40, "0"),
+    contractAddress,
     fundedAt: new Date().toISOString(),
     parties: {
       landlord: lease.landlord || "landlord-default",
@@ -89,7 +101,11 @@ export function createEscrow(lease: Pick<Lease, "id"> & { landlord?: string; ten
 /**
  * Transitions escrow to 'locked' state (deposit held on Polygon testnet).
  */
-export function lockEscrow(escrow: Escrow): "locked" {
+export async function lockEscrow(
+  escrow: Escrow,
+  client: PolygonClient = getDefaultPolygonClient()
+): Promise<"locked"> {
+  await client.lock(escrow.id);
   escrow.status = "locked";
   escrow.lockedAt = new Date().toISOString();
   return "locked";
@@ -109,10 +125,16 @@ export function requestRelease(escrow: Escrow, amount: number): "release-request
 /**
  * Releases escrow funds. Transitions status to 'released' (if >= amount check) or 'partial-released'.
  */
-export function releaseEscrow(escrow: Escrow, amount: number): "partial-released" | "released" {
+export async function releaseEscrow(
+  escrow: Escrow,
+  amount: number,
+  client: PolygonClient = getDefaultPolygonClient()
+): Promise<"partial-released" | "released"> {
   if (amount <= 0) {
     throw new Error("Release amount must be greater than zero");
   }
+
+  await client.release(escrow.id, amount);
 
   const currentReleased = escrow.releasedAmount || 0;
   const newReleased = currentReleased + amount;
@@ -175,7 +197,11 @@ export function resolveDispute(dispute: Dispute, outcome: DisputeOutcome): "deci
 /**
  * Enforces the outcome of a dispute, updating the dispute to 'enforced' and releasing escrow funds accordingly.
  */
-export function enforceOutcome(dispute: Dispute, escrow: Escrow): "enforced" {
+export async function enforceOutcome(
+  dispute: Dispute,
+  escrow: Escrow,
+  client: PolygonClient = getDefaultPolygonClient()
+): Promise<"enforced"> {
   if (dispute.status !== "decided" || !dispute.outcome) {
     throw new Error("Cannot enforce outcome of an unresolved dispute");
   }
@@ -184,8 +210,8 @@ export function enforceOutcome(dispute: Dispute, escrow: Escrow): "enforced" {
     throw new Error("Dispute does not belong to the specified escrow");
   }
 
-  // Release escrow per outcome
-  releaseEscrow(escrow, dispute.outcome.releaseAmount);
+  // Release escrow per outcome (on-chain via client + pure state update)
+  await releaseEscrow(escrow, dispute.outcome.releaseAmount, client);
 
   dispute.status = "enforced";
   return "enforced";
