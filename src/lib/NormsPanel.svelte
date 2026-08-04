@@ -78,12 +78,12 @@
 <div class="norms-panel" data-testid="norms-panel">
   <h3 class="panel-title">📐 Building Norms</h3>
   {#if activeFloorViolations.length === 0}
-    <div class="no-violations" data-testid="no-violations">
+    <div class="no-violations" data-testid="no-violations" role="status" aria-live="polite">
       <Badge variant="success">Compliant</Badge>
       <span class="success-message">No violations on this floor. All layouts comply with NSR-10 and POT standards.</span>
     </div>
   {:else}
-    <ul class="violation-list" data-testid="violations-list">
+    <ul class="violation-list" data-testid="violations-list" aria-label="Active floor building norm violations">
       {#each activeFloorViolations as violation}
         <li class="violation-item" data-testid="violation-item" aria-live="polite">
           <div class="violation-header">
