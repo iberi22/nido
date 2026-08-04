@@ -39,6 +39,7 @@
   "dependencies": {
     "@iberi22/edge-mesh": "file:src/lib/vendor/edge-mesh",
     "@noble/post-quantum": "0.6.1",
+    "@simplewebauthn/browser": "13.3.0",
     "@swal/ui": "file:src/lib/vendor/swal-ui",
     "dxf-writer": "1.18.4",
     "html2canvas": "1.4.1",
