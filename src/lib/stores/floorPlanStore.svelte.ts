@@ -421,7 +421,8 @@ export class FloorPlanStore {
           const db = e.target.result;
           const transaction = db.transaction('properties', 'readwrite');
           const store = transaction.objectStore('properties');
-          store.put(prop);
+          // JSON round-trip: this.property is a Svelte $state proxy — structuredClone/IDB.put rejects proxies
+          store.put(JSON.parse(JSON.stringify(prop)));
           resolve();
         };
         request.onerror = () => {
