@@ -23,6 +23,13 @@
 
   const C = $derived(config.colors);
 
+  // Drawing state
+  let isDrawing = $state(false);
+  let drawStartX = $state(0);     // In world meters
+  let drawStartY = $state(0);     // In world meters
+  let drawCurrentX = $state(0);    // In world meters
+  let drawCurrentY = $state(0);    // In world meters
+
   onMount(() => {
     initCanvas();
     const ro = new ResizeObserver(() => fitStage());
@@ -57,6 +64,31 @@
     }
   });
 
+  // Watch tool changes to toggle drag/selection ability
+  $effect(() => {
+    if (!stage || !tr) return;
+    const tool = floorPlanStore.currentTool;
+    if (tool === 'select') {
+      stage.draggable(true);
+      tr.visible(true);
+    } else {
+      stage.draggable(false);
+      tr.nodes([]);
+      tr.visible(false);
+      floorPlanStore.selectComponent(null);
+    }
+  });
+
+  function getStagePointerInMeters(): { x: number, y: number } | null {
+    if (!stage) return null;
+    const ptr = stage.getPointerPosition();
+    if (!ptr) return null;
+    const lx = (ptr.x - stage.x()) / stage.scaleX();
+    const ly = (ptr.y - stage.y()) / stage.scaleX();
+    const mx = (lx - PLOT.x) / SCALE;
+    const my = (ly - PLOT.y) / SCALE;
+    return { x: mx, y: my };
+  }
 
   function initCanvas() {
     stage = new Konva.Stage({ container, width: VIRTUAL_WIDTH, height: VIRTUAL_HEIGHT, draggable: true });
@@ -77,6 +109,9 @@
 
     // Stage Selection Logic
     stage.on('click tap', (e: any) => {
+      const tool = floorPlanStore.currentTool;
+      if (tool !== 'select') return;
+
       if (e.target === stage || e.target.name() === 'background') {
         floorPlanStore.selectComponent(null);
         return;
@@ -86,6 +121,136 @@
       if (id) {
         floorPlanStore.selectComponent(id);
       }
+    });
+
+    stage.on('mousedown touchstart', (e: any) => {
+      const tool = floorPlanStore.currentTool;
+      if (tool === 'select') return;
+
+      const pt = getStagePointerInMeters();
+      if (!pt) return;
+
+      if (tool === 'delete') {
+        if (e.target !== stage && e.target.name() !== 'background') {
+          const id = e.target.id() || e.target.getParent()?.id();
+          if (id) {
+            floorPlanStore.deleteComponent(id);
+            floorPlanStore.setTool('select');
+            draw();
+          }
+        }
+        return;
+      }
+
+      if (tool === 'room') {
+        const id = crypto.randomUUID();
+        floorPlanStore.addComponent({
+          id,
+          type: 'room',
+          x: pt.x,
+          y: pt.y,
+          width: 1.5,
+          height: 1.0,
+          layer: 'annotations',
+          properties: {
+            name: 'Room ' + (floorPlanStore.currentFloor.components.filter(c => c.type === 'room').length + 1),
+            color: C.accent
+          }
+        });
+        floorPlanStore.setTool('select');
+        floorPlanStore.selectComponent(id);
+        draw();
+        return;
+      }
+
+      if (['wall', 'zone', 'measure', 'dimension'].includes(tool)) {
+        isDrawing = true;
+        drawStartX = pt.x;
+        drawStartY = pt.y;
+        drawCurrentX = pt.x;
+        drawCurrentY = pt.y;
+        draw();
+      }
+    });
+
+    stage.on('mousemove touchmove', () => {
+      if (!isDrawing) return;
+      const pt = getStagePointerInMeters();
+      if (!pt) return;
+      drawCurrentX = pt.x;
+      drawCurrentY = pt.y;
+      draw();
+    });
+
+    stage.on('mouseup touchend', () => {
+      if (!isDrawing) return;
+      isDrawing = false;
+
+      const tool = floorPlanStore.currentTool;
+      const pt = getStagePointerInMeters();
+      if (!pt) return;
+
+      const x1 = drawStartX;
+      const y1 = drawStartY;
+      const x2 = drawCurrentX;
+      const y2 = drawCurrentY;
+
+      const dist = Math.hypot(x2 - x1, y2 - y1);
+      if (dist > 0.05) {
+        const id = crypto.randomUUID();
+        if (tool === 'wall') {
+          floorPlanStore.addComponent({
+            id,
+            type: 'wall',
+            x: Math.min(x1, x2),
+            y: Math.min(y1, y2),
+            width: Math.abs(x2 - x1) || config.wallThickness,
+            height: Math.abs(y2 - y1) || config.wallThickness,
+            layer: 'structure',
+            properties: {
+              x1, y1, x2, y2,
+              thickness: config.wallThickness,
+              note: 'User Wall'
+            }
+          });
+          floorPlanStore.selectComponent(id);
+        } else if (tool === 'zone') {
+          floorPlanStore.addComponent({
+            id,
+            type: 'zone',
+            x: Math.min(x1, x2),
+            y: Math.min(y1, y2),
+            width: Math.abs(x2 - x1),
+            height: Math.abs(y2 - y1),
+            layer: 'zones',
+            properties: {
+              name: 'New Zone',
+              color: C.zone_fill,
+              type: 'zone'
+            }
+          });
+          floorPlanStore.selectComponent(id);
+        } else if (tool === 'measure' || tool === 'dimension') {
+          floorPlanStore.addComponent({
+            id,
+            type: 'dimension',
+            x: x1,
+            y: y1,
+            width: Math.abs(x2 - x1),
+            height: Math.abs(y2 - y1),
+            layer: 'annotations',
+            properties: {
+              toX: x2,
+              toY: y2,
+              label: `${dist.toFixed(2)}m`,
+              note: 'User Measurement'
+            }
+          });
+        }
+      }
+
+      floorPlanStore.setTool('select');
+      draw();
     });
 
     stage.on('wheel', (e) => {
@@ -129,7 +294,7 @@
         const newHeight = (node.height() * scaleY) / SCALE;
         const newRot = node.rotation();
         const newX = (node.x() - PLOT.x) / SCALE;
-        const newY = (node.y() - PLOT.y) / SCALE; // Origin might change
+        const newY = (node.y() - PLOT.y) / SCALE;
 
         floorPlanStore.updateComponent(id, {
           x: newX, y: newY,
@@ -155,7 +320,7 @@
 
   // ── Drag & Drop ──
   function handleDragOver(e: DragEvent) {
-    e.preventDefault(); // Necessary to allow dropping
+    e.preventDefault();
   }
 
   function handleDrop(e: DragEvent) {
@@ -166,15 +331,6 @@
 
     const type = e.dataTransfer?.getData('application/json');
     if (!type) return;
-
-    // Convert from stage pixels to world meters (relative to plot origin PLOT.x/y)
-    // Stage transform: x' = (world_x * scaleX + stageX)
-    // world_x = (x' - stageX) / scaleX
-    // But our internal logic is: Component X (meters) -> Render X (pixels) = (comp.x * SCALE + PLOT.x)
-    // So we need to reverse:
-    // 1. Get pointer stage coords: px, py
-    // 2. Transform to layer coords (reverse stage pan/zoom): lx = (px - stage.x()) / stage.scaleX()
-    // 3. Transform to plot relative meters: mx = (lx - PLOT.x) / SCALE
 
     const lx = (ptr.x - stage.x()) / stage.scaleX();
     const ly = (ptr.y - stage.y()) / stage.scaleX();
@@ -227,8 +383,73 @@
       comps.forEach(comp => drawComponent(comp));
     });
 
+    // Draw interactive transient previews
+    if (isDrawing) {
+      const tool = floorPlanStore.currentTool;
+      const x1 = PLOT.x + drawStartX * SCALE;
+      const y1 = PLOT.y + drawStartY * SCALE;
+      const x2 = PLOT.x + drawCurrentX * SCALE;
+      const y2 = PLOT.y + drawCurrentY * SCALE;
+      const dist = Math.hypot(drawCurrentX - drawStartX, drawCurrentY - drawStartY);
+
+      if (tool === 'wall') {
+        layer.add(new Konva.Line({
+          points: [x1, y1, x2, y2],
+          stroke: C.accent || '#4dd0e1',
+          strokeWidth: config.wallThickness * SCALE,
+          opacity: 0.7
+        }));
+        layer.add(new Konva.Text({
+          x: (x1 + x2) / 2 + 5,
+          y: (y1 + y2) / 2 - 15,
+          text: `${dist.toFixed(2)}m (Wall)`,
+          fontSize: 12,
+          fontFamily: 'Consolas',
+          fill: C.blueprint_text || '#e0f4ff',
+          fontStyle: 'bold'
+        }));
+      } else if (tool === 'zone') {
+        layer.add(new Konva.Rect({
+          x: Math.min(x1, x2),
+          y: Math.min(y1, y2),
+          width: Math.abs(x2 - x1),
+          height: Math.abs(y2 - y1),
+          fill: C.zone_fill || 'rgba(135, 206, 235, 0.06)',
+          stroke: C.accent || '#4dd0e1',
+          strokeWidth: 1.5,
+          dash: [4, 4]
+        }));
+        const zw = Math.abs(drawCurrentX - drawStartX);
+        const zh = Math.abs(drawCurrentY - drawStartY);
+        layer.add(new Konva.Text({
+          x: Math.min(x1, x2) + 5,
+          y: Math.min(y1, y2) + 5,
+          text: `${zw.toFixed(2)}m x ${zh.toFixed(2)}m (Zone)`,
+          fontSize: 11,
+          fontFamily: 'Consolas',
+          fill: C.blueprint_text || '#e0f4ff'
+        }));
+      } else if (tool === 'measure' || tool === 'dimension') {
+        layer.add(new Konva.Line({
+          points: [x1, y1, x2, y2],
+          stroke: C.highlight || '#ffd54f',
+          strokeWidth: 1.5,
+          dash: [6, 3]
+        }));
+        layer.add(new Konva.Text({
+          x: (x1 + x2) / 2 + 5,
+          y: (y1 + y2) / 2 - 15,
+          text: `${dist.toFixed(2)}m`,
+          fontSize: 12,
+          fontFamily: 'Consolas',
+          fill: C.blueprint_text || '#e0f4ff',
+          fontStyle: 'bold'
+        }));
+      }
+    }
+
     drawFooter();
-    drawCompass(); // on top
+    drawCompass();
 
     // Ensure transformer is on top
     tr.moveToTop();
@@ -251,13 +472,17 @@
       draggable: !comp.locked && !['zone', 'text', 'dimension'].includes(comp.type)
     });
 
-    // Content based on type
+    // Highlight selection
+    const isSelected = floorPlanStore.selectedComponentId === comp.id;
+
     switch (comp.type) {
       case 'zone':
         group.add(new Konva.Rect({
           width: cw, height: ch,
           fill: comp.properties.color || C.zone_fill,
-          stroke: C.blueprint_line, strokeWidth: 0.8, dash: [4, 4]
+          stroke: isSelected ? C.accent : C.blueprint_line,
+          strokeWidth: isSelected ? 1.5 : 0.8,
+          dash: [4, 4]
         }));
         // Label
         const zName = comp.properties.name || '';
@@ -272,30 +497,49 @@
             fontSize: 8, fontFamily: 'Consolas', fill: C.blueprint_text, opacity: 0.6
           }));
         }
-        // Zones are mostly static backgrounds, dragging them is weird usually, but let's allow it if user unlocks
         group.draggable(!comp.locked);
         break;
 
       case 'wall':
-        // Wall logic: If x1,y1,x2,y2 exist in props, use them relative to 0,0
-        // BUT our store migration normalized components to x,y,width,height
-        // Draw standard wall rect
         group.add(new Konva.Rect({
           width: cw, height: ch,
-          fill: C.wall_fill, stroke: C.blueprint_line, strokeWidth: 1.2
+          fill: C.wall_fill,
+          stroke: isSelected ? C.accent : C.blueprint_line,
+          strokeWidth: isSelected ? 2 : 1.2
+        }));
+        break;
+
+      case 'room':
+        group.add(new Konva.Rect({
+          width: cw, height: ch,
+          fill: 'rgba(77, 208, 225, 0.1)',
+          stroke: isSelected ? C.highlight : C.accent,
+          strokeWidth: isSelected ? 2 : 1.5,
+          cornerRadius: 6
+        }));
+        group.add(new Konva.Text({
+          width: cw, height: ch,
+          text: `📍 ${comp.properties.name || 'Room'}`,
+          fontSize: 11,
+          fontFamily: 'Consolas',
+          fill: C.blueprint_text,
+          align: 'center',
+          verticalAlign: 'middle',
+          fontStyle: 'bold'
         }));
         break;
 
       case 'furniture':
       case 'motorcycle':
       case 'car':
-        // Outline
         group.add(new Konva.Rect({
           width: cw, height: ch,
-          stroke: C.accent, strokeWidth: 1, fill: 'transparent',
-          cornerRadius: 4, dash: [4, 2]
+          stroke: isSelected ? C.highlight : C.accent,
+          strokeWidth: isSelected ? 2 : 1,
+          fill: 'transparent',
+          cornerRadius: 4,
+          dash: [4, 2]
         }));
-        // Icon/Text
         let icon = comp.type === 'motorcycle' ? '🏍️' : comp.type === 'car' ? '🚗' : '🪑';
         group.add(new Konva.Text({
           width: cw, height: ch, text: icon,
@@ -305,16 +549,7 @@
         break;
 
       case 'stairs':
-        // Special renderer for stairs from properties.data
         if (comp.properties.data) {
-           // We need to render the sub-components relative to (0,0) of the group
-           // The original data had absolute coordinates.
-           // Since comp.x/y is 0, we can just use the original coordinates relative to PLOT
-           // wait, if comp.x is 0, then cx = PLOT.x.
-           // Components inside stairs had x/y relative to 0,0 of floor.
-           // So we draw them directly.
-           // BUT, to make the whole stair group draggable, we should find bounding box?
-           // For now, let's just render them as children.
            const sData = comp.properties.data;
            sData.components.forEach((part: any) => {
              const px = part.x * SCALE;
@@ -322,14 +557,12 @@
              const pw = part.width * SCALE;
              const ph = part.height * SCALE;
 
-             // Part shape
              group.add(new Konva.Rect({
                x: px, y: py, width: pw, height: ph,
                stroke: C.blueprint_line, strokeWidth: 1,
                fill: part.id === 'landing' ? 'rgba(135, 206, 235, 0.15)' : 'rgba(135, 206, 235, 0.05)'
              }));
 
-             // Steps lines
              if (part.steps) {
                if (part.orientation === 'vertical') {
                  const stepH = ph / part.steps;
@@ -351,17 +584,14 @@
       case 'sliding_door':
       case 'garage_door':
       case 'pedestrian_door':
-        // Draw Generic Door with swing
         group.add(new Konva.Rect({
-          width: cw, height: ch, stroke: 'transparent' // Hit area
+          width: cw, height: ch, stroke: 'transparent'
         }));
-        // Opening
         group.add(new Konva.Line({
           points: [0, 0, cw, 0],
           stroke: comp.type.includes('garage') ? C.highlight : C.accent,
           strokeWidth: comp.type.includes('garage') ? 6 : 4
         }));
-        // Swing/Arc
         if (comp.type === 'pedestrian_door' || comp.type === 'door') {
            group.add(new Konva.Arc({
              x: 0, y: 0, innerRadius: 0, outerRadius: cw, angle: 90,
@@ -373,20 +603,14 @@
 
       case 'dimension':
         const props = comp.properties;
-        // x,y is "from". props has "toX, toY"
-        // Draw dimension line from (0,0) to relative (toX-x, toY-y)
-        // Wait, dimension components are "annotations", maybe not grouped?
-        // Let's rely on absolute coords for now?
-        // Better: Group is at x,y. Draw to relative target.
         const dx = (props.toX - comp.x) * SCALE;
         const dy = (props.toY - comp.y) * SCALE;
 
         group.add(new Konva.Line({
           points: [0, 0, dx, dy],
-          stroke: C.blueprint_line, strokeWidth: 0.8
+          stroke: isSelected ? C.highlight : C.blueprint_line,
+          strokeWidth: isSelected ? 1.5 : 0.8
         }));
-        // Markers
-        // Text center
         group.add(new Konva.Text({
           x: dx/2 - 10, y: dy/2 - 10,
           text: props.label,
@@ -395,7 +619,6 @@
         break;
 
       default:
-        // Generic fallback
         group.add(new Konva.Rect({
           width: cw, height: ch,
           stroke: 'red', strokeWidth: 1
@@ -443,13 +666,11 @@
 
   // ── Global Dimensions ──
   function drawGlobalDimensions() {
-    // We already have dims in components now, but we can keep these global plot dims
     dimLine(PLOT.x, PLOT.y - 35, PLOT.x + PLOT.w, PLOT.y - 35, `${config.plot.width}m`);
     dimLineV(PLOT.x + PLOT.w + 35, PLOT.y, PLOT.x + PLOT.w + 35, PLOT.y + PLOT.h, `${config.plot.height}m`);
   }
 
   function drawFooter() {
-     // Concise footer
      layer.add(new Konva.Text({
        x: PLOT.x, y: PLOT.y + PLOT.h + 20,
        text: `${floorData.id.toUpperCase()} | Scale 1:${config.scale}`,
