@@ -37,10 +37,16 @@
     "vite": "^8.0.0-beta.13"
   },
   "dependencies": {
+    "@iberi22/edge-mesh": "file:src/lib/vendor/edge-mesh",
+    "@noble/post-quantum": "0.6.1",
     "@swal/ui": "file:src/lib/vendor/swal-ui",
     "dxf-writer": "1.18.4",
     "html2canvas": "1.4.1",
+    "idb": "8.0.3",
     "jspdf": "4.2.1",
-    "jszip": "3.10.1"
+    "jszip": "3.10.1",
+    "peerjs": "1.5.5",
+    "y-protocols": "1.0.7",
+    "yjs": "13.6.31"
   }
 }
