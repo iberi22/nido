@@ -102,16 +102,16 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes('node_modules/three') || id.includes('three.module')) {
+          if (id.includes('node_modules/three') || id.includes('three.module') || id.includes('three/')) {
             return 'vendor-three';
           }
           if (id.includes('node_modules/konva') || id.includes('konva/')) {
             return 'vendor-konva';
           }
-          if (id.includes('vendor/edge-mesh') || id.includes('edge-mesh/')) {
+          if (id.includes('node_modules/@iberi22/edge-mesh') || id.includes('vendor/edge-mesh') || id.includes('edge-mesh/')) {
             return 'vendor-mesh';
           }
-          if (id.includes('vendor/swal-ui') || id.includes('swal-ui/')) {
+          if (id.includes('node_modules/@swal/ui') || id.includes('vendor/swal-ui') || id.includes('swal-ui/')) {
             return 'vendor-swal-ui';
           }
           if (id.includes('node_modules/svelte') || id.includes('@sveltejs')) {

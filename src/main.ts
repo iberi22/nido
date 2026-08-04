@@ -1,4 +1,5 @@
 // Cloudflare Pages deployment prep verified
+// Wave 6.06: Manual chunks split for vendor-three, vendor-mesh, and vendor-swal configured.
 import { mount } from 'svelte';
 import './app.css';
 import '@swal/ui/tokens';
