@@ -1,8 +1,14 @@
 import { floorPlanStore } from './floorPlanStore.svelte';
 import { loadFromIndexedDB, saveToIndexedDB, loadQueueFromIndexedDB, saveQueueToIndexedDB } from '../domain/db';
 import { publishPresence } from '../domain/mesh';
+import { ExponentialBackoff, HeartbeatManager } from '../mesh/reconnect';
 
-export async function initDatabaseSync(options?: { meshClient?: any }) {
+export async function initDatabaseSync(options?: {
+  meshClient?: any;
+  heartbeatInterval?: number;
+  missedPingsThreshold?: number;
+  backoffOptions?: any;
+}) {
   let meshClient = options?.meshClient;
   if (!meshClient && typeof window !== 'undefined' && (window as any).nidoTestMeshClientEnabled) {
     meshClient = (window as any).nidoTestMeshClient;
@@ -12,6 +18,7 @@ export async function initDatabaseSync(options?: { meshClient?: any }) {
   let offlineQueue: any[] = [];
   let wasConnected = true;
   let isSyncing = false;
+  let heartbeatManager: any = null;
 
   // 1. Load initial state from IndexedDB
   try {
@@ -58,6 +65,13 @@ export async function initDatabaseSync(options?: { meshClient?: any }) {
   // Handle incoming mesh state updates
   if (meshClient && typeof meshClient.onStateUpdate === 'function') {
     meshClient.onStateUpdate((incomingState: any) => {
+      if (incomingState && incomingState.type === 'heartbeat') {
+        if (heartbeatManager) {
+          heartbeatManager.handleHeartbeatMessage(incomingState);
+        }
+        return;
+      }
+
       if (incomingState && typeof incomingState.updatedAt === 'number') {
         if (incomingState.updatedAt > localLastUpdatedAt) {
           isSyncing = true;
@@ -163,10 +177,82 @@ export async function initDatabaseSync(options?: { meshClient?: any }) {
       }
     }, 1000);
 
+    const heartbeatInterval = options?.heartbeatInterval ?? 15000;
+    const missedPingsThreshold = options?.missedPingsThreshold ?? 3;
+    heartbeatManager = new HeartbeatManager(meshClient, {
+      heartbeatInterval,
+      missedPingsThreshold
+    });
+    heartbeatManager.start();
+
+    const backoff = new ExponentialBackoff(options?.backoffOptions);
+    let reconnectTimeoutId: any = null;
+    const knownReconnectTargets = new Set<string>();
+
+    if (Array.isArray(meshClient.peers)) {
+      for (const peer of meshClient.peers) {
+        if (peer.id !== 'self') {
+          knownReconnectTargets.add(peer.id.replace(/^nido-/, ""));
+        }
+      }
+    }
+
+    const attemptReconnect = () => {
+      if (reconnectTimeoutId) return;
+      const isClientConnected = typeof meshClient.isConnected === 'boolean' ? meshClient.isConnected : true;
+      if (isClientConnected) {
+        backoff.reset();
+        return;
+      }
+
+      const delay = backoff.nextDelay();
+      reconnectTimeoutId = setTimeout(async () => {
+        reconnectTimeoutId = null;
+
+        if (knownReconnectTargets.size > 0) {
+          for (const target of knownReconnectTargets) {
+            try {
+              if (typeof meshClient.connect === 'function') {
+                await meshClient.connect(target);
+              }
+            } catch (err) {
+              console.error(`Failed to reconnect to target ${target}:`, err);
+            }
+          }
+        }
+
+        const stillConnected = typeof meshClient.isConnected === 'boolean' ? meshClient.isConnected : true;
+        if (!stillConnected) {
+          attemptReconnect();
+        } else {
+          backoff.reset();
+        }
+      }, delay);
+    };
+
     // Connection status checking for offline -> reconnect flush
     setInterval(async () => {
       if (!meshClient) return;
       const isClientConnected = typeof meshClient.isConnected === 'boolean' ? meshClient.isConnected : true;
+
+      if (isClientConnected) {
+        if (reconnectTimeoutId) {
+          clearTimeout(reconnectTimeoutId);
+          reconnectTimeoutId = null;
+        }
+        backoff.reset();
+
+        if (Array.isArray(meshClient.peers)) {
+          for (const peer of meshClient.peers) {
+            if (peer.id !== 'self' && peer.presence === 'online') {
+              const targetId = peer.id.replace(/^nido-/, "");
+              knownReconnectTargets.add(targetId);
+              heartbeatManager.registerPeerActivity(peer.id);
+            }
+          }
+        }
+      }
+
       if (isClientConnected && !wasConnected) {
         // Reconnected! Load the latest queue from IndexedDB to ensure we flush absolute source of truth
         try {
@@ -225,6 +311,7 @@ export async function initDatabaseSync(options?: { meshClient?: any }) {
         wasConnected = true;
       } else if (!isClientConnected) {
         wasConnected = false;
+        attemptReconnect();
       }
     }, 300);
   }
