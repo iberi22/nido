@@ -85,4 +85,21 @@ export default defineConfig({
       }
     })
   ],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/three') || id.includes('three/')) {
+            return 'vendor-three';
+          }
+          if (id.includes('node_modules/@iberi22/edge-mesh') || id.includes('vendor/edge-mesh')) {
+            return 'vendor-mesh';
+          }
+          if (id.includes('node_modules/@swal/ui') || id.includes('vendor/swal-ui')) {
+            return 'vendor-swal';
+          }
+        }
+      }
+    }
+  }
 })
