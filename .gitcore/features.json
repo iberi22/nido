@@ -106,8 +106,8 @@
       ],
       "implemented_in": "src/lib/domain/ai-skills.ts,src/lib/AIChat.svelte",
       "last_updated": null,
-      "last_verified": "2026-08-03",
-      "last_tested": "2026-08-03",
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
       "notes": ""
     },
     {
@@ -257,8 +257,8 @@
       ],
       "implemented_in": "src/lib/domain/escrow.ts,src/lib/domain/polygon-client.ts",
       "last_updated": null,
-      "last_verified": "2026-08-03",
-      "last_tested": "2026-08-03",
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
       "notes": ""
     },
     {
@@ -514,7 +514,7 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": "PASS — edge-hive client injectable, tier Pro=node active, instance namespace (wave 5 #88/#89)"
+      "notes": "PASS \u2014 edge-hive client injectable, tier Pro=node active, instance namespace (wave 5 #88/#89)"
     },
     {
       "id": "mesh-integration",
@@ -547,8 +547,8 @@
       ],
       "implemented_in": "src/lib/domain/mesh.ts,src/lib/vendor/edge-mesh/",
       "last_updated": null,
-      "last_verified": "2026-08-03",
-      "last_tested": "2026-08-03",
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
       "notes": ""
     },
     {
@@ -663,7 +663,7 @@
       ],
       "implemented_in": "src/lib/stores/floorPlanStore.svelte.ts,src/App.svelte",
       "last_updated": null,
-      "notes": "PASS — 2D editor on @swal/ui + e2e 5/5 (wave 3)",
+      "notes": "PASS \u2014 2D editor on @swal/ui + e2e 5/5 (wave 3)",
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04"
     },
@@ -703,7 +703,7 @@
       ],
       "implemented_in": "src/lib/Scene3D.svelte",
       "last_updated": null,
-      "notes": "PASS — 3D viewer lazy-loaded + e2e 4/4 (wave 3)",
+      "notes": "PASS \u2014 3D viewer lazy-loaded + e2e 4/4 (wave 3)",
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04"
     },
@@ -850,7 +850,7 @@
       "implemented_in": "vitest.config.ts,playwright.config.ts,package.json,scripts/",
       "last_updated": null,
       "last_verified": "2026-08-04",
-      "notes": "PASS — 175 unit/integration + 28 e2e (wave 3)",
+      "notes": "PASS \u2014 175 unit/integration + 28 e2e (wave 3)",
       "last_tested": "2026-08-04"
     },
     {
@@ -929,7 +929,7 @@
       ],
       "implemented_in": "src/App.svelte,src/lib/Toolbar.svelte,src/lib/FloorSelector.svelte,src/lib/vendor/swal-ui/",
       "last_updated": null,
-      "notes": "PASS — @swal/ui shell, data-testid hooks, a11y 0 warnings (wave 3)",
+      "notes": "PASS \u2014 @swal/ui shell, data-testid hooks, a11y 0 warnings (wave 3)",
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04"
     },
