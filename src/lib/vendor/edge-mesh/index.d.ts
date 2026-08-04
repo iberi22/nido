@@ -105,6 +105,7 @@ export class EdgeMesh {
   readonly nodo: EdgeMeshNode;
   readonly eventTarget: EventTarget;
   readonly identity: PostQuantumIdentity;
+  readonly presence: PresenceManager;
   readonly authorizer: NamespaceAuthorizer;
   readonly yjsAdapter: YjsAdapter;
   readonly sharesExternalDoc: boolean;
@@ -124,6 +125,37 @@ export class EdgeMesh {
   on(tipo: string, handler: (ev: CustomEvent) => void): void;
   off(tipo: string, handler: (ev: CustomEvent) => void): void;
 }
+
+export class MeshPresence {
+  static isOnline(peerId: string): boolean;
+  static setOnline(peerId: string, online: boolean): void;
+  static clear(): void;
+}
+
+export class PresenceManager {
+  readonly eventTarget: EventTarget;
+  peerId: string;
+  iniciar(
+    nodoId: NodoId,
+    transmitir: (payload: unknown) => Promise<void>,
+    identity?: PostQuantumIdentity,
+  ): Promise<void>;
+  detener(): void;
+  registrarClavePublica(nodoId: string, parPublico: Uint8Array): void;
+}
+
+export class InMemoryStorage {
+  constructor();
+}
+
+export const TIPO_CANAL: {
+  readonly PUBLICO: 'publico';
+  readonly PRIVADO: 'privado';
+  readonly SALON_VIRTUAL: 'salon_virtual';
+};
+
+export function bytesAHex(bytes: Uint8Array): string;
+export function hexABytes(hex: string): Uint8Array;
 
 export type CapacidadEstandar = 'read' | 'write' | 'admin' | 'sync' | 'presence' | 'governance';
 
@@ -185,8 +217,16 @@ export class ChatChannel extends EventTarget {
   );
   setPeerId(peerId: string): void;
   enviarMensajeDirecto(mensaje: ChatMessage): Promise<void>;
-  sendMessage(text: string, meta?: Record<string, unknown>): Promise<unknown>;
-  enviarMensaje(texto: string, meta?: Record<string, unknown>): Promise<unknown>;
+  sendMessage(
+    texto: string,
+    tipo?: string,
+    metadata?: Readonly<Record<string, unknown>>,
+  ): Promise<string>;
+  enviarMensaje(
+    texto: string,
+    tipo?: string,
+    metadata?: Readonly<Record<string, unknown>>,
+  ): Promise<string>;
   unirseAlCanal(): Promise<void>;
   abandonarCanal(): Promise<void>;
   obtenerHistorial(limite?: number): Promise<readonly unknown[]>;
