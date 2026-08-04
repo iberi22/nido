@@ -16,6 +16,7 @@ import {
   type NodoId,
 } from "@iberi22/edge-mesh";
 import { ml_dsa65 } from "@noble/post-quantum/ml-dsa.js";
+import { WebRTCTransport, InMemorySignaling, type SignalingChannel, type RTCPeerConnectionFactory } from "../mesh/transport";
 
 export interface MeshPeer {
   id: string;
@@ -40,6 +41,14 @@ export interface MeshClient {
   publishPresence(presence: MeshPeer["presence"]): void;
   sendChatMessage(to: string, text: string): MeshMessage;
   authzCheck(resource: string, action: string): boolean;
+  // Extra properties supporting WebRTC and SyncStore
+  isConnected?: boolean;
+  onStateUpdate?(cb: (state: any) => void): void;
+  publishState?(namespace: string, state: any): void;
+  connect?(targetInstanceId: string): Promise<void>;
+  disconnect?(): Promise<void>;
+  _mesh?: EdgeMesh;
+  _transport?: any;
 }
 
 export interface MeshState {
@@ -86,8 +95,17 @@ function seedAuthz(mesh: EdgeMesh, namespace: string, rules: Record<string, stri
   }
 }
 
+// Share a global signaling channel instance so clients can discover each other
+export const globalSignaling = new InMemorySignaling();
+
 /** Create the isolated mesh namespace for an instance (REQ-004). */
-export function createMeshClient(instanceId: string): MeshClient {
+export function createMeshClient(
+  instanceId: string,
+  options?: {
+    signaling?: SignalingChannel;
+    rtcFactory?: RTCPeerConnectionFactory;
+  }
+): MeshClient {
   const namespace = `${MESH_NAMESPACE}/${instanceId}`;
   const nodoId = asNodoId(`nido-${instanceId}`);
 
@@ -116,6 +134,42 @@ export function createMeshClient(instanceId: string): MeshClient {
     online: false,
     authzRules,
   };
+
+  // Set up the real WebRTC transport
+  const signaling = options?.signaling ?? globalSignaling;
+  const transport = new WebRTCTransport(nodoId, signaling, options?.rtcFactory);
+  mesh.usarTransport(transport);
+
+  // Initialize the EdgeMesh node/presence asynchronously
+  void mesh.iniciar();
+
+  const stateUpdateCallbacks = new Set<(state: any) => void>();
+
+  mesh.on("mensajeRecibido", (ev) => {
+    const env = ev.detail.envolvente;
+    if (env.tipo === "ack") {
+      for (const cb of stateUpdateCallbacks) {
+        cb(env.payload);
+      }
+    }
+  });
+
+  transport.on("conectado", (ev) => {
+    const peerId = ev.detail.nodoId;
+    state.peers[peerId] = {
+      id: peerId,
+      name: peerId.replace(/^nido-/, ""),
+      presence: "online",
+      lastSeen: new Date().toISOString(),
+    };
+  });
+
+  transport.on("desconectado", (ev) => {
+    const peerId = ev.detail.nodoId;
+    if (state.peers[peerId]) {
+      state.peers[peerId].presence = "offline";
+    }
+  });
 
   return {
     get instanceId() {
@@ -164,6 +218,28 @@ export function createMeshClient(instanceId: string): MeshClient {
         resource,
       );
     },
+    get isConnected() {
+      return transport.estaConectado();
+    },
+    onStateUpdate(cb: (state: any) => void) {
+      stateUpdateCallbacks.add(cb);
+    },
+    publishState(ns: string, stateToSave: any) {
+      void mesh.transmitir(stateToSave, "ack" as any);
+    },
+    async connect(targetInstanceId: string) {
+      const targetNodoId = `nido-${targetInstanceId}`;
+      await transport.conectarRemoto(targetNodoId);
+    },
+    async disconnect() {
+      await transport.cerrar();
+    },
+    get _mesh() {
+      return mesh;
+    },
+    get _transport() {
+      return transport;
+    }
   };
 }
 

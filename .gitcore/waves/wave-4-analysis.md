@@ -72,6 +72,6 @@
 - [x] Fix 2 persistence bugs (Svelte proxies → JSON round-trip) + 1 merge-conflict corruption (main.ts)
 - [x] Reconcile features.json: 23/24 → 100% (mesh 85% pending #63)
 - [x] Close issues #58-#62, #64-#70 with evidence; #63 stays open (re-dispatched)
-- [ ] Integrate #63 when the new session delivers, then mesh-integration → 100%
-- [ ] Dispatch wave 5 (#83-#93) AFTER #63 lands (islands overlap: sync.svelte.ts)
-- [ ] Deploy gate (Cloudflare): 100% features + full e2e green → `npm run deploy` (wave 5.11 checklist)
+- [x] #63 mesh DELIVERED on re-dispatch (PR #94, merge 3b19ef8) — sync store mesh hook + sync-mesh tests; mesh-integration → 100%; issue closed. **WAVE 4 COMPLETE: 24/24 features at 100%, 13/13 issues closed.**
+- [x] Dispatch wave 5 (#83-#93) after #63 landed (islands clear) — automated integration via cron `nido-wave5-integration` (every 30m)
+- [ ] Wave 5 close → deploy gate (Cloudflare): 100% features + full e2e green → `npm run deploy` (wave 5.11 checklist)

@@ -65,6 +65,45 @@ export async function loadFromIndexedDB(): Promise<any> {
   }
 }
 
+export async function saveQueueToIndexedDB(queue: any[]): Promise<void> {
+  if (typeof indexedDB === 'undefined') {
+    mockStorage['offline_queue'] = JSON.parse(JSON.stringify(queue));
+    return;
+  }
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readwrite');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.put(queue, 'offline_queue');
+      request.onsuccess = () => resolve();
+      request.onerror = () => reject(request.error);
+    });
+  } catch (err) {
+    console.error('IndexedDB queue save failed, saving to memory:', err);
+    mockStorage['offline_queue'] = JSON.parse(JSON.stringify(queue));
+  }
+}
+
+export async function loadQueueFromIndexedDB(): Promise<any[]> {
+  if (typeof indexedDB === 'undefined') {
+    return mockStorage['offline_queue'] || [];
+  }
+  try {
+    const db = await openDB();
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction(STORE_NAME, 'readonly');
+      const store = transaction.objectStore(STORE_NAME);
+      const request = store.get('offline_queue');
+      request.onsuccess = () => resolve(request.result || []);
+      request.onerror = () => reject(request.error);
+    });
+  } catch (err) {
+    console.error('IndexedDB queue load failed, trying memory:', err);
+    return mockStorage['offline_queue'] || [];
+  }
+}
+
 export function clearMockStorage(): void {
   mockStorage = {};
 }

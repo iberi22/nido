@@ -1,5 +1,5 @@
 import { floorPlanStore } from './floorPlanStore.svelte';
-import { loadFromIndexedDB, saveToIndexedDB } from '../domain/db';
+import { loadFromIndexedDB, saveToIndexedDB, loadQueueFromIndexedDB, saveQueueToIndexedDB } from '../domain/db';
 import { publishPresence } from '../domain/mesh';
 
 export async function initDatabaseSync(options?: { meshClient?: any }) {
@@ -45,6 +45,16 @@ export async function initDatabaseSync(options?: { meshClient?: any }) {
     console.error('Failed to load state from IndexedDB:', err);
   }
 
+  // Load initial offline queue from IndexedDB
+  try {
+    const savedQueue = await loadQueueFromIndexedDB();
+    if (Array.isArray(savedQueue)) {
+      offlineQueue = savedQueue;
+    }
+  } catch (err) {
+    console.error('Failed to load offline queue from IndexedDB:', err);
+  }
+
   // Handle incoming mesh state updates
   if (meshClient && typeof meshClient.onStateUpdate === 'function') {
     meshClient.onStateUpdate((incomingState: any) => {
@@ -88,7 +98,7 @@ export async function initDatabaseSync(options?: { meshClient?: any }) {
     });
   }
 
-  // Helper to serialize and save current state
+  // Helper to serialize and save current state (Synchronous flow to guarantee deterministic Vitest timers)
   const triggerSave = () => {
     if (isSyncing) return;
     try {
@@ -115,8 +125,16 @@ export async function initDatabaseSync(options?: { meshClient?: any }) {
             meshClient.publishState(meshClient.namespace, stateToSave);
           }
         } else {
-          // Push latest state to queue (LWW logic: we only need to sync the latest state on reconnect)
-          offlineQueue.push(stateToSave);
+          // Construct and push latest state as a queue item (LWW: we deduplicate by entity+timestamp)
+          const queueItem = {
+            entity: 'state',
+            timestamp: currentTimestamp,
+            data: stateToSave
+          };
+          // Filter out existing 'state' entity to keep queue size compact
+          offlineQueue = offlineQueue.filter(item => item.entity !== 'state');
+          offlineQueue.push(queueItem);
+          saveQueueToIndexedDB(offlineQueue);
         }
       }
     } catch (e) {
@@ -146,16 +164,63 @@ export async function initDatabaseSync(options?: { meshClient?: any }) {
     }, 1000);
 
     // Connection status checking for offline -> reconnect flush
-    setInterval(() => {
+    setInterval(async () => {
+      if (!meshClient) return;
       const isClientConnected = typeof meshClient.isConnected === 'boolean' ? meshClient.isConnected : true;
       if (isClientConnected && !wasConnected) {
-        // Reconnected! Flush offline queue (send the last saved state)
-        if (offlineQueue.length > 0) {
-          const latestState = offlineQueue[offlineQueue.length - 1];
-          if (latestState && typeof meshClient.publishState === 'function') {
-            meshClient.publishState(meshClient.namespace, latestState);
+        // Reconnected! Load the latest queue from IndexedDB to ensure we flush absolute source of truth
+        try {
+          const savedQueue = await loadQueueFromIndexedDB();
+          if (Array.isArray(savedQueue)) {
+            offlineQueue = savedQueue;
           }
-          offlineQueue = [];
+        } catch (err) {
+          console.error('Failed to reload offline queue before flush:', err);
+        }
+
+        if (offlineQueue.length > 0) {
+          // Deduplicate: latest LWW wins per entity
+          const latestByEntity: Record<string, any> = {};
+          for (const item of offlineQueue) {
+            const key = item.entity;
+            if (!latestByEntity[key] || item.timestamp > latestByEntity[key].timestamp) {
+              latestByEntity[key] = item;
+            }
+          }
+
+          // Sort by timestamp explicitly before flush
+          const deduplicatedQueue = Object.values(latestByEntity).sort((a, b) => a.timestamp - b.timestamp);
+
+          const sentEntityMaxTimestamps: Record<string, number> = {};
+
+          for (const item of deduplicatedQueue) {
+            try {
+              if (typeof meshClient.publishState === 'function') {
+                const targetNs = item.entity === 'state' ? meshClient.namespace : item.entity;
+                await meshClient.publishState(targetNs, item.data);
+              }
+              // Record the maximum sent timestamp for this entity
+              sentEntityMaxTimestamps[item.entity] = Math.max(
+                sentEntityMaxTimestamps[item.entity] || 0,
+                item.timestamp
+              );
+            } catch (err) {
+              console.error('Failed to flush queue item:', err);
+              break; // Stop flushing to preserve order on failure
+            }
+          }
+
+          // Safe filtering: discard items for an entity that are <= the highest timestamp successfully published.
+          // This removes older/superseded historical revisions as well as the published items, while keeping
+          // unpublished items (from failures) and any concurrently added newer items.
+          offlineQueue = offlineQueue.filter(item => {
+            const maxSent = sentEntityMaxTimestamps[item.entity];
+            if (maxSent !== undefined && item.timestamp <= maxSent) {
+              return false;
+            }
+            return true;
+          });
+          await saveQueueToIndexedDB(offlineQueue);
         }
         wasConnected = true;
       } else if (!isClientConnected) {

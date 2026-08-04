@@ -25,6 +25,7 @@
     "@types/three": "^0.182.0",
     "jsdom": "29.1.1",
     "konva": "^10.2.0",
+    "sharp": "^0.35.3",
     "svelte": "^5.53.0",
     "svelte-check": "^4.3.4",
     "svelte-konva": "^1.0.1",
