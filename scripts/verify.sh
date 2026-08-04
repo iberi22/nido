@@ -3,10 +3,21 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-echo "==> NIDO verify"
-npm run test 2>/dev/null || echo "WARN: no unit tests configured yet (M0 adds Vitest)"
-npm run test:e2e 2>/dev/null || echo "WARN: no e2e tests configured yet (M0 adds Playwright)"
+echo "==> NIDO verify — Running Full CI Gate"
 
+echo "==> Step 1: Type Checking (npm run check)"
+npm run check
+
+echo "==> Step 2: Unit/Integration Tests (npx vitest run)"
+npx vitest run
+
+echo "==> Step 3: E2E Tests (npx playwright test)"
+npx playwright test
+
+echo "==> Step 4: Build Gate (npm run build)"
+npm run build
+
+echo "==> Step 5: Generating state-report.json"
 # Feature status snapshot
 python3 - <<'PY'
 import json, os, datetime
@@ -30,3 +41,5 @@ os.makedirs(".gitcore", exist_ok=True)
 json.dump(report, open(".gitcore/state-report.json", "w"), indent=2, ensure_ascii=False)
 print(f"state-report: {len(done)}/{len(feats)} passing")
 PY
+
+echo "==> All CI checks passed successfully!"
