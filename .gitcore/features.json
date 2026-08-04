@@ -69,7 +69,7 @@
           "req_id": "REQ-018"
         }
       ],
-      "implemented_in": "",
+      "implemented_in": "src/lib/domain/accounts.ts",
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
