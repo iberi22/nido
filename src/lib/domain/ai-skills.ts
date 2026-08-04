@@ -1,4 +1,7 @@
 import { floorPlanStore, type LayerType } from '../stores/floorPlanStore.svelte';
+import { isOverdue } from './maintenance';
+import { summarizeByMonth, summarizeByCategory } from './costs';
+import type { Item } from './property';
 
 export interface SkillParameter {
   type: string;
@@ -94,6 +97,33 @@ export const SKILLS: SkillDefinition[] = [
       properties: { json: { type: 'string', description: 'The JSON string of the design' } },
       required: ['json']
     }
+  },
+  {
+    name: 'skillMaintenanceAdvice',
+    description: 'Retrieves advice on maintenance tasks, overdue schedules, and work orders.',
+    parameters: { type: 'object', properties: {}, required: [] }
+  },
+  {
+    name: 'skillInventoryLookup',
+    description: 'Searches for items in the inventory by name or category.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search query for item name or category' }
+      },
+      required: []
+    }
+  },
+  {
+    name: 'skillCostSummary',
+    description: 'Provides a cost summary of expenses and income, optionally filtered by period (YYYY-MM).',
+    parameters: {
+      type: 'object',
+      properties: {
+        period: { type: 'string', description: 'The month to filter (YYYY-MM)' }
+      },
+      required: []
+    }
   }
 ];
 
@@ -134,12 +164,118 @@ function requireNumbers(
 }
 
 /**
+ * Executes a maintenance advice analysis based on the provided context.
+ */
+export function skillMaintenanceAdvice(context?: any): { ok: boolean; message: string } {
+  const ctx = context || {};
+  const schedules: any[] = ctx.schedules || [];
+  const property = ctx.property;
+  const workOrders = property?.workOrders || ctx.workOrders || [];
+
+  const overdueCount = schedules.filter((s: any) => {
+    if (!s || !s.nextDue) return false;
+    try {
+      const scheduleObj = {
+        ...s,
+        lastDone: s.lastDone instanceof Date ? s.lastDone : new Date(s.lastDone),
+        nextDue: s.nextDue instanceof Date ? s.nextDue : new Date(s.nextDue)
+      };
+      return isOverdue(scheduleObj);
+    } catch {
+      return false;
+    }
+  }).length;
+
+  const openWorkOrders = workOrders.filter((wo: any) => wo && (wo.status === 'open' || wo.status === 'in_progress'));
+
+  let msg = `Maintenance Advice:\n`;
+  msg += `- Overdue schedules: ${overdueCount}\n`;
+  msg += `- Open/In-Progress work orders: ${openWorkOrders.length}`;
+
+  if (openWorkOrders.length > 0) {
+    msg += `\nOpen orders:\n` + openWorkOrders.map((wo: any) => `* ${wo.notes} (assigned to ${wo.assignee})`).join('\n');
+  }
+
+  return { ok: true, message: msg };
+}
+
+/**
+ * Searches the property inventory for items matching the search query.
+ */
+export function skillInventoryLookup(query?: string, context?: any): { ok: boolean; message: string } {
+  const ctx = context || {};
+  const items: Item[] = ctx.items || ctx.property?.items || [];
+  if (items.length === 0) {
+    return { ok: true, message: 'Inventory is empty' };
+  }
+
+  const q = (query || '').toLowerCase().trim();
+  const matched = q
+    ? items.filter(item => {
+        const nameMatch = item.name ? item.name.toLowerCase().includes(q) : false;
+        const catMatch = item.category ? item.category.toLowerCase().includes(q) : false;
+        return nameMatch || catMatch;
+      })
+    : items;
+
+  if (matched.length === 0) {
+    return { ok: true, message: `No items found matching "${query}"` };
+  }
+
+  let msg = `Inventory Lookup (found ${matched.length} items):\n`;
+  msg += matched.map(item => `- ${item.name} [${item.category}]` + (item.value ? ` - Value: $${item.value}` : '')).join('\n');
+
+  return { ok: true, message: msg };
+}
+
+/**
+ * Summarizes transaction data based on the provided period and context.
+ */
+export function skillCostSummary(period?: string, context?: any): { ok: boolean; message: string } {
+  const ctx = context || {};
+  const transactions: any[] = ctx.transactions || [];
+  if (transactions.length === 0) {
+    return { ok: true, message: 'No transactions recorded' };
+  }
+
+  const p = (period || '').trim();
+
+  if (/^\d{4}-\d{2}$/.test(p)) {
+    const monthly = summarizeByMonth(transactions);
+    const data = monthly[p];
+    if (!data) {
+      return { ok: true, message: `No transaction data found for period "${p}"` };
+    }
+    return {
+      ok: true,
+      message: `Cost Summary for ${p}:\n- Expenses: $${data.expense.toFixed(2)}\n- Income: $${data.income.toFixed(2)}\n- Net: $${data.net.toFixed(2)}`
+    };
+  }
+
+  const monthly = summarizeByMonth(transactions);
+  const categories = summarizeByCategory(transactions);
+
+  let msg = `Overall Cost Summary:\n`;
+  msg += `By Month:\n`;
+  for (const [m, data] of Object.entries(monthly)) {
+    msg += `- ${m}: Expense: $${data.expense.toFixed(2)} | Income: $${data.income.toFixed(2)} | Net: $${data.net.toFixed(2)}\n`;
+  }
+  msg += `\nBy Category:\n`;
+  for (const [c, data] of Object.entries(categories)) {
+    msg += `- ${c}: Expense: $${data.expense.toFixed(2)} | Income: $${data.income.toFixed(2)}\n`;
+  }
+
+  return { ok: true, message: msg.trim() };
+}
+
+/**
  * Execute a named AI skill against floorPlanStore.
  * Returns ok/message for toast feedback.
  */
 export function executeSkill(
   name: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
+  context?: any
 ): { ok: boolean; message: string } {
   switch (name) {
     case 'addWall': {
@@ -194,6 +330,23 @@ export function executeSkill(
       }
       floor.components = [];
       return { ok: true, message: 'Floor cleared' };
+    }
+
+    case 'skillMaintenanceAdvice':
+    case 'maintenanceAdvice': {
+      return skillMaintenanceAdvice(context);
+    }
+
+    case 'skillInventoryLookup':
+    case 'inventoryLookup': {
+      const query = asString(params.query || params.q) || '';
+      return skillInventoryLookup(query, context);
+    }
+
+    case 'skillCostSummary':
+    case 'costSummary': {
+      const period = asString(params.period || params.month) || '';
+      return skillCostSummary(period, context);
     }
 
     case 'toggleLayer':
