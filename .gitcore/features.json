@@ -789,11 +789,11 @@
       "name": "Cross-app verified trust score",
       "sdlc_phase": "PENDING",
       "phase": 6,
-      "passes": false,
-      "status": "planned",
-      "progress_pct": 0,
-      "claimed_pct": 0,
-      "verified_pct": 0,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
       "req_ids": [
         "REQ-024"
       ],
@@ -818,8 +818,10 @@
           "req_id": "REQ-024"
         }
       ],
-      "implemented_in": [],
-      "last_updated": null,
+      "implemented_in": [
+        "src/lib/domain/trust.ts"
+      ],
+      "last_updated": "2026-08-03",
       "last_verified": "2026-08-03"
     },
     {
