@@ -278,7 +278,8 @@ export function isPlanAnchored(listing: Listing, property: any): boolean {
   if (!hasFloor && !hasRoom) return false;
 
   // 5. Geohash match (no spoofed/fake listings)
-  if (listing.geohash !== property.location?.geohash) return false;
+  if (!listing.geohash || !property.location?.geohash) return false;
+  if (listing.geohash !== property.location.geohash) return false;
 
   return true;
 }

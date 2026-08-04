@@ -114,6 +114,10 @@ export function addLink(
  * Verifies a link proof via real structural OAuth link-proof checks (links.verifyProof).
  */
 export function verifyLink(link: TrustLink): { valid: boolean; reason?: string } {
+  if (!link) {
+    return { valid: false, reason: 'Link is null or undefined' };
+  }
+
   if (isManualUpload(link.proof)) {
     return { valid: false, reason: 'Proof is a manual file/image upload' };
   }

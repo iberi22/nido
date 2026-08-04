@@ -13,6 +13,14 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
   });
 }
 
+import { listingsInRadius } from './lib/domain/discovery';
+import { computeTrustScore } from './lib/domain/trust';
+
+// Expose for testing/E2E verification inside the browser
+if (typeof window !== 'undefined') {
+  (window as any).nidoDiscovery = { listingsInRadius, computeTrustScore };
+}
+
 // Initialize the sync
 initDatabaseSync().then(() => {
   const app = mount(App, {
