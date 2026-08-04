@@ -145,7 +145,7 @@
             size="sm"
             onclick={copyInstanceId}
             disabled={!instanceId}
-            {...{ 'data-testid': 'copy-btn' }}
+            {...{ 'data-testid': 'copy-btn', 'aria-label': 'Copy Instance ID to clipboard' }}
           >
             {copied ? 'Copied!' : 'Copy'}
           </Button>
