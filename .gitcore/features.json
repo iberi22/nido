@@ -485,6 +485,38 @@
       "notes": ""
     },
     {
+      "id": "maloca",
+      "name": "SWAL backoffice integration (edge-hive account, tier, instance)",
+      "sdlc_phase": "PENDING",
+      "phase": 5,
+      "passes": true,
+      "status": "stable",
+      "progress_pct": 100,
+      "claimed_pct": 100,
+      "verified_pct": 100,
+      "req_ids": [
+        "REQ-018"
+      ],
+      "user_stories": [
+        "US-401"
+      ],
+      "tests": [
+        "test/unit/maloca-client.test.ts",
+        "test/integration/maloca-sync.test.ts"
+      ],
+      "evidence": [
+        {
+          "type": "test",
+          "path": "test/unit/maloca-client.test.ts"
+        }
+      ],
+      "implemented_in": "src/lib/maloca/client.ts,src/lib/maloca/tier.ts,src/lib/maloca/instance.ts,src/lib/AdminPanel.svelte",
+      "last_updated": null,
+      "last_verified": "2026-08-04",
+      "last_tested": "2026-08-04",
+      "notes": "PASS — edge-hive client injectable, tier Pro=node active, instance namespace (wave 5 #88/#89)"
+    },
+    {
       "id": "mesh-integration",
       "name": "edge-mesh rental network integration",
       "sdlc_phase": "PENDING",
