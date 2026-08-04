@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { floorPlanStore } from './stores/floorPlanStore.svelte';
+  import { buildExtrusion, parseColorToHexAndOpacity } from './three-extrusion';
 
   let container: HTMLDivElement;
   let canvas: HTMLCanvasElement;
@@ -16,29 +17,6 @@
   let controls: any;
   let animationId: number;
   let floorGroup: any;
-
-  // Robust RGBA or Hex color parser
-  function parseColor(colorStr: string): { color: number; opacity: number } {
-    if (!colorStr) return { color: 0x3b82f6, opacity: 1.0 };
-    colorStr = colorStr.trim();
-    if (colorStr.startsWith('rgba') || colorStr.startsWith('rgb')) {
-      const match = colorStr.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-      if (match) {
-        const r = parseInt(match[1]);
-        const g = parseInt(match[2]);
-        const b = parseInt(match[3]);
-        const a = match[4] ? parseFloat(match[4]) : 1.0;
-        const colorHex = (r << 16) + (g << 8) + b;
-        return { color: colorHex, opacity: a };
-      }
-    }
-    try {
-      const col = new THREE.Color(colorStr);
-      return { color: col.getHex(), opacity: 1.0 };
-    } catch {
-      return { color: 0x3b82f6, opacity: 1.0 };
-    }
-  }
 
   // Trigger rebuild when three is loaded, config changes, or floor switches/updates
   $effect(() => {
@@ -149,6 +127,54 @@
     scene.add(sun);
   }
 
+  function createTextSprite(text: string, colorStr: string) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Background tooltip style
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.roundRect ? ctx.roundRect(16, 16, canvas.width - 32, canvas.height - 32, 12) : ctx.rect(16, 16, canvas.width - 32, canvas.height - 32);
+      ctx.fill();
+
+      // Border outline matching the zone color
+      const parsedColor = parseColorToHexAndOpacity(colorStr);
+      const r = (parsedColor.color >> 16) & 255;
+      const g = (parsedColor.color >> 8) & 255;
+      const b = parsedColor.color & 255;
+      ctx.strokeStyle = `rgba(${r}, ${g}, ${b}, 0.8)`;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Text properties
+      ctx.fillStyle = '#f1f5f9';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const lines = text.split('\n');
+      if (lines.length > 1) {
+        ctx.font = 'bold 24px sans-serif';
+        ctx.fillText(lines[0], canvas.width / 2, canvas.height / 2 - 15);
+        ctx.font = '20px sans-serif';
+        ctx.fillStyle = `rgba(${r}, ${g}, ${b}, 0.95)`;
+        ctx.fillText(lines[1], canvas.width / 2, canvas.height / 2 + 18);
+      } else {
+        ctx.font = 'bold 26px sans-serif';
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+      }
+    }
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(material);
+    // Scale standard dimensions
+    sprite.scale.set(4, 1, 1);
+    return sprite;
+  }
+
   function rebuildScene() {
     if (!THREE || !scene) return;
 
@@ -156,12 +182,14 @@
     if (floorGroup) {
       scene.remove(floorGroup);
       floorGroup.traverse((child: any) => {
-        if (child instanceof THREE.Mesh) {
-          child.geometry.dispose();
-          if (Array.isArray(child.material)) {
-            child.material.forEach((m: any) => m.dispose());
-          } else {
-            child.material.dispose();
+        if (child instanceof THREE.Mesh || child instanceof THREE.Sprite) {
+          child.geometry?.dispose();
+          if (child.material) {
+            if (Array.isArray(child.material)) {
+              child.material.forEach((m: any) => m.dispose());
+            } else {
+              child.material.dispose();
+            }
           }
         }
       });
@@ -176,8 +204,7 @@
     const floorHeight = floor.height_m || 2.8;
     const plotWidth = floorPlanStore.config.plot.width;
     const plotHeight = floorPlanStore.config.plot.height;
-    const offsetX = -plotWidth / 2;
-    const offsetZ = -plotHeight / 2;
+    const wallThickness = floorPlanStore.config.wallThickness || 0.15;
 
     // Ground plane representing the lot size
     const groundGeom = new THREE.BoxGeometry(plotWidth, 0.1, plotHeight);
@@ -187,65 +214,69 @@
     groundMesh.receiveShadow = true;
     floorGroup.add(groundMesh);
 
-    // Build floor elements from store components
-    floor.components.forEach((comp) => {
-      const w = comp.width || 0;
-      const h = comp.height || 0;
+    // Call pure geometry builder to get all standard items
+    const extrudedItems = buildExtrusion(
+      floor.components,
+      floorHeight,
+      plotWidth,
+      plotHeight,
+      wallThickness
+    );
 
-      if (comp.type === 'zone') {
-        const { color, opacity } = parseColor(comp.properties.color);
-        const geom = new THREE.BoxGeometry(w, 0.05, h);
-        const mat = new THREE.MeshStandardMaterial({
+    extrudedItems.forEach((item) => {
+      const { width, height, depth } = item.dimensions;
+      const geom = new THREE.BoxGeometry(width, height, depth);
+
+      let mat;
+      if (item.type === 'zone') {
+        const { color, opacity } = parseColorToHexAndOpacity(item.color || '');
+        mat = new THREE.MeshStandardMaterial({
           color: color,
           transparent: opacity < 1.0,
           opacity: opacity,
           roughness: 0.8
         });
-        const mesh = new THREE.Mesh(geom, mat);
-        // Place slightly above the ground plane to avoid z-fighting
-        mesh.position.set(comp.x + w / 2 + offsetX, 0.025, comp.y + h / 2 + offsetZ);
-        mesh.receiveShadow = true;
-        floorGroup.add(mesh);
-      } else if (comp.type === 'wall') {
-        // Walls extruded by floor height_m
-        const geom = new THREE.BoxGeometry(w, floorHeight, h);
-        const mat = new THREE.MeshStandardMaterial({
+      } else if (item.type === 'wall') {
+        mat = new THREE.MeshStandardMaterial({
           color: 0xe2e8f0, // Clean light wall color
           roughness: 0.7
         });
-        const mesh = new THREE.Mesh(geom, mat);
-        mesh.position.set(comp.x + w / 2 + offsetX, floorHeight / 2, comp.y + h / 2 + offsetZ);
+      } else {
+        // door or object/furniture
+        const colorHex = parseColorToHexAndOpacity(item.color || '').color;
+        mat = new THREE.MeshStandardMaterial({
+          color: colorHex,
+          roughness: 0.5,
+          transparent: item.opacity !== undefined,
+          opacity: item.opacity ?? 1.0
+        });
+      }
+
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.position.set(item.position.x, item.position.y, item.position.z);
+      mesh.rotation.y = item.rotationY;
+
+      if (item.type === 'wall') {
         mesh.castShadow = true;
         mesh.receiveShadow = true;
-        floorGroup.add(mesh);
-      } else if (['door', 'sliding_door', 'garage_door', 'pedestrian_door'].includes(comp.type)) {
-        // Render doors/garage doors beautifully
-        const doorHeight = comp.type === 'garage_door' ? 2.4 : 2.0;
-        const geom = new THREE.BoxGeometry(w, doorHeight, h);
-        const mat = new THREE.MeshStandardMaterial({
-          color: comp.type === 'garage_door' ? 0x0ea5e9 : 0x78350f, // Blue for garage, wood brown for pedestrian
-          roughness: 0.8,
-          transparent: true,
-          opacity: 0.85
-        });
-        const mesh = new THREE.Mesh(geom, mat);
-        mesh.position.set(comp.x + w / 2 + offsetX, doorHeight / 2, comp.y + h / 2 + offsetZ);
-        mesh.castShadow = true;
-        floorGroup.add(mesh);
-      } else if (['car', 'motorcycle', 'furniture'].includes(comp.type)) {
-        // Render simple placeholder bounding volumes
-        const objHeight = comp.type === 'car' ? 1.4 : comp.type === 'motorcycle' ? 1.0 : 0.75;
-        const geom = new THREE.BoxGeometry(w, objHeight, h);
-        const color = comp.type === 'car' ? 0xe11d48 : comp.type === 'motorcycle' ? 0x2563eb : 0x059669;
-        const mat = new THREE.MeshStandardMaterial({
-          color: color,
-          roughness: 0.5
-        });
-        const mesh = new THREE.Mesh(geom, mat);
-        mesh.position.set(comp.x + w / 2 + offsetX, objHeight / 2, comp.y + h / 2 + offsetZ);
-        mesh.castShadow = true;
+      } else if (item.type === 'zone') {
         mesh.receiveShadow = true;
-        floorGroup.add(mesh);
+      } else {
+        mesh.castShadow = true;
+        if (item.type !== 'door') {
+          mesh.receiveShadow = true;
+        }
+      }
+
+      floorGroup.add(mesh);
+
+      // Create high-quality canvas-based text sprite for zones/rooms
+      if (item.type === 'zone' && item.label) {
+        const labelText = `${item.label}\n${(item.area_m2 || 0).toFixed(1)} m²`;
+        const textSprite = createTextSprite(labelText, item.color || '#ffffff');
+        // Position it slightly above the zone slab so it floats beautifully
+        textSprite.position.set(item.position.x, 0.25, item.position.z);
+        floorGroup.add(textSprite);
       }
     });
   }
@@ -264,12 +295,14 @@
     }
     if (scene) {
       scene.traverse((object: any) => {
-        if (object instanceof THREE.Mesh) {
-          object.geometry.dispose();
-          if (Array.isArray(object.material)) {
-            object.material.forEach((m: any) => m.dispose());
-          } else {
-            object.material.dispose();
+        if (object instanceof THREE.Mesh || object instanceof THREE.Sprite) {
+          object.geometry?.dispose();
+          if (object.material) {
+            if (Array.isArray(object.material)) {
+              object.material.forEach((m: any) => m.dispose());
+            } else {
+              object.material.dispose();
+            }
           }
         }
       });
