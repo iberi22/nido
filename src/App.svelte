@@ -8,7 +8,7 @@
   import MeshPanel from './lib/MeshPanel.svelte';
   import AdminPanel from './lib/AdminPanel.svelte';
   import Onboarding from './lib/Onboarding.svelte';
-  import { t, setLang, getLang } from './lib/i18n/index.svelte';
+  import { t, setLang, getLang, type SupportedLang } from './lib/i18n/index.svelte';
   import { createMeshClient, type MeshClient } from './lib/domain/mesh';
   import { EdgeHiveClient } from './lib/maloca/client';
   import { isPro } from './lib/maloca/tier';
@@ -129,7 +129,7 @@
       <div class="lang-selector-wrapper">
         <select
           value={getLang()}
-          onchange={(e) => setLang((e.target as HTMLSelectElement).value)}
+          onchange={(e) => setLang((e.target as HTMLSelectElement).value as SupportedLang)}
           data-testid="language-selector"
           class="swal-select"
         >

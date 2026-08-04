@@ -5,7 +5,7 @@ export const catalogs = { es, en } as const;
 export type SupportedLang = keyof typeof catalogs;
 
 // Module-level reactive state using Svelte 5 $state
-let _currentLang = $state<SupportedLang>('es');
+let _currentLang = $state<SupportedLang>('en');
 
 /**
  * Object holding a reactive getter for the current language.
