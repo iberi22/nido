@@ -176,7 +176,7 @@ export function buildPDF(
     if (!floor) return;
 
     // 1. Draw Blueprint Background (Dark navy)
-    doc.setFillColor(30, 58, 95); // dark blue
+    doc.setFillColor(30, 58, 95); // Dark blue
     doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
     // 2. Draw Plot & Floor Plan Elements
@@ -205,7 +205,7 @@ export function buildPDF(
     };
 
     // Draw Plot Boundary (dashed light cyan line)
-    doc.setDrawColor(135, 206, 235); // sky blue
+    doc.setDrawColor(135, 206, 235); // Sky blue
     doc.setLineWidth(0.4);
     // Draw boundary rect
     const [p1x, p1y] = toPageCoords(0, 0);

@@ -20,5 +20,16 @@ export default defineConfig({
     environmentOptions: {
       jsdom: { url: 'http://localhost/' },
     },
+    coverage: {
+      provider: 'v8',
+      include: ['src/lib/domain/**'],
+      reportsDirectory: 'test/coverage',
+      // Code coverage gate requirements
+      thresholds: {
+        lines: 70,
+        functions: 70,
+        branches: 60,
+      },
+    },
   },
 })

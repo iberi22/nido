@@ -67,7 +67,7 @@
   <div class="separator"></div>
 
   <h3 class="panel-title">📚 Library (Drag & Drop)</h3>
-  <div class="tool-grid" role="list" aria-label="Component library">
+  <div class="tool-grid" role="group" aria-label="Component library">
     {#each libraryItems as item}
       <Button
         variant="ghost"

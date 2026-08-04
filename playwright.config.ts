@@ -36,6 +36,10 @@ export default defineConfig({
       ...(fs.existsSync('/run/current-system/sw/bin/chromium')
         ? { executablePath: '/run/current-system/sw/bin/chromium' }
         : {}),
+      // Headless chromium mDNS host candidates (.local) never resolve — ICE
+      // fails silently. Disable IP obfuscation so WebRTC E2E (mesh-realtime)
+      // can connect over loopback in CI. (wave 6.03)
+      args: ['--disable-features=WebRtcHideLocalIpsWithMdns'],
       env,
     },
   },
