@@ -7,13 +7,31 @@ import { initDatabaseSync } from './lib/stores/sync.svelte';
 import { listingsInRadius } from './lib/domain/discovery';
 import { computeTrustScore } from './lib/domain/trust';
 
-// Register the PWA service worker (if supported)
-if ('serviceWorker' in navigator && import.meta.env.PROD) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('ServiceWorker registered successfully:', reg))
-      .catch(err => console.error('ServiceWorker registration failed:', err));
+// Register the PWA service worker via vite-plugin-pwa (autoUpdate)
+// Use variable indirection to prevent Vite static analysis in test env
+if (import.meta.env.PROD) {
+  const pwaModule = 'virtual:pwa-register';
+  const { registerSW } = await import(/* @vite-ignore */ pwaModule);
+  const updateSW = registerSW({
+    immediate: true,
+    onRegisteredSW(swUrl, registration) {
+      if (registration) {
+        // Check for updates periodically (every 60 minutes)
+        setInterval(() => {
+          registration.update();
+        }, 60 * 60 * 1000);
+        console.log('ServiceWorker registered:', swUrl);
+      }
+    },
+    onOfflineReady() {
+      console.log('PWA offline content ready');
+    },
   });
+
+  // Expose for testing/E2E — allows triggering update flow from outside
+  if (typeof window !== 'undefined') {
+    (window as any).__nidoUpdateSW = updateSW;
+  }
 }
 
 // Expose for testing/E2E verification inside the browser (wave 4 #64)
