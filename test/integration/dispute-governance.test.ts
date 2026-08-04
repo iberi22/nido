@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import {
   createEscrow,
   lockEscrow,
@@ -11,16 +11,31 @@ import {
   disputes,
   escrows
 } from "../../src/lib/domain/escrow";
+import type { PolygonClient } from "../../src/lib/domain/polygon-client";
+
+const MOCK_CONTRACT = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
+
+function createMockPolygonClient(): PolygonClient {
+  return {
+    createEscrowContract: vi.fn().mockResolvedValue(MOCK_CONTRACT),
+    lock: vi.fn().mockResolvedValue("0xlocktx"),
+    release: vi.fn().mockResolvedValue("0xreleasetx"),
+    getBalance: vi.fn().mockResolvedValue(0n)
+  };
+}
 
 describe("US-605: open a dispute that goes to governance", () => {
+  let mockClient: PolygonClient;
+
   beforeEach(() => {
     resetEscrowModule();
+    mockClient = createMockPolygonClient();
   });
 
-  it("acceptance 1: Dispute creation with evidence attachments", () => {
+  it("acceptance 1: Dispute creation with evidence attachments", async () => {
     const lease = { id: "lease-501", landlord: "LandlordAlpha", tenantName: "TenantBeta" };
-    const escrow = createEscrow(lease, 2000);
-    lockEscrow(escrow);
+    const escrow = await createEscrow(lease, 2000, mockClient);
+    await lockEscrow(escrow, mockClient);
 
     const status = openDispute(escrow, {
       claimant: "TenantBeta",
@@ -41,10 +56,10 @@ describe("US-605: open a dispute that goes to governance", () => {
     expect(dispute.status).toBe("opened");
   });
 
-  it("acceptance 2: edge-mesh governance voting round", () => {
+  it("acceptance 2: edge-mesh governance voting round", async () => {
     const lease = { id: "lease-502", landlord: "LandlordAlpha", tenantName: "TenantBeta" };
-    const escrow = createEscrow(lease, 2500);
-    lockEscrow(escrow);
+    const escrow = await createEscrow(lease, 2500, mockClient);
+    await lockEscrow(escrow, mockClient);
     openDispute(escrow, {
       claimant: "LandlordAlpha",
       reason: "Tenant damaged the wooden floor in living room",
@@ -58,10 +73,10 @@ describe("US-605: open a dispute that goes to governance", () => {
     expect(dispute.status).toBe("voting");
   });
 
-  it("acceptance 3: Outcome enforceable (escrow release/payout)", () => {
+  it("acceptance 3: Outcome enforceable (escrow release/payout)", async () => {
     const lease = { id: "lease-503", landlord: "LandlordAlpha", tenantName: "TenantBeta" };
-    const escrow = createEscrow(lease, 3000);
-    lockEscrow(escrow);
+    const escrow = await createEscrow(lease, 3000, mockClient);
+    await lockEscrow(escrow, mockClient);
     openDispute(escrow, {
       claimant: "TenantBeta",
       reason: "Unfair deduction attempt",
@@ -85,7 +100,8 @@ describe("US-605: open a dispute that goes to governance", () => {
     });
 
     // Enforce outcome
-    const enforceStatus = enforceOutcome(dispute, escrow);
+    const enforceStatus = await enforceOutcome(dispute, escrow, mockClient);
+    expect(mockClient.release).toHaveBeenCalledWith(escrow.id, 500);
     expect(enforceStatus).toBe("enforced");
     expect(dispute.status).toBe("enforced");
 
@@ -94,10 +110,10 @@ describe("US-605: open a dispute that goes to governance", () => {
     expect(escrow.releasedAmount).toBe(500);
   });
 
-  it("acceptance 4: Dispute history on both profiles", () => {
+  it("acceptance 4: Dispute history on both profiles", async () => {
     const lease = { id: "lease-504", landlord: "LandlordAlpha", tenantName: "TenantBeta" };
-    const escrow = createEscrow(lease, 1800);
-    lockEscrow(escrow);
+    const escrow = await createEscrow(lease, 1800, mockClient);
+    await lockEscrow(escrow, mockClient);
     openDispute(escrow, {
       claimant: "TenantBeta",
       reason: "Security deposit refund delay",
@@ -117,5 +133,8 @@ describe("US-605: open a dispute that goes to governance", () => {
     // History for some unrelated profile
     const strangerHistory = getDisputeHistory("UnrelatedGuy");
     expect(strangerHistory.length).toBe(0);
+
+    // silence unused (registry still populated)
+    expect(escrows.length).toBe(1);
   });
 });
