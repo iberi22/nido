@@ -7,31 +7,36 @@ import { initDatabaseSync } from './lib/stores/sync.svelte';
 import { listingsInRadius } from './lib/domain/discovery';
 import { computeTrustScore } from './lib/domain/trust';
 
-// Register the PWA service worker via vite-plugin-pwa (autoUpdate)
-// Use variable indirection to prevent Vite static analysis in test env
-if (import.meta.env.PROD) {
-  const pwaModule = 'virtual:pwa-register';
-  const { registerSW } = await import(/* @vite-ignore */ pwaModule);
-  const updateSW = registerSW({
-    immediate: true,
-    onRegisteredSW(swUrl, registration) {
-      if (registration) {
-        // Check for updates periodically (every 60 minutes)
-        setInterval(() => {
-          registration.update();
-        }, 60 * 60 * 1000);
-        console.log('ServiceWorker registered:', swUrl);
-      }
-    },
-    onOfflineReady() {
-      console.log('PWA offline content ready');
-    },
-  });
-
-  // Expose for testing/E2E — allows triggering update flow from outside
-  if (typeof window !== 'undefined') {
-    (window as any).__nidoUpdateSW = updateSW;
+// Wave 5 #84 — PWA update flow: vite-plugin-pwa registerSW (autoUpdate, config from #83).
+// The `virtual:pwa-register` module is injected at build/dev time only, so it is
+// imported lazily and guarded by import.meta.env.PROD (vitest never resolves it).
+async function registerPWA() {
+  try {
+    // @ts-ignore — virtual module injected by vite-plugin-pwa (typed via vite-env.d.ts)
+    const { registerSW } = await import('virtual:pwa-register');
+    registerSW({
+      immediate: true,
+      onNeedRefresh() {
+        // Surface the update banner in OfflineBanner.svelte
+        window.dispatchEvent(new CustomEvent('nido:sw-update'));
+      },
+      onOfflineReady() {
+        console.info('NIDO: app is ready to work offline.');
+      },
+    });
+  } catch (err) {
+    console.error('PWA registerSW failed:', err);
   }
+}
+
+// Register the PWA service worker (if supported)
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    registerPWA();
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('ServiceWorker registered successfully:', reg))
+      .catch(err => console.error('ServiceWorker registration failed:', err));
+  });
 }
 
 // Expose for testing/E2E verification inside the browser (wave 4 #64)
