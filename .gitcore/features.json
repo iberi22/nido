@@ -42,7 +42,7 @@
       "phase": 4,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -73,7 +73,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "ai-assistant",
@@ -82,7 +86,7 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -108,7 +112,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "analytics",
@@ -117,7 +125,7 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -143,7 +151,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "costs",
@@ -152,7 +164,7 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -178,7 +190,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "data-model",
@@ -187,7 +203,7 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -218,7 +234,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "escrow-disputes",
@@ -227,7 +247,7 @@
       "phase": 6,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -259,7 +279,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "export-cad",
@@ -268,7 +292,7 @@
       "phase": 4,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -299,7 +323,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "gitcore-compliance",
@@ -308,7 +336,7 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -362,7 +390,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "inventory",
@@ -371,7 +403,7 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -402,7 +434,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "leasing",
@@ -411,7 +447,7 @@
       "phase": 5,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -442,7 +478,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "maintenance",
@@ -451,7 +491,7 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -482,7 +522,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "maloca",
@@ -491,7 +535,7 @@
       "phase": 5,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -514,7 +558,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": "PASS \u2014 edge-hive client injectable, tier Pro=node active, instance namespace (wave 5 #88/#89)"
+      "notes": "PASS — edge-hive client injectable, tier Pro=node active, instance namespace (wave 5 #88/#89)",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "mesh-integration",
@@ -523,7 +571,7 @@
       "phase": 6,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -549,7 +597,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "norms-validation",
@@ -558,7 +610,7 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -584,7 +636,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "p2p-discovery",
@@ -593,7 +649,7 @@
       "phase": 6,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -625,7 +681,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "plans-2d",
@@ -634,7 +694,7 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -663,9 +723,13 @@
       ],
       "implemented_in": "src/lib/stores/floorPlanStore.svelte.ts,src/App.svelte",
       "last_updated": null,
-      "notes": "PASS \u2014 2D editor on @swal/ui + e2e 5/5 (wave 3)",
+      "notes": "PASS — 2D editor on @swal/ui + e2e 5/5 (wave 3)",
       "last_verified": "2026-08-04",
-      "last_tested": "2026-08-04"
+      "last_tested": "2026-08-04",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "plans-3d",
@@ -674,7 +738,7 @@
       "phase": 2,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -703,9 +767,13 @@
       ],
       "implemented_in": "src/lib/Scene3D.svelte",
       "last_updated": null,
-      "notes": "PASS \u2014 3D viewer lazy-loaded + e2e 4/4 (wave 3)",
+      "notes": "PASS — 3D viewer lazy-loaded + e2e 4/4 (wave 3)",
       "last_verified": "2026-08-04",
-      "last_tested": "2026-08-04"
+      "last_tested": "2026-08-04",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "pwa-offline",
@@ -714,7 +782,7 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -743,7 +811,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "taxes",
@@ -752,7 +824,7 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -778,7 +850,11 @@
       "last_updated": null,
       "notes": "implemented locally 2026-08-03 (was empty from PR #14); 5 tests passing",
       "last_verified": "2026-08-04",
-      "last_tested": "2026-08-04"
+      "last_tested": "2026-08-04",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "tenant-portal",
@@ -787,7 +863,7 @@
       "phase": 5,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -818,7 +894,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "toolchain-ci",
@@ -827,7 +907,7 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -850,8 +930,12 @@
       "implemented_in": "vitest.config.ts,playwright.config.ts,package.json,scripts/",
       "last_updated": null,
       "last_verified": "2026-08-04",
-      "notes": "PASS \u2014 175 unit/integration + 28 e2e (wave 3)",
-      "last_tested": "2026-08-04"
+      "notes": "PASS — 175 unit/integration + 28 e2e (wave 3)",
+      "last_tested": "2026-08-04",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "trust-score",
@@ -860,7 +944,7 @@
       "phase": 6,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -891,7 +975,11 @@
       "last_updated": "2026-08-03",
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "ui-swal",
@@ -900,7 +988,7 @@
       "phase": 1,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -929,9 +1017,13 @@
       ],
       "implemented_in": "src/App.svelte,src/lib/Toolbar.svelte,src/lib/FloorSelector.svelte,src/lib/vendor/swal-ui/",
       "last_updated": null,
-      "notes": "PASS \u2014 @swal/ui shell, data-testid hooks, a11y 0 warnings (wave 3)",
+      "notes": "PASS — @swal/ui shell, data-testid hooks, a11y 0 warnings (wave 3)",
       "last_verified": "2026-08-04",
-      "last_tested": "2026-08-04"
+      "last_tested": "2026-08-04",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "utilities",
@@ -940,7 +1032,7 @@
       "phase": 3,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -971,7 +1063,11 @@
       "last_updated": null,
       "notes": "implemented locally 2026-08-03 (was empty from PR #14); 10 tests passing",
       "last_verified": "2026-08-04",
-      "last_tested": "2026-08-04"
+      "last_tested": "2026-08-04",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     },
     {
       "id": "verified-invitations",
@@ -980,7 +1076,7 @@
       "phase": 4,
       "passes": true,
       "status": "stable",
-      "progress_pct": 100,
+      "progress_pct": 100.0,
       "claimed_pct": 100,
       "verified_pct": 100,
       "req_ids": [
@@ -1011,7 +1107,11 @@
       "last_updated": null,
       "last_verified": "2026-08-04",
       "last_tested": "2026-08-04",
-      "notes": ""
+      "notes": "",
+      "priority": "P2",
+      "category": "general",
+      "github_issue": null,
+      "verified_by": null
     }
   ],
   "agents": {
@@ -1027,5 +1127,16 @@
       "active": true,
       "default_strategy": "round-robin"
     }
+  },
+  "metadata": {
+    "project": "nido",
+    "version": "3.8.0",
+    "created": "2026-08-18",
+    "updated": "2026-08-18",
+    "total_features": 25,
+    "passing": 25,
+    "failing": 0,
+    "overall_progress_pct": 100.0,
+    "status": "completed"
   }
 }
