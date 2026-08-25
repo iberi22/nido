@@ -1,47 +1,111 @@
-# Svelte + TS + Vite
+# 🪺 NIDO — Intelligent Home Administration
 
-This template should help get you started developing with Svelte and TypeScript in Vite.
+> Plans, rules and measurements for any dwelling — plus a private, verified
+> peer-to-peer rental network.
 
-## Recommended IDE Setup
+**NIDO** is an intelligent home-administration platform (formerly
+`floor-plan-designer`). It turns any dwelling — house, apartment, bodega or
+construction project — into a living, governable digital model: draw the floor
+plan in 2D, explore it in 3D, keep every measurement and rule, and run the whole
+home from a single offline-first workspace.
 
-[VS Code](https://code.visualstudio.com/) + [Svelte](https://marketplace.visualstudio.com/items?itemName=svelte.svelte-vscode).
+Beyond a single home, NIDO grows into a **private GPS-proximity rental
+network**: a P2P marketplace with cross-app **verified accounts** (trust score,
+WebAuthn, identity anchoring) designed to be **anti-scam** by default.
 
-## Need an official Svelte framework?
+## ✨ Core capabilities
 
-Check out [SvelteKit](https://github.com/sveltejs/kit#readme), which is also powered by Vite. Deploy anywhere with its serverless-first approach and adapt to various platforms, with out of the box support for TypeScript, SCSS, and Less, and easily-added support for mdsvex, GraphQL, PostCSS, Tailwind CSS, and more.
+### Dwellings & plans
+- **2D floor-plan editor** (Konva) and **3D viewer** (Three.js)
+- Canonical property **data model** + building **norms validation**
+- **Architect export**: DXF / PDF / ZIP
 
-## Technical considerations
+### Home administration
+- **Property tax (predial)** tracking
+- **Leasing**: contracts & payments, tenant portal
+- **Parts & furniture inventory**
+- **Costs & income** tracking + home **analytics & notifications**
+- **Preventive maintenance** planning
+- **Public utilities** administration
+- **AI home assistant** over the property model
 
-**Why use this over SvelteKit?**
+### P2P rental network (M5)
+- **GPS-proximity discovery** of nearby listings
+- **Cross-app verified accounts** with **trust score** (T1–T4: gov-ID+selfie →
+  linked sessions → on-network history → Polygon deposit/collateral)
+- **Verified 1-time invitations**, escrow & **dispute governance**
+- Post-quantum **ML-DSA-65** lease signing via **edge-mesh**
 
-- It brings its own routing solution which might not be preferable for some users.
-- It is first and foremost a framework that just happens to use Vite under the hood, not a Vite app.
+## 🧱 Stack
 
-This template contains as little as possible to get started with Vite + TypeScript + Svelte, while taking into account the developer experience with regards to HMR and intellisense. It demonstrates capabilities on par with the other `create-vite` templates and is a good starting point for beginners dipping their toes into a Vite + Svelte project.
+| Layer | Technology |
+|-------|-----------|
+| UI | **Svelte 5** (runes) + **Astro** islands |
+| Design system | **`@swal/ui`** (edge-hive theme — SWAL lab reference UI) |
+| Plans | **Konva** 2D · **Three.js** 3D |
+| P2P | **edge-mesh** (Yjs CRDT, ML-DSA-65 identity) |
+| Memory | **Xavier** (HTTP `:8006` / MCP) |
+| Backend | **edge-hive** (SurrealDB, WASM edge functions) |
+| Offline | **IndexedDB** local-first · **PWA** |
+| Payments | Stripe (M4) → Polygon/`$SWAL` escrow (M5) |
 
-Should you later need the extended capabilities and extensibility provided by SvelteKit, the template has been structured similarly to SvelteKit so that it is easy to migrate.
+## 🚀 Quickstart
 
-**Why `global.d.ts` instead of `compilerOptions.types` inside `jsconfig.json` or `tsconfig.json`?**
+```bash
+# 1. Install dependencies
+pnpm install
 
-Setting `compilerOptions.types` shuts out all other types not explicitly listed in the configuration. Using triple-slash references keeps the default TypeScript setting of accepting type information from the entire workspace, while also adding `svelte` and `vite/client` type information.
+# 2. Start the dev server
+pnpm dev
 
-**Why include `.vscode/extensions.json`?**
-
-Other templates indirectly recommend extensions via the README, but this file allows VS Code to prompt the user to install the recommended extension upon opening the project.
-
-**Why enable `allowJs` in the TS template?**
-
-While `allowJs: false` would indeed prevent the use of `.js` files in the project, it does not prevent the use of JavaScript syntax in `.svelte` files. In addition, it would force `checkJs: false`, bringing the worst of both worlds: not being able to guarantee the entire codebase is TypeScript, and also having worse typechecking for the existing JavaScript. In addition, there are valid use cases in which a mixed codebase may be relevant.
-
-**Why is HMR not preserving my local component state?**
-
-HMR state preservation comes with a number of gotchas! It has been disabled by default in both `svelte-hmr` and `@sveltejs/vite-plugin-svelte` due to its often surprising behavior. You can read the details [here](https://github.com/rixo/svelte-hmr#svelte-hmr).
-
-If you have state that's important to retain within a component, consider creating an external store which would not be replaced by HMR.
-
-```ts
-// store.ts
-// An extremely simple external store
-import { writable } from 'svelte/store'
-export default writable(0)
+# 3. Type-check + unit & integration tests
+pnpm check
+pnpm test
 ```
+
+### Useful scripts
+
+| Command | Purpose |
+|---------|---------|
+| `pnpm dev` | Vite dev server |
+| `pnpm build` | Production build |
+| `pnpm preview` | Preview the production build |
+| `pnpm check` | `svelte-check` + `tsc` type checking |
+| `pnpm test` | Run unit + integration tests |
+| `pnpm test:e2e` | Playwright end-to-end tests |
+| `pnpm test:coverage` | Coverage report |
+| `pnpm security` | Security verification (`gitleaks` etc.) |
+| `pnpm deploy` | Deploy to Cloudflare (Wrangler) |
+
+## 📋 Roadmap & feature tracking
+
+The source of truth for features, user stories and tests lives in
+**[`.gitcore/features.json`](.gitcore/features.json)** (GitCore 3.8.0 protocol).
+
+Roadmap phases: **M0** Foundation → **M1** Data model & plans → **M2** Home
+administration → **M3** Export & accounts → **M4** Leasing → **M5** P2P
+network. See also `docs/SRS/` for formal requirements and
+`.gitcore/ARCHITECTURE.md` for the architecture.
+
+## 🏗️ Project structure
+
+```
+src/lib/
+  domain/     # domain services (plans, inventory, costs, taxes, leasing, …)
+  vendor/     # vendored @swal/ui + edge-mesh
+test/
+  unit/       # unit tests
+  integration/# integration tests
+  e2e/        # Playwright e2e
+```
+
+## 🔒 Security & governance
+
+- Post-quantum key signing (**ML-DSA-65**) via edge-mesh
+- Geolocation only with explicit user consent (data minimization)
+- Escrow on Polygon; disputes via edge-mesh governance
+- Secrets in `.env` (gitignored); `.env.example` carries no real values
+
+## 📄 License
+
+Private — part of the SWAL ecosystem (`@iberi22`).
