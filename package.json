@@ -29,7 +29,7 @@
     "axe-core": "^4.12.1",
     "jsdom": "30.0.1",
     "konva": "^10.2.0",
-    "sharp": "^0.35.3",
+    "sharp": "^0.35.4",
     "svelte": "^5.53.0",
     "svelte-check": "^4.3.4",
     "svelte-konva": "^1.0.1",
