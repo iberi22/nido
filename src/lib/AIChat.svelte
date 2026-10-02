@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Input, Button } from '@swal/ui';
-  import { toast } from './vendor/swal-ui/lib/toast.svelte.js';
+  import { toast } from '@swal/ui/toast';
   import { executeSkill, parseSkillCommand } from './domain/ai-skills';
   import { sceneCommands } from './commands/sceneCommands.svelte';
   import { rulesEsProposer } from './commands/rules-es';
