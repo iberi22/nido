@@ -12,7 +12,7 @@
 - **Backoffice:** `maloca/apps/swal-backoffice`
 - **Protocol:** GitCore 3.8.0 · feature-verify / implementation-score under `.gitcore/scripts/`
 
-**Protocol:** GitCore 3.8.0 (SWAL private era)
+**Protocol:** GitCore 3.8.0 (SWAL era)
 **Updated:** 2026-08-03
 
 ## READ ORDER (mandatory)
@@ -37,8 +37,8 @@ administration: taxes (predial), leasing, parts inventory, costs, maintenance
 planning, public utilities. Later: private GPS-proximity rental network with
 cross-app verified accounts (anti-scam).
 
-- **Origin repo:** `iberi22/floor-plan-designer` (PRIVATE) — rename target `iberi22/nido`
-- **Stack:** Svelte 5 (runes) + Astro · `@swal/ui` (design system, edge-hive theme)
+- **Repo:** `iberi22/nido` (**PUBLIC** on GitHub; formerly `floor-plan-designer`)
+- **Stack:** Svelte 5 (runes) + Vite SPA/PWA · `@swal/ui` core (design system, Bone theme, AppShell)
   · Konva 2D · Three.js 3D · edge-mesh (P2P) · Xavier (memory) · edge-hive (backend)
 - **UI rule:** **edge-hive-admin is the reference UI of the SWAL lab** (React 19 +
   Tailwind + Tauri, 26 pages, "Hive Dark" theme — designed first for edge-hive).
@@ -48,7 +48,7 @@ cross-app verified accounts (anti-scam).
 
 ## SWAL rules
 
-- Repos **private** by default
+- Repos private by default — **exception: NIDO is PUBLIC** (no secrets, no client data in the repo)
 - GitHub Actions **disabled** (`.github/workflows.disabled`)
 - Pro features = **SWAL node active** — **no Stripe**
 - Multi-instance data **decoupled** by default: `instance_id` per workspace

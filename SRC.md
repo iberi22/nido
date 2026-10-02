@@ -14,10 +14,10 @@ network with cross-app verified accounts.
 | Field | Value |
 |-------|--------|
 | Path | `$SWAL_ROOT/nido` (workspace-relative; never a personal absolute path) |
-| GitHub | `iberi22/floor-plan-designer` (PRIVATE, rename target: `iberi22/nido`) |
-| Stack | Svelte 5 (runes) + Vite + TypeScript · Konva 2D · Three.js 3D · `@swal/ui` |
+| GitHub | `iberi22/nido` (PUBLIC; formerly `floor-plan-designer`) |
+| Stack | Svelte 5 (runes) + Vite + TypeScript · Konva 2D · Three.js 3D · `@swal/ui` (core, `github:iberi22/swal-ui` pinned by commit) |
 | Protocol | GitCore 3.9.0 |
-| Visibility | **PUBLIC en GitHub (verificado 2026-09-16)** — contradice el default SWAL; decidir si pasa a privado |
+| Visibility | **PUBLIC** (GitHub, verificado 2026-09-16; decisión del owner: se mantiene público, sin secretos en el repo) |
 | Pro model | SWAL node active (not Stripe) |
 | Product plan | monorepo `docs/SWAL/NIDO_PLAN.md` |
 

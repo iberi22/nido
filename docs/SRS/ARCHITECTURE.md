@@ -7,7 +7,7 @@
 
 | Component | Technology | REQ-IDs | Source |
 |-----------|-----------|---------|--------|
-| App shell | Svelte 5 (runes) + Astro, PWA | REQ-025, REQ-027, REQ-028 | `src/App.svelte` |
+| App shell | Svelte 5 (runes) + Vite, PWA | REQ-025, REQ-027, REQ-028 | `src/App.svelte` |
 | **UI reference** | **`edge-hive-admin`** (React 19 + Tailwind + Tauri, 26 pages) | REQ-027 | `edge-hive/edge-hive-admin/` — lab reference UI, replicated in every SWAL project |
 | UI kit | `@swal/ui` (15 components, edge-hive) — **Svelte 5 port of edge-hive-admin** | REQ-027 | `@swal/ui` package; port gaps: `DeployNodeModal`, `MetricsChart` → port INTO @swal/ui when needed |
 | 2D canvas | Konva + svelte-konva | REQ-009 | `src/lib/CanvasStage.svelte` |
@@ -23,7 +23,7 @@
 | Export | dxf-writer, jspdf, html2canvas | REQ-017 | — |
 | Auth/roles | localAuth + seed + WebAuthn | REQ-018 | shelf patterns |
 | Invitations | 1-time token API | REQ-019 | mimatera pattern |
-| Leasing | domain + Stripe → Polygon | REQ-020, REQ-021 | hosteler-ia patterns |
+| Leasing | domain + Polygon/$SWAL escrow | REQ-020, REQ-021 | hosteler-ia patterns |
 | Mesh | edge-mesh (Yjs, WebRTC, ML-DSA-65) | REQ-022 | `edge-mesh` core |
 | Discovery | geohash + presence | REQ-023 | edge-mesh |
 | Trust | T1–T4 verifier | REQ-024 | in-house OAuth link proofs |
@@ -40,7 +40,7 @@
                             │
                      [Xavier :8006] (semantic memory)
                      [edge-hive node] (SurrealDB sync, WASM edge fns)
-                     [Stripe / Polygon] (payments, escrow)
+                     [Polygon] (escrow)
 ```
 
 ## Deployment

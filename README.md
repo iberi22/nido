@@ -40,14 +40,14 @@ WebAuthn, identity anchoring) designed to be **anti-scam** by default.
 
 | Layer | Technology |
 |-------|-----------|
-| UI | **Svelte 5** (runes) + **Astro** islands |
+| UI | **Svelte 5** (runes) + Vite SPA/PWA · `@swal/ui` core (Bone theme) |
 | Design system | **`@swal/ui`** (edge-hive theme — SWAL lab reference UI) |
 | Plans | **Konva** 2D · **Three.js** 3D |
 | P2P | **edge-mesh** (Yjs CRDT, ML-DSA-65 identity) |
 | Memory | **Xavier** (HTTP `:8006` / MCP) |
 | Backend | **edge-hive** (SurrealDB, WASM edge functions) |
 | Offline | **IndexedDB** local-first · **PWA** |
-| Payments | Stripe (M4) → Polygon/`$SWAL` escrow (M5) |
+| Payments | Polygon/`$SWAL` escrow (M5) — no Stripe as a product path |
 
 ## 🚀 Quickstart
 
@@ -108,4 +108,4 @@ test/
 
 ## 📄 License
 
-Private — part of the SWAL ecosystem (`@iberi22`).
+Public repository (`github.com/iberi22/nido`) — part of the SWAL ecosystem (`@iberi22`).

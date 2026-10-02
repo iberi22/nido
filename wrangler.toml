@@ -2,5 +2,5 @@ name = "nido"
 compatibility_date = "2026-08-03"
 pages_build_output_dir = "dist"
 
-[build]
-command = "npm run build"
+# Cloudflare Pages ESTATICO (plan gratuito): sin KV, sin D1, sin Functions, sin cron.
+# Despliegue: `pnpm build` y `wrangler pages deploy dist --project-name nido` (scripts/deploy-cloudflare.sh).
