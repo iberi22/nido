@@ -2,6 +2,8 @@
   import { onMount } from 'svelte';
   import Konva from 'konva';
   import { floorPlanStore, type Component, type LayerType } from './stores/floorPlanStore.svelte';
+  import { sceneCommands } from './commands/sceneCommands.svelte';
+  import { mToMm } from './commands/units';
 
   let container: HTMLDivElement;
   let stage: Konva.Stage;
@@ -134,7 +136,8 @@
         if (e.target !== stage && e.target.name() !== 'background') {
           const id = e.target.id() || e.target.getParent()?.id();
           if (id) {
-            floorPlanStore.deleteComponent(id);
+            // through the command layer so it is undoable
+            if (!sceneCommands.execute({ op: 'deleteObject', id }).ok) floorPlanStore.deleteComponent(id);
             floorPlanStore.setTool('select');
             draw();
           }
@@ -199,21 +202,17 @@
       if (dist > 0.05) {
         const id = crypto.randomUUID();
         if (tool === 'wall') {
-          floorPlanStore.addComponent({
+          // through the command layer (integer mm) so it is undoable
+          const res = sceneCommands.execute({
+            op: 'addWall',
             id,
-            type: 'wall',
-            x: Math.min(x1, x2),
-            y: Math.min(y1, y2),
-            width: Math.abs(x2 - x1) || config.wallThickness,
-            height: Math.abs(y2 - y1) || config.wallThickness,
-            layer: 'structure',
-            properties: {
-              x1, y1, x2, y2,
-              thickness: config.wallThickness,
-              note: 'User Wall'
-            }
+            x1: mToMm(x1),
+            y1: mToMm(y1),
+            x2: mToMm(x2),
+            y2: mToMm(y2),
+            thickness: mToMm(config.wallThickness)
           });
-          floorPlanStore.selectComponent(id);
+          if (res.ok) floorPlanStore.selectComponent(id);
         } else if (tool === 'zone') {
           floorPlanStore.addComponent({
             id,
@@ -273,7 +272,16 @@
         // Calculate new position in meters
         const newX = (e.target.x() - PLOT.x) / SCALE;
         const newY = (e.target.y() - PLOT.y) / SCALE;
-        floorPlanStore.updateComponent(id, { x: newX, y: newY });
+        const comp = floorPlanStore.currentFloor.components.find(c => c.id === id)!;
+        const dx = mToMm(newX) - mToMm(comp.x);
+        const dy = mToMm(newY) - mToMm(comp.y);
+        if (dx !== 0 || dy !== 0) {
+          const res = sceneCommands.execute({ op: 'moveObject', id, dx, dy });
+          if (!res.ok) {
+            // rejected (e.g. locked / opening): fall back to the plain update so 2D drag keeps working
+            floorPlanStore.updateComponent(id, { x: newX, y: newY });
+          }
+        }
       }
     });
 
