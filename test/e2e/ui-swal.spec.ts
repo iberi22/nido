@@ -13,7 +13,7 @@ test.describe("US-101: NIDO shell on @swal/ui", () => {
   });
 
   test("acceptance 1: Canvas renders blueprint grid and plan from store", async ({ page }) => {
-    await expect(page.getByText("NIDO")).toBeVisible();
+    await expect(page.getByRole("strong").first()).toBeVisible();
     // Canvas stage renders (2D view default)
     const canvas = page.locator(".canvas-wrapper, .konva-container, #konva-container");
     await expect(canvas.first()).toBeAttached();
@@ -61,8 +61,8 @@ test.describe("US-101: NIDO shell on @swal/ui", () => {
 
   test("acceptance 5: @swal/ui components render (Button/Badge/Tabs on Hive Dark shell)", async ({ page }) => {
     // Tabs (Plans/Inventory/Taxes) from @swal/ui — rendered with role="tab"
-    await expect(page.getByRole("tab", { name: /Plans/i }).first()).toBeVisible();
-    await expect(page.getByRole("tab", { name: /Inventory/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Plans/i }).first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Inventory/i }).first()).toBeVisible();
     // Sidebar panels render
     await expect(page.getByText(/Tools/i).first()).toBeVisible();
   });

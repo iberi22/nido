@@ -116,7 +116,7 @@ describe("NIDO Domain Flows & User Stories Coverage Suite", () => {
 
   it("US-301: Inventory management per room and warranty check", async ({ page }) => {
     // 1. Verify we can switch to the Inventory tab
-    const inventoryTab = page.locator('[data-testid="tab-inventory"]');
+    const inventoryTab = page.getByRole("link", { name: /inventory/i }).first();
     await expect(inventoryTab).toBeVisible();
     await inventoryTab.click();
 
@@ -147,7 +147,7 @@ describe("NIDO Domain Flows & User Stories Coverage Suite", () => {
 
   it("US-302..305: Financials, taxes, and maintenance verification", async ({ page }) => {
     // 1. Go to Taxes Tab
-    const taxesTab = page.locator('[data-testid="tab-taxes"]');
+    const taxesTab = page.getByRole("link", { name: /taxes/i }).first();
     await expect(taxesTab).toBeVisible();
     await taxesTab.click();
 
