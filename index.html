@@ -4,7 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#faf9f5" />
     <title>NIDO</title>
+    <!-- Tema Bone (core @swal/ui): light/dark/system sin destello. Generado con themeModeScript({ light: 'light', dark: 'dark', defaultMode: 'system' }). -->
+    <script>
+      (function(){var C={"light":"light","dark":"dark","def":"system","key":"swal:theme-mode","color":{"light":"#faf9f5","dark":"#0e1116"}};var m=window.matchMedia?window.matchMedia('(prefers-color-scheme: dark)'):null;
+      function read(){try{var v=localStorage.getItem(C.key);if(v==='light'||v==='dark'||v==='system')return v}catch(e){}return C.def}
+      function resolve(x){return x==='system'?(m&&m.matches?'dark':'light'):x}
+      function apply(x){var r=resolve(x),h=document.documentElement;h.setAttribute('data-theme',C[r]);h.setAttribute('data-theme-mode',x);h.style.colorScheme=r;
+      var t=document.querySelector('meta[name="theme-color"]');if(t)t.setAttribute('content',C.color[r]);return r}
+      function emit(x,r){document.dispatchEvent(new CustomEvent('swal:themechange',{detail:{mode:x,resolved:r}}))}
+      apply(read());
+      if(!window.swalTheme){window.swalTheme={get:read,resolved:function(){return resolve(read())},set:function(x){if(x!=='light'&&x!=='dark'&&x!=='system')return;try{localStorage.setItem(C.key,x)}catch(e){}emit(x,apply(x))}};
+      if(m&&m.addEventListener)m.addEventListener('change',function(){if(read()==='system')emit('system',apply('system'))})}
+      document.documentElement.classList.add('js');})();
+    </script>
   </head>
   <body>
     <div id="app"></div>

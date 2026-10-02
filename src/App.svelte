@@ -14,8 +14,8 @@
   import { isPro } from './lib/maloca/tier';
   import { generateInstanceId } from './lib/maloca/instance';
   import { floorPlanStore } from './lib/stores/floorPlanStore.svelte';
-  import { Button, Card, Badge, StatusBadge, Tabs, Toaster } from '@swal/ui';
-  import { toast } from './lib/vendor/swal-ui/lib/toast.svelte.js';
+  import { AppShell, Icon, ThemeModeSwitch, Button, Card, Badge, StatusBadge, Toaster } from '@swal/ui';
+  import { toast } from '@swal/ui/toast';
 
   let currentView = $state<'2d' | '3d'>('2d');
   let activeTab = $state('plan');
@@ -67,12 +67,14 @@
     };
   });
 
+  // Core shell nav: hash hrefs (no router); activeTab drives currentPath.
   const tabs = $derived([
-    { id: 'plan', label: t('global.plans') },
-    { id: 'inventory', label: t('global.inventory') },
-    { id: 'taxes', label: t('global.taxes') },
-    { id: 'maintenance', label: t('global.maintenance') }
+    { id: 'plan', href: '#/plan', icon: 'home', label: t('global.plans') },
+    { id: 'inventory', href: '#/inventory', icon: 'package', label: t('global.inventory') },
+    { id: 'taxes', href: '#/taxes', icon: 'receipt', label: t('global.taxes') },
+    { id: 'maintenance', href: '#/maintenance', icon: 'sliders', label: t('global.maintenance') }
   ]);
+  let menuOpen = $state(false);
 
   function handleExport() {
     try {
@@ -93,100 +95,93 @@
   }
 </script>
 
-<main class="nido-shell">
+<div class="nido-root">
   <OfflineBanner />
 
-  <header class="nido-topbar">
-    <div class="topbar-left">
-      <span class="logo-mark" aria-hidden="true">🏠</span>
-      <div class="brand">
-        <h1 class="brand-title">{t('app.title')}</h1>
+  <AppShell
+    items={tabs}
+    currentPath={`#/${activeTab}`}
+    bind:menuOpen
+    menuLabel={t('app.title')}
+    data-testid="app-shell"
+  >
+    {#snippet brand()}
+      <Icon name="home" size={20} />
+      <span class="brand">
+        <strong class="brand-title">{t('app.title')}</strong>
         <span class="brand-sub">{t('app.subtitle')}</span>
-      </div>
+      </span>
+    {/snippet}
+
+    {#snippet navFooter()}
       <Badge variant="info">{t('app.badge')}</Badge>
       <StatusBadge status="healthy">{t('app.local')}</StatusBadge>
-    </div>
+    {/snippet}
 
-    <div class="topbar-center">
-      <Tabs bind:value={activeTab}>
-        {#each tabs as tab}
-          <button
-            class="swal-tab"
-            class:active={activeTab === tab.id}
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            aria-label={tab.label}
-            data-testid={`tab-${tab.id}`}
-            onclick={() => (activeTab = tab.id)}
+    {#snippet topbar()}
+      <div class="topbar-right" role="group" aria-label="View mode">
+        <ThemeModeSwitch />
+        <div class="lang-selector-wrapper">
+          <select
+            value={getLang()}
+            onchange={(e) => setLang((e.target as HTMLSelectElement).value as SupportedLang)}
+            data-testid="language-selector"
+            class="swal-select"
           >
-            {tab.label}
-          </button>
-        {/each}
-      </Tabs>
-    </div>
+            <option value="en">{t('lang.en')}</option>
+            <option value="es">{t('lang.es')}</option>
+          </select>
+        </div>
 
-    <div class="topbar-right" role="group" aria-label="View mode">
-      <div class="lang-selector-wrapper">
-        <select
-          value={getLang()}
-          onchange={(e) => setLang((e.target as HTMLSelectElement).value as SupportedLang)}
-          data-testid="language-selector"
-          class="swal-select"
+        <Button
+          variant={currentView === '2d' ? 'primary' : 'ghost'}
+          size="sm"
+          onclick={() => (currentView = '2d')}
+          {...{
+            'aria-pressed': currentView === '2d',
+            'aria-label': '2D plan view',
+            'data-testid': 'view-2d'
+          }}
         >
-          <option value="en">{t('lang.en')}</option>
-          <option value="es">{t('lang.es')}</option>
-        </select>
+          {t('view.2d')}
+        </Button>
+        <Button
+          variant={currentView === '3d' ? 'primary' : 'ghost'}
+          size="sm"
+          onclick={() => (currentView = '3d')}
+          {...{
+            'aria-pressed': currentView === '3d',
+            'aria-label': '3D view',
+            'data-testid': 'view-3d'
+          }}
+        >
+          {t('view.3d')}
+        </Button>
+        <Button
+          variant="primary"
+          size="sm"
+          onclick={handleExport}
+          {...{
+            'aria-label': 'Export property JSON',
+            'data-testid': 'export-json'
+          }}
+        >
+          {t('btn.export')}
+        </Button>
+        <Button
+          variant={showAIChat ? 'primary' : 'ghost'}
+          size="sm"
+          onclick={() => (showAIChat = !showAIChat)}
+          {...{
+            'aria-label': 'Toggle AI Chat panel',
+            'aria-pressed': showAIChat,
+            'data-testid': 'toggle-ai-chat'
+          }}
+        >
+          {t('btn.aiChat')}
+        </Button>
       </div>
-
-      <Button
-        variant={currentView === '2d' ? 'primary' : 'ghost'}
-        size="sm"
-        onclick={() => (currentView = '2d')}
-        {...{
-          'aria-pressed': currentView === '2d',
-          'aria-label': '2D plan view',
-          'data-testid': 'view-2d'
-        }}
-      >
-        {t('view.2d')}
-      </Button>
-      <Button
-        variant={currentView === '3d' ? 'primary' : 'ghost'}
-        size="sm"
-        onclick={() => (currentView = '3d')}
-        {...{
-          'aria-pressed': currentView === '3d',
-          'aria-label': '3D view',
-          'data-testid': 'view-3d'
-        }}
-      >
-        {t('view.3d')}
-      </Button>
-      <Button
-        variant="primary"
-        size="sm"
-        onclick={handleExport}
-        {...{
-          'aria-label': 'Export property JSON',
-          'data-testid': 'export-json'
-        }}
-      >
-        {t('btn.export')}
-      </Button>
-      <Button
-        variant={showAIChat ? 'primary' : 'ghost'}
-        size="sm"
-        onclick={() => (showAIChat = !showAIChat)}
-        {...{
-          'aria-label': 'Toggle AI Chat panel',
-          'aria-pressed': showAIChat,
-          'data-testid': 'toggle-ai-chat'
-        }}
-      >
-        {t('btn.aiChat')}
-      </Button>
-    </div>
-  </header>
+    {/snippet}
 
   {#if showOnboarding}
     <Onboarding ondismiss={() => (showOnboarding = false)} />
@@ -252,51 +247,21 @@
     {/if}
   </div>
 
+  </AppShell>
+
   <Toaster />
-</main>
+</div>
 
 <style>
-  :global(body) {
-    margin: 0;
-    background: var(--swal-bg, #020617);
-    color: var(--swal-text, #f1f5f9);
-    font-family: var(--swal-font, Inter, sans-serif);
-  }
-  .nido-shell {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    background: var(--swal-bg, #020617);
-    color: var(--swal-text, #f1f5f9);
-  }
-  .nido-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 16px;
-    background: var(--swal-elevated, #0f172a);
-    border-bottom: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));
-  }
-  .topbar-left { display: flex; align-items: center; gap: 10px; }
-  .logo-mark { font-size: 22px; }
-  .brand-title { margin: 0; font-size: 16px; font-weight: 600; }
-  /* Secondary on elevated: use text token for AA contrast on small type */
-  .brand-sub { font-size: 11px; color: var(--swal-text, #f1f5f9); opacity: 0.85; }
-  .topbar-center { display: flex; gap: 4px; }
-  .swal-tab {
-    background: transparent; border: none; color: var(--swal-text, #f1f5f9); opacity: 0.75;
-    padding: 6px 12px; cursor: pointer; border-radius: 6px; font-size: 13px;
-  }
-  .swal-tab.active, .swal-tab:hover {
-    color: var(--swal-accent, #06b6d4); opacity: 1;
-    background: var(--swal-accent-muted, rgba(6, 182, 212, 0.15));
-  }
-  .topbar-right { display: flex; gap: 6px; align-items: center; }
+  .nido-root { min-height: 100dvh; }
+  .brand { display: flex; flex-direction: column; min-width: 0; }
+  .brand-title { font-size: 16px; font-weight: 600; }
+  .brand-sub { font-size: 11px; color: var(--swal-text); opacity: 0.85; }
+  .topbar-right { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
   .swal-select {
-    background: var(--swal-surface, #0f172a);
-    border: 1px solid var(--swal-border, rgba(255, 255, 255, 0.12));
-    color: var(--swal-text, #f1f5f9);
+    background: var(--swal-surface);
+    border: 1px solid var(--swal-border);
+    color: var(--swal-text);
     border-radius: 6px;
     padding: 6px 12px;
     font-size: 13px;
@@ -304,35 +269,33 @@
     outline: none;
     transition: border-color 0.2s ease;
   }
-  .swal-select:hover {
-    border-color: var(--swal-accent, #06b6d4);
-  }
-  .nido-content { display: flex; flex: 1; min-height: 0; }
+  .swal-select:hover { border-color: var(--swal-accent); }
+  .nido-content { display: flex; height: calc(100dvh - 8rem); min-height: 480px; }
   .nido-sidebar {
     width: 280px; padding: 12px; display: flex; flex-direction: column; gap: 12px;
-    background: var(--swal-elevated, #0f172a); border-right: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));
+    background: var(--swal-elevated); border-right: 1px solid var(--swal-border);
     overflow-y: auto;
   }
-  .panel-title { margin: 0 0 8px; font-size: 13px; color: var(--swal-text, #f1f5f9); opacity: 0.85; }
+  .panel-title { margin: 0 0 8px; font-size: 13px; color: var(--swal-text); opacity: 0.85; }
   .param-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 8px; }
-  .param-group label { font-size: 12px; color: var(--swal-text, #f1f5f9); opacity: 0.85; }
+  .param-group label { font-size: 12px; color: var(--swal-text); opacity: 0.85; }
   .param-group input {
-    background: var(--swal-surface, rgba(15, 23, 42, 0.8)); border: 1px solid var(--swal-border, rgba(255, 255, 255, 0.12));
-    color: var(--swal-text, #f1f5f9); border-radius: 6px; padding: 6px 8px; font-size: 13px;
+    background: var(--swal-surface); border: 1px solid var(--swal-border);
+    color: var(--swal-text); border-radius: 6px; padding: 6px 8px; font-size: 13px;
   }
-  .nido-main { flex: 1; min-width: 0; background: var(--swal-void, #000000); position: relative; }
-  .view-error {
-    color: var(--swal-danger, #ef4444);
-    padding: 20px;
-  }
+  .nido-main { flex: 1; min-width: 0; background: var(--swal-void); position: relative; }
+  .view-error { color: var(--swal-danger, #ef4444); padding: 20px; }
   .nido-sidebar-right {
     width: 280px; padding: 12px; display: flex; flex-direction: column; gap: 12px;
-    background: var(--swal-elevated, #0f172a); border-left: 1px solid var(--swal-border, rgba(255, 255, 255, 0.08));
+    background: var(--swal-elevated); border-left: 1px solid var(--swal-border);
     overflow-y: auto;
   }
-  .ai-panel { color: var(--swal-text, #f1f5f9); }
-  .ai-panel summary {
-    cursor: pointer; margin-bottom: 8px; list-style: none;
-  }
+  .ai-panel { color: var(--swal-text); }
+  .ai-panel summary { cursor: pointer; margin-bottom: 8px; list-style: none; }
   .ai-panel summary::-webkit-details-marker { display: none; }
+  @media (max-width: 900px) {
+    .nido-content { flex-direction: column; height: auto; }
+    .nido-sidebar, .nido-sidebar-right { width: auto; border: none; }
+    .nido-main { min-height: 60vh; }
+  }
 </style>

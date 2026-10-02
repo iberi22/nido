@@ -117,7 +117,7 @@ describe('Wave 6.08 Shell: Language Selector and Onboarding Tour', () => {
     expect(getLang()).toEqual('es');
 
     // Verify that some header/tab labels reactively switched to Spanish
-    const plansTab = getByTestId('tab-plan');
+    const plansTab = (getByTestId('app-shell').querySelector('a[href="#/plan"]') as HTMLElement);
     expect(plansTab.textContent?.trim()).toEqual('Planos');
 
     // Switch back to English
