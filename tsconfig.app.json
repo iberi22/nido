@@ -10,12 +10,8 @@
     "allowJs": true,
     "checkJs": true,
     "moduleDetection": "force",
-    "paths": {
-      "@swal/ui": ["./src/lib/vendor/swal-ui/index.d.ts"],
-      "@swal/ui/*": ["./src/lib/vendor/swal-ui/*"]
-    },
     "skipLibCheck": true
   },
   "include": ["src/**/*.ts", "src/**/*.js", "src/**/*.svelte"],
-  "exclude": ["src/lib/vendor", "src/lib/vendor/swal-ui/lib/toast.svelte.js"]
+  "exclude": ["src/lib/vendor"]
 }

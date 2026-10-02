@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Card, Badge, Button, StatusBadge } from '@swal/ui';
-  import { toast } from './vendor/swal-ui/lib/toast.svelte.js';
+  import { toast } from '@swal/ui/toast';
 
   // Props using Svelte 5 runes (DI style)
   let { client } = $props<{

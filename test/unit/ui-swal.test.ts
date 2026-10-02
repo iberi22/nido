@@ -10,11 +10,11 @@ import { floorPlanStore } from "../../src/lib/stores/floorPlanStore.svelte";
 vi.mock("konva", () => ({ default: {} }));
 
 describe("US-101: UI shell on @swal/ui (edge-hive theme)", () => {
-  it("acceptance 1: @swal/ui is a vendored dependency (no shadcn/Tailwind in src)", () => {
+  it("acceptance 1: @swal/ui is the pinned core dependency (no shadcn/Tailwind in src)", () => {
     const fs = require("fs");
     const pkg = JSON.parse(fs.readFileSync("package.json", "utf8"));
     expect(Object.keys(pkg.dependencies)).toContain("@swal/ui");
-    expect(pkg.dependencies["@swal/ui"]).toMatch(/vendor/);
+    expect(pkg.dependencies["@swal/ui"]).toMatch(/^github:iberi22\/swal-ui#[0-9a-f]{7,40}$/);
 
     const walk = (dir: string): string[] => {
       const out: string[] = [];
@@ -33,8 +33,8 @@ describe("US-101: UI shell on @swal/ui (edge-hive theme)", () => {
     }
   });
 
-  it("acceptance 2: vendored @swal/ui exports core components", async () => {
-    const mod = await import("../../src/lib/vendor/swal-ui/components/index.js");
+  it("acceptance 2: @swal/ui (core) exports core components", async () => {
+    const mod = await import("@swal/ui");
     expect(mod.Button).toBeTruthy();
     expect(mod.Card).toBeTruthy();
     expect(mod.Badge).toBeTruthy();

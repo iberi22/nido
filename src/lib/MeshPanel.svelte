@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button, Input, Card, Badge } from '@swal/ui';
-  import { toast } from './vendor/swal-ui/lib/toast.svelte.js';
+  import { toast } from '@swal/ui/toast';
   import type { MeshClient, MeshPeer, MeshMessage } from './domain/mesh';
 
   // 1. Props using Svelte 5 runes

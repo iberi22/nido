@@ -27,10 +27,10 @@ describe("toolchain-ci", () => {
     expect(pkg.devDependencies["@playwright/test"]).toBeTruthy();
   });
 
-  it("@swal/ui is a vendored dependency (unified-core rule)", () => {
+  it("@swal/ui is the canonical core pinned by commit (unified-core rule)", () => {
     const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
-    expect(pkg.dependencies["@swal/ui"]).toMatch(/vendor/);
-    expect(existsSync(join(ROOT, "src/lib/vendor/swal-ui/components/index.js"))).toBe(true);
+    expect(pkg.dependencies["@swal/ui"]).toMatch(/^github:iberi22\/swal-ui#[0-9a-f]{7,40}$/);
+    expect(existsSync(join(ROOT, "node_modules/@swal/ui/src/components/index.js"))).toBe(true);
   });
 
   it("no shadcn/Tailwind UI layer in src (UI reference rule)", () => {
