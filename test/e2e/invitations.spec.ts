@@ -48,7 +48,7 @@ describe("Verified Invitations E2E Shell Flow", () => {
     await page.waitForTimeout(500);
 
     // Verify tabs are visible
-    const planTab = page.getByRole("tab", { name: /Plans/i }).first();
+    const planTab = page.getByRole("link", { name: /Plans/i }).first();
     await expect(planTab).toBeVisible();
 
     expect(errors.length).toBe(0);

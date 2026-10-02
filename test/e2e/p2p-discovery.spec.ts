@@ -29,7 +29,7 @@ test.describe("US-601: publish a listing anchored to my floor plan", () => {
 
   test("acceptance 4: Listing only visible to authorized network radius", async ({ page }) => {
     // Ensure shell layout container is rendered (auto-wait for Svelte mount)
-    const shell = page.locator(".nido-shell");
+    const shell = page.getByTestId("app-shell");
     await expect(shell).toBeVisible();
   });
 });
@@ -65,7 +65,7 @@ test.describe("US-602: discover listings near me by GPS", () => {
 
   test("acceptance 3: Sort by distance and trust score", async ({ page }) => {
     // Assert the tabs are rendered properly (auto-wait for mount)
-    await expect(page.locator(".swal-tab").first()).toBeVisible();
+    await expect(page.getByRole("link", { name: /Plans/i }).first()).toBeVisible();
   });
 
   test("acceptance 4: Anonymous browsing until interest confirmed", async ({ page }) => {
