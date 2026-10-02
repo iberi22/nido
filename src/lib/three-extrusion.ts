@@ -145,6 +145,27 @@ export function buildExtrusion(
         color: color,
         opacity: 0.85
       });
+    } else if (comp.type === 'window') {
+      const winHeight = (comp.properties?.heightMm ?? 1100) / 1000;
+      const sill = (comp.properties?.sillMm ?? 900) / 1000;
+
+      items.push({
+        id: comp.id,
+        type: 'window',
+        position: {
+          x: comp.x + w / 2 + offsetX,
+          y: sill + winHeight / 2,
+          z: comp.y + h / 2 + offsetZ
+        },
+        dimensions: {
+          width: w,
+          height: winHeight,
+          depth: (h || wallThickness) + 0.02
+        },
+        rotationY: (comp.rotation || 0) * (Math.PI / 180),
+        color: '#7dd3fc',
+        opacity: 0.55
+      });
     } else if (['car', 'motorcycle', 'furniture'].includes(comp.type)) {
       const objHeight = comp.type === 'car' ? 1.4 : comp.type === 'motorcycle' ? 1.0 : 0.75;
       const color = comp.type === 'car' ? '#e11d48' : comp.type === 'motorcycle' ? '#2563eb' : '#059669';

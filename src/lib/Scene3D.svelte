@@ -2,6 +2,10 @@
   import { onMount, onDestroy } from 'svelte';
   import { floorPlanStore } from './stores/floorPlanStore.svelte';
   import { buildExtrusion, parseColorToHexAndOpacity } from './three-extrusion';
+  import { sceneCommands } from './commands/sceneCommands.svelte';
+  import { componentOriginMm, isOpening, isWall } from './commands/apply';
+  import { wallDimensionLines } from './commands/measure';
+  import { snapMoveDelta } from './commands/units';
 
   let container: HTMLDivElement;
   let canvas: HTMLCanvasElement;
@@ -18,6 +22,20 @@
   let animationId: number;
   let floorGroup: any;
 
+  // 3D measurements (toggleable) + drag state
+  let showDims = $state(true);
+  let raycaster: any;
+  let dragPlane: any;
+  let drag: null | {
+    targetId: string;
+    meshes: Array<{ mesh: any; start: { x: number; y: number; z: number } }>;
+    startPoint: { x: number; z: number };
+    originMm: { x: number; y: number };
+    wall: boolean;
+    delta: { dx: number; dy: number };
+    pointerId: number;
+  } = null;
+
   // Trigger rebuild when three is loaded, config changes, or floor switches/updates
   $effect(() => {
     // Establish dependencies
@@ -25,6 +43,8 @@
     const _floor = floorPlanStore.currentFloor;
     const _comps = floorPlanStore.currentFloor?.components;
     const _config = floorPlanStore.config;
+    const _dims = showDims;
+    const _sel = floorPlanStore.selectedComponentId;
 
     if (THREE && scene) {
       rebuildScene();
@@ -100,6 +120,16 @@
 
     // Lights
     setupLighting();
+
+    // Pointer picking / drag on the floor plane
+    raycaster = new THREE.Raycaster();
+    dragPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const el = renderer.domElement as HTMLCanvasElement;
+    // capture phase: runs before OrbitControls so it can be disabled for the drag
+    el.addEventListener('pointerdown', onPointerDown, true);
+    el.addEventListener('pointermove', onPointerMove);
+    el.addEventListener('pointerup', onPointerUp);
+    el.addEventListener('pointercancel', onPointerCancel);
 
     // Rebuild Scene content
     rebuildScene();
@@ -182,7 +212,7 @@
     if (floorGroup) {
       scene.remove(floorGroup);
       floorGroup.traverse((child: any) => {
-        if (child instanceof THREE.Mesh || child instanceof THREE.Sprite) {
+        if (child instanceof THREE.Mesh || child instanceof THREE.Sprite || child instanceof THREE.Line) {
           child.geometry?.dispose();
           if (child.material) {
             if (Array.isArray(child.material)) {
@@ -253,6 +283,13 @@
       }
 
       const mesh = new THREE.Mesh(geom, mat);
+      const src = floor.components.find((c) => c.id === item.id);
+      mesh.userData.cid = item.id;
+      mesh.userData.groupId = src && isOpening(src) ? src.properties.wallId : item.id;
+      if (item.id === floorPlanStore.selectedComponentId && item.type !== 'zone') {
+        mat.emissive = new THREE.Color(0xf59e0b);
+        mat.emissiveIntensity = 0.45;
+      }
       mesh.position.set(item.position.x, item.position.y, item.position.z);
       mesh.rotation.y = item.rotationY;
 
@@ -279,6 +316,138 @@
         floorGroup.add(textSprite);
       }
     });
+
+    // Wall dimension lines + labels (length in m, 2 decimals)
+    if (showDims) {
+      const lineMat = new THREE.LineBasicMaterial({ color: 0xfbbf24, depthTest: false });
+      const y = floorHeight + 0.2;
+      for (const d of wallDimensionLines(floor.components, floorPlanStore.config.plot)) {
+        const geo = new THREE.BufferGeometry().setFromPoints([
+          new THREE.Vector3(d.a.x, y, d.a.z),
+          new THREE.Vector3(d.b.x, y, d.b.z)
+        ]);
+        const line = new THREE.Line(geo, lineMat);
+        line.renderOrder = 9;
+        floorGroup.add(line);
+        const label = createDimLabel(d.label);
+        label.position.set(d.mid.x, y + 0.2, d.mid.z);
+        floorGroup.add(label);
+      }
+    }
+  }
+
+  // ---- picking + drag (plane-drag with grid snap; commits ONE undoable command on release) ----
+
+  function setRay(e: PointerEvent) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const ndc = new THREE.Vector2(
+      ((e.clientX - rect.left) / rect.width) * 2 - 1,
+      -((e.clientY - rect.top) / rect.height) * 2 + 1
+    );
+    raycaster.setFromCamera(ndc, camera);
+  }
+
+  function planePoint(e: PointerEvent): { x: number; z: number } | null {
+    setRay(e);
+    const hit = new THREE.Vector3();
+    return raycaster.ray.intersectPlane(dragPlane, hit) ? { x: hit.x, z: hit.z } : null;
+  }
+
+  function onPointerDown(e: PointerEvent) {
+    if (!floorGroup || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    setRay(e);
+    const pickables = floorGroup.children.filter((m: any) => m.userData?.cid);
+    const hit = raycaster.intersectObjects(pickables, false)[0];
+    const cid: string | undefined = hit?.object.userData.cid;
+    if (!cid) return;
+
+    // doors/windows are dragged through their wall
+    const comps = floorPlanStore.currentFloor?.components ?? [];
+    let comp = comps.find((c) => c.id === cid);
+    if (!comp) return;
+    if (isOpening(comp)) comp = comps.find((c) => c.id === comp!.properties.wallId) ?? comp;
+    if (comp.type === 'zone' || comp.type === 'room') return; // zones: let OrbitControls orbit
+    floorPlanStore.selectComponent(comp.id);
+    if (comp.locked || isOpening(comp)) return;
+
+    const start = planePoint(e);
+    if (!start) return;
+    const meshes = floorGroup.children
+      .filter((m: any) => m.userData?.groupId === comp!.id)
+      .map((mesh: any) => ({ mesh, start: mesh.position.clone() }));
+    drag = {
+      targetId: comp.id,
+      meshes,
+      startPoint: start,
+      originMm: componentOriginMm(comp),
+      wall: isWall(comp),
+      delta: { dx: 0, dy: 0 },
+      pointerId: e.pointerId
+    };
+    if (controls) controls.enabled = false;
+    (e.target as HTMLElement).setPointerCapture?.(e.pointerId);
+  }
+
+  function onPointerMove(e: PointerEvent) {
+    if (!drag || e.pointerId !== drag.pointerId) return;
+    const p = planePoint(e);
+    if (!p) return;
+    drag.delta = snapMoveDelta(
+      drag.originMm,
+      { x: Math.round((p.x - drag.startPoint.x) * 1000), y: Math.round((p.z - drag.startPoint.z) * 1000) }
+    );
+    for (const m of drag.meshes) {
+      m.mesh.position.set(m.start.x + drag.delta.dx / 1000, m.start.y, m.start.z + drag.delta.dy / 1000);
+    }
+  }
+
+  function endDrag(commit: boolean) {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    if (controls) controls.enabled = true;
+    if (commit && (d.delta.dx !== 0 || d.delta.dy !== 0)) {
+      const r = sceneCommands.execute({
+        op: d.wall ? 'moveWall' : 'moveObject',
+        id: d.targetId,
+        dx: d.delta.dx,
+        dy: d.delta.dy
+      });
+      if (r.ok) return; // store change triggers rebuildScene()
+      console.warn('3D move rejected:', r.error);
+    }
+    rebuildScene(); // snap meshes back
+  }
+
+  function onPointerUp(e: PointerEvent) {
+    if (drag && e.pointerId === drag.pointerId) endDrag(true);
+  }
+
+  function onPointerCancel(e: PointerEvent) {
+    if (drag && e.pointerId === drag.pointerId) endDrag(false);
+  }
+
+  function createDimLabel(text: string) {
+    const c = document.createElement('canvas');
+    c.width = 256;
+    c.height = 64;
+    const ctx = c.getContext('2d');
+    if (ctx) {
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillRect(0, 0, 256, 64);
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(2, 2, 252, 60);
+      ctx.fillStyle = '#fde68a';
+      ctx.font = 'bold 34px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, 128, 34);
+    }
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
+    sprite.scale.set(1.6, 0.4, 1);
+    sprite.renderOrder = 10;
+    return sprite;
   }
 
   function animate() {
@@ -291,6 +460,11 @@
 
   function cleanupThree() {
     if (renderer) {
+      const el = renderer.domElement as HTMLCanvasElement;
+      el.removeEventListener('pointerdown', onPointerDown, true);
+      el.removeEventListener('pointermove', onPointerMove);
+      el.removeEventListener('pointerup', onPointerUp);
+      el.removeEventListener('pointercancel', onPointerCancel);
       renderer.dispose();
     }
     if (scene) {
@@ -319,6 +493,16 @@
       <p>🖱️ Left Click + Drag: Rotate</p>
       <p>🖱️ Right Click + Drag: Pan</p>
       <p>🖱️ Scroll: Zoom</p>
+      <p>👆 Drag a wall/object: move (50 mm snap)</p>
+      <button
+        type="button"
+        class="dims-toggle"
+        data-testid="toggle-3d-dims"
+        aria-pressed={showDims}
+        onclick={() => (showDims = !showDims)}
+      >
+        {showDims ? 'Hide' : 'Show'} measurements
+      </button>
       <div class="active-info">
         Floor: <strong>{floorPlanStore.currentFloor?.name || ''}</strong> ({floorPlanStore.currentFloor?.height_m || 2.8}m)
       </div>
@@ -364,6 +548,19 @@
     font-size: 11px;
     color: var(--swal-text, #f1f5f9);
     opacity: 0.85;
+  }
+
+  .dims-toggle {
+    pointer-events: auto;
+    margin-top: 6px;
+    padding: 6px 10px;
+    min-height: 32px;
+    font-size: 11px;
+    color: var(--swal-text, #f1f5f9);
+    background: var(--swal-surface-hover, #1e293b);
+    border: 1px solid var(--swal-border, rgba(255, 255, 255, 0.2));
+    border-radius: 6px;
+    cursor: pointer;
   }
 
   .active-info {

@@ -90,6 +90,7 @@ nido/
 | 3D viewer | `src/lib/Scene3D.svelte` | Three.js visualization |
 | State | `src/lib/stores/floorPlanStore.svelte.ts` | Reactive plan state (runes) |
 | Data model | `src/lib/data/house-data.json` | Sample property (NSR-10/POT norms) |
+| Scene commands | `src/lib/commands/` | zod command schema (mm), pure `applyCommand` + inverse, undo/redo history, Spanish rule `CommandProposer`, 3D dimension plan |
 
 ## 4. Build / run / test
 
