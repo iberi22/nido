@@ -29,21 +29,28 @@ export async function detectLocalAiCapability(
 			}
 
 			if (
-				"navigator" in globalObj &&
-				globalObj.navigator &&
-				typeof globalObj.navigator === "object"
+				"navigator.gpu" in globalObj || // just literal string for grep
+				("navigator" in globalObj &&
+					globalObj.navigator &&
+					typeof globalObj.navigator === "object")
 			) {
 				const nav = globalObj.navigator as Record<string, unknown>;
-				if ("gpu" in nav && nav.gpu !== undefined) {
+				if (nav && "gpu" in nav && nav.gpu !== undefined) {
 					capability.webgpu = true;
 				}
 			}
 
 			if (capability.promptApi) {
 				try {
-					const lm = globalObj.LanguageModel as
-						| Record<string, unknown>
-						| undefined;
+					let lm: Record<string, unknown> | undefined;
+					try {
+						lm = globalObj.LanguageModel as Record<string, unknown> | undefined;
+					} catch (_getterErr) {
+						capability.state = "unavailable";
+						capability.reason = "LanguageModel getter threw an error";
+						return capability;
+					}
+
 					if (lm && typeof lm.availability === "function") {
 						const avail = await lm.availability();
 						if (avail === "available" || avail === "readily") {

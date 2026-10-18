@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
 	detectLocalAiCapability,
 	localAiSummary,
@@ -14,10 +14,34 @@ describe("local-ai detection", () => {
 		expect(result.reason).toBe("No local AI APIs detected");
 	});
 
+	it("(1.b) LanguageModel: undefined -> unavailable with reason (not present)", async () => {
+		const scope = { LanguageModel: undefined };
+		const result = await detectLocalAiCapability(scope);
+		expect(result.promptApi).toBe(false);
+		expect(result.state).toBe("unavailable");
+	});
+
+	it("(1.c) LanguageModel hostile getter -> unavailable", async () => {
+		const scope = {};
+		Object.defineProperty(scope, "LanguageModel", {
+			get() {
+				throw new Error("Hostile getter");
+			},
+		});
+		const result = await detectLocalAiCapability(scope);
+		expect(result.promptApi).toBe(false);
+		expect(result.state).toBe("unavailable");
+		expect(result.reason).toBe(
+			"Feature detection encountered an unexpected error",
+		);
+	});
+
 	it('(2) LanguageModel with availability returning "available" -> available', async () => {
+		const create = vi.fn();
 		const scope = {
 			LanguageModel: {
 				availability: async () => "available",
+				create,
 			},
 		};
 		const result = await detectLocalAiCapability(scope);
@@ -25,12 +49,28 @@ describe("local-ai detection", () => {
 		expect(result.webgpu).toBe(false);
 		expect(result.state).toBe("available");
 		expect(result.reason).toBe("Prompt API is ready");
+		expect(create).not.toHaveBeenCalled();
+	});
+
+	it('(2.b) LanguageModel with availability returning "readily" -> available', async () => {
+		const create = vi.fn();
+		const scope = {
+			LanguageModel: {
+				availability: async () => "readily",
+				create,
+			},
+		};
+		const result = await detectLocalAiCapability(scope);
+		expect(result.state).toBe("available");
+		expect(create).not.toHaveBeenCalled();
 	});
 
 	it('(3) LanguageModel with availability returning "downloadable" -> downloadable', async () => {
+		const create = vi.fn();
 		const scope = {
 			LanguageModel: {
 				availability: async () => "downloadable",
+				create,
 			},
 		};
 		const result = await detectLocalAiCapability(scope);
@@ -38,11 +78,52 @@ describe("local-ai detection", () => {
 		expect(result.webgpu).toBe(false);
 		expect(result.state).toBe("downloadable");
 		expect(result.reason).toBe("Prompt API model needs download");
+		expect(create).not.toHaveBeenCalled();
+	});
+
+	it('(3.b) LanguageModel with availability returning "downloading" -> downloadable', async () => {
+		const create = vi.fn();
+		const scope = {
+			LanguageModel: {
+				availability: async () => "downloading",
+				create,
+			},
+		};
+		const result = await detectLocalAiCapability(scope);
+		expect(result.state).toBe("downloadable");
+		expect(create).not.toHaveBeenCalled();
+	});
+
+	it('(3.c) LanguageModel with availability returning "after-download" -> downloadable', async () => {
+		const create = vi.fn();
+		const scope = {
+			LanguageModel: {
+				availability: async () => "after-download",
+				create,
+			},
+		};
+		const result = await detectLocalAiCapability(scope);
+		expect(result.state).toBe("downloadable");
+		expect(create).not.toHaveBeenCalled();
+	});
+
+	it('(3.d) LanguageModel with availability returning "unavailable" -> unavailable', async () => {
+		const create = vi.fn();
+		const scope = {
+			LanguageModel: {
+				availability: async () => "unavailable",
+				create,
+			},
+		};
+		const result = await detectLocalAiCapability(scope);
+		expect(result.state).toBe("unavailable");
+		expect(create).not.toHaveBeenCalled();
 	});
 
 	it("(4) LanguageModel present but availability absent -> promptApi true and unavailable", async () => {
+		const create = vi.fn();
 		const scope = {
-			LanguageModel: {},
+			LanguageModel: { create },
 		};
 		const result = await detectLocalAiCapability(scope);
 		expect(result.promptApi).toBe(true);
@@ -51,14 +132,17 @@ describe("local-ai detection", () => {
 		expect(result.reason).toBe(
 			"LanguageModel present but no availability function",
 		);
+		expect(create).not.toHaveBeenCalled();
 	});
 
 	it("(5) throwing availability -> unavailable, no exception", async () => {
+		const create = vi.fn();
 		const scope = {
 			LanguageModel: {
 				availability: async () => {
 					throw new Error("Boom");
 				},
+				create,
 			},
 		};
 		const result = await detectLocalAiCapability(scope);
@@ -66,6 +150,7 @@ describe("local-ai detection", () => {
 		expect(result.webgpu).toBe(false);
 		expect(result.state).toBe("unavailable");
 		expect(result.reason).toBe("LanguageModel.availability threw an error");
+		expect(create).not.toHaveBeenCalled();
 	});
 
 	it("(6) navigator.gpu present without a model API -> unavailable (webgpu true)", async () => {

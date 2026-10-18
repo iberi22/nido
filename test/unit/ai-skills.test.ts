@@ -200,4 +200,26 @@ describe('AI skills registry + executeSkill', () => {
     expect(screen.getByLabelText(/command/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /send/i })).toBeTruthy();
   });
+
+  it('AIChat smoke: detects local AI capability and renders status', async () => {
+    // Stub global scope for detection
+    const { vi } = await import('vitest');
+    vi.stubGlobal('LanguageModel', {
+      availability: async () => 'available'
+    });
+
+    const { default: AIChat } = await import('../../src/lib/AIChat.svelte');
+    const { tick } = await import('svelte');
+
+    render(AIChat, { props: { context: {} } });
+    await tick();
+    // Re-await tick / macrotask for detectLocalAiCapability promise to resolve in $effect
+    await new Promise(r => setTimeout(r, 0));
+
+    const statusEl = screen.getByTestId('local-ai-status');
+    expect(statusEl).toBeTruthy();
+    expect(statusEl.textContent).toContain('on-device ready');
+
+    vi.unstubAllGlobals();
+  });
 });

@@ -1,63 +1,51 @@
 <script lang="ts">
-import { Input, Button } from '@swal/ui';
-import { executeSkill, parseSkillCommand } from "./domain/ai-skills";
-import {
-	detectLocalAiCapability,
-	localAiSummary,
-	type LocalAiCapability,
-} from "./domain/local-ai";
-import { toast } from "./vendor/swal-ui/lib/toast.svelte.js";
+  import { Input, Button } from '@swal/ui';
+  import { toast } from './vendor/swal-ui/lib/toast.svelte.js';
+  import { executeSkill, parseSkillCommand } from './domain/ai-skills';
+  import { detectLocalAiCapability, localAiSummary, type LocalAiCapability } from './domain/local-ai';
 
-// Export optional context prop
-let { context = {} } = $props<{ context?: any }>();
+  // Export optional context prop
+  let { context = {} } = $props<{ context?: any }>();
 
-let _capability = $state<LocalAiCapability | null>(null);
+  let capability = $state<LocalAiCapability | null>(null);
 
-$effect(() => {
-	detectLocalAiCapability().then((cap) => {
-		_capability = cap;
-	});
-});
+  $effect(() => {
+    detectLocalAiCapability().then(cap => {
+      capability = cap;
+    });
+  });
 
-let command = $state("");
-let results = $state<
-	Array<{ id: string; name: string; ok: boolean; message: string }>
->([]);
+  let command = $state('');
+  let results = $state<Array<{ id: string; name: string; ok: boolean; message: string }>>([]);
 
-function handleSend() {
-	const parsed = parseSkillCommand(command);
-	if (!parsed) {
-		toast.error("Enter a skill command");
-		return;
-	}
-	const result = executeSkill(parsed.name, parsed.params, context);
-	const id =
-		typeof crypto !== "undefined" && crypto.randomUUID
-			? crypto.randomUUID()
-			: Math.random().toString(36);
-	results = [
-		...results,
-		{ id, name: parsed.name, ok: result.ok, message: result.message },
-	];
+  function handleSend() {
+    const parsed = parseSkillCommand(command);
+    if (!parsed) {
+      toast.error('Enter a skill command');
+      return;
+    }
+    const result = executeSkill(parsed.name, parsed.params, context);
+    const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36);
+    results = [...results, { id, name: parsed.name, ok: result.ok, message: result.message }];
 
-	if (result.ok) {
-		toast.success(result.message);
-		command = "";
-	} else {
-		toast.error(result.message);
-	}
-}
+    if (result.ok) {
+      toast.success(result.message);
+      command = '';
+    } else {
+      toast.error(result.message);
+    }
+  }
 
-function handleSubmit(e: Event) {
-	e.preventDefault();
-	handleSend();
-}
+  function handleSubmit(e: Event) {
+    e.preventDefault();
+    handleSend();
+  }
 </script>
 
 <div class="ai-chat">
-  {#if _capability}
+  {#if capability}
     <p data-testid="local-ai-status" class="hint local-ai-status">
-      {localAiSummary(_capability)}
+      {localAiSummary(capability)}
     </p>
   {/if}
   <p class="hint">e.g. addWall x=2 y=3 width=5 height=0.15</p>
