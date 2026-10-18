@@ -2,7 +2,10 @@
 
 ## SWAL ecosystem goal (do not disconnect)
 
-- **Canonical:** `monorepo:docs/SWAL/GOAL.md` · `monorepo:docs/SWAL/PROJECT_MAP.md` · `monorepo:docs/SWAL/README.md`
+- **Canonical:**
+  - `monorepo:docs/SWAL/GOAL.md`
+  - `monorepo:docs/SWAL/PROJECT_MAP.md`
+  - `monorepo:docs/SWAL/README.md`
 - **Local copy:** `.gitcore/docs/SWAL_GOAL.md` (absent from origin/main; created by `gitcore-update`, not tracked here)
 - **Product plan:** `monorepo:docs/SWAL/NIDO_PLAN.md` (this product)
 - **Pro:** active SWAL node only — **no Stripe** as Pro unlock
@@ -12,7 +15,7 @@
 - **Backoffice:** `maloca/apps/swal-backoffice`
 - **Protocol:** GitCore 3.8.0 · feature-verify / implementation-score under `.gitcore/scripts/`
 
-**Protocol:** GitCore 3.8.0 (SWAL private era)
+**Protocol:** GitCore 3.8.0
 **Updated:** 2026-08-03
 
 ## READ ORDER (mandatory)
@@ -26,7 +29,12 @@ STEP 5: `docs/SRS/REQUIREMENTS.md`   ← REQ-IDs with user stories
 STEP 6: `docs/SRS/ARCHITECTURE.md`
 STEP 7: `README.md`
 ```
-*(Note: `.gitcore/ARCHITECTURE.md`, `.gitcore/AGENT_INDEX.md`, `.gitcore/planning/PLANNING.md`, and `.gitcore/planning/TASK.md` are declared in `.gitcore/MANIFEST.json` under `preserved_paths` and are absent from `origin/main`, so no agent should hunt for them.)*
+*(Note: The following paths are absent from origin/main, so no agent should hunt for them:*
+- `absent from origin/main: .gitcore/ARCHITECTURE.md`
+- `absent from origin/main: .gitcore/AGENT_INDEX.md`
+- `absent from origin/main: .gitcore/planning/PLANNING.md`
+- `absent from origin/main: .gitcore/planning/TASK.md`
+*)*
 
 ## Product identity
 
@@ -60,8 +68,7 @@ cross-app verified accounts (anti-scam).
 
 - HTTP: `http://127.0.0.1:8006` (token if required)
 - Namespace: `app/nido/instance/{instanceId}` (paths: `app/nido/instance/{id}/...`)
-- MCP: connect Xavier MCP server when available; if connection is WIP, note in
-  TASK.md and use HTTP fallback
+- MCP: connect Xavier MCP server when available; if connection is WIP, use HTTP fallback
 - Ecosystem map: `monorepo:docs/SWAL/README.md`
 
 ## Forbidden root scratch

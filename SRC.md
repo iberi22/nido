@@ -39,11 +39,13 @@ nido/
 ├── .gitcore/
 │   ├── features.json          # source of truth: features + user stories + tests
 │   ├── features/details/      # 1 JSON per feature (GitCore detail schema v1)
-│   ├── MANIFEST.json          # protocol extensions (user_stories field; defines preserved_paths)
-│   ├── docs/                  # canonical SWAL docs mirrors
+│   ├── MANIFEST.json          # protocol extensions (user_stories field)
 │   ├── scripts/               # gitcore feature-verify helpers
 │   └── state-report.json      # auto-generated (gitignored)
-│   # (Note: ARCHITECTURE.md, AGENT_INDEX.md, and planning/* are absent from origin/main but defined in MANIFEST.json preserved_paths)
+│   # (Note: absent from origin/main: .gitcore/ARCHITECTURE.md)
+│   # (Note: absent from origin/main: .gitcore/AGENT_INDEX.md)
+│   # (Note: absent from origin/main: .gitcore/planning/PLANNING.md)
+│   # (Note: absent from origin/main: .gitcore/planning/TASK.md)
 ├── docs/
 │   ├── SRS/index.md           # SRS status
 │   ├── SRS/REQUIREMENTS.md    # REQ-001..007 base + REQ-008+ domain w/ user stories
@@ -79,7 +81,7 @@ nido/
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| Protocol meta | `.gitcore/` | Architecture, features (source of truth), planning |
+| Protocol meta | `.gitcore/` | Features (source of truth) |
 | SRS | `docs/SRS/` | Formal requirements w/ user stories (REQ-IDs) |
 | Product plan | `monorepo:docs/SWAL/NIDO_PLAN.md` | Vision, architecture, roadmap |
 | Agent rules | `AGENTS.md` | Read order + SWAL constraints |
