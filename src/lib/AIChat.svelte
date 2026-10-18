@@ -1,39 +1,65 @@
 <script lang="ts">
-  import { Input, Button } from '@swal/ui';
-  import { toast } from './vendor/swal-ui/lib/toast.svelte.js';
-  import { executeSkill, parseSkillCommand } from './domain/ai-skills';
+import { Input, Button } from '@swal/ui';
+import { executeSkill, parseSkillCommand } from "./domain/ai-skills";
+import {
+	detectLocalAiCapability,
+	localAiSummary,
+	type LocalAiCapability,
+} from "./domain/local-ai";
+import { toast } from "./vendor/swal-ui/lib/toast.svelte.js";
 
-  // Export optional context prop
-  let { context = {} } = $props<{ context?: any }>();
+// Export optional context prop
+let { context = {} } = $props<{ context?: any }>();
 
-  let command = $state('');
-  let results = $state<Array<{ id: string; name: string; ok: boolean; message: string }>>([]);
+let _capability = $state<LocalAiCapability | null>(null);
 
-  function handleSend() {
-    const parsed = parseSkillCommand(command);
-    if (!parsed) {
-      toast.error('Enter a skill command');
-      return;
-    }
-    const result = executeSkill(parsed.name, parsed.params, context);
-    const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : Math.random().toString(36);
-    results = [...results, { id, name: parsed.name, ok: result.ok, message: result.message }];
+$effect(() => {
+	detectLocalAiCapability().then((cap) => {
+		_capability = cap;
+	});
+});
 
-    if (result.ok) {
-      toast.success(result.message);
-      command = '';
-    } else {
-      toast.error(result.message);
-    }
-  }
+let command = $state("");
+let results = $state<
+	Array<{ id: string; name: string; ok: boolean; message: string }>
+>([]);
 
-  function handleSubmit(e: Event) {
-    e.preventDefault();
-    handleSend();
-  }
+function handleSend() {
+	const parsed = parseSkillCommand(command);
+	if (!parsed) {
+		toast.error("Enter a skill command");
+		return;
+	}
+	const result = executeSkill(parsed.name, parsed.params, context);
+	const id =
+		typeof crypto !== "undefined" && crypto.randomUUID
+			? crypto.randomUUID()
+			: Math.random().toString(36);
+	results = [
+		...results,
+		{ id, name: parsed.name, ok: result.ok, message: result.message },
+	];
+
+	if (result.ok) {
+		toast.success(result.message);
+		command = "";
+	} else {
+		toast.error(result.message);
+	}
+}
+
+function handleSubmit(e: Event) {
+	e.preventDefault();
+	handleSend();
+}
 </script>
 
 <div class="ai-chat">
+  {#if _capability}
+    <p data-testid="local-ai-status" class="hint local-ai-status">
+      {localAiSummary(_capability)}
+    </p>
+  {/if}
   <p class="hint">e.g. addWall x=2 y=3 width=5 height=0.15</p>
   <form class="row" onsubmit={handleSubmit} aria-label="AI Assistant panel">
     <Input label="Command" bind:value={command} />
@@ -62,6 +88,9 @@
     margin: 0;
     font-size: 11px;
     color: var(--swal-text-secondary, #94a3b8);
+  }
+  .local-ai-status {
+    color: var(--swal-accent, #3b82f6);
   }
   .row {
     display: flex;
