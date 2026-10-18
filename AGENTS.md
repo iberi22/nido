@@ -2,9 +2,12 @@
 
 ## SWAL ecosystem goal (do not disconnect)
 
-- **Canonical:** monorepo `docs/SWAL/GOAL.md` · `docs/SWAL/PROJECT_MAP.md` · `docs/SWAL/README.md`
-- **Local copy:** `.gitcore/docs/SWAL_GOAL.md` (via `gitcore-update`)
-- **Product plan:** monorepo `docs/SWAL/NIDO_PLAN.md` (this product)
+- **Canonical:**
+  - `monorepo:docs/SWAL/GOAL.md`
+  - `monorepo:docs/SWAL/PROJECT_MAP.md`
+  - `monorepo:docs/SWAL/README.md`
+- **Local copy:** `.gitcore/docs/SWAL_GOAL.md` (absent from origin/main; created by `gitcore-update`, not tracked here)
+- **Product plan:** `monorepo:docs/SWAL/NIDO_PLAN.md` (this product)
 - **Pro:** active SWAL node only — **no Stripe** as Pro unlock
 - **Memory:** Xavier HTTP/MCP · namespace `app/nido/instance/{instanceId}`
 - **Mesh:** edge-mesh · `swal/nido/{instanceId}` (P2P rental network, M5)
@@ -12,22 +15,26 @@
 - **Backoffice:** `maloca/apps/swal-backoffice`
 - **Protocol:** GitCore 3.8.0 · feature-verify / implementation-score under `.gitcore/scripts/`
 
-**Protocol:** GitCore 3.8.0 (SWAL private era)
+**Protocol:** GitCore 3.8.0
 **Updated:** 2026-08-03
 
 ## READ ORDER (mandatory)
 
 ```
-STEP 1: AGENTS.md                  ← this file
-STEP 2: .gitcore/ARCHITECTURE.md
-STEP 3: .gitcore/AGENT_INDEX.md
-STEP 4: .gitcore/planning/PLANNING.md
-STEP 5: .gitcore/planning/TASK.md
-STEP 6: .gitcore/features.json      ← source of truth (features + user stories + tests)
-STEP 7: SRC.md
-STEP 8: docs/SRS/index.md          ← formal requirements (mandatory)
-STEP 9: docs/SRS/REQUIREMENTS.md   ← REQ-IDs with user stories
+STEP 1: `AGENTS.md`                  ← this file
+STEP 2: `.gitcore/features.json`     ← source of truth (features + user stories + tests)
+STEP 3: `SRC.md`
+STEP 4: `docs/SRS/index.md`          ← formal requirements (mandatory)
+STEP 5: `docs/SRS/REQUIREMENTS.md`   ← REQ-IDs with user stories
+STEP 6: `docs/SRS/ARCHITECTURE.md`
+STEP 7: `README.md`
 ```
+*(Note: The following paths are absent from origin/main, so no agent should hunt for them:*
+- `absent from origin/main: .gitcore/ARCHITECTURE.md`
+- `absent from origin/main: .gitcore/AGENT_INDEX.md`
+- `absent from origin/main: .gitcore/planning/PLANNING.md`
+- `absent from origin/main: .gitcore/planning/TASK.md`
+*)*
 
 ## Product identity
 
@@ -37,7 +44,8 @@ administration: taxes (predial), leasing, parts inventory, costs, maintenance
 planning, public utilities. Later: private GPS-proximity rental network with
 cross-app verified accounts (anti-scam).
 
-- **Origin repo:** `iberi22/floor-plan-designer` (PRIVATE) — rename target `iberi22/nido`
+- **Repository:** `iberi22/nido` (PUBLIC)
+- **Historical origin:** `iberi22/floor-plan-designer` (rename target)
 - **Stack:** Svelte 5 (runes) + Astro · `@swal/ui` (design system, edge-hive theme)
   · Konva 2D · Three.js 3D · edge-mesh (P2P) · Xavier (memory) · edge-hive (backend)
 - **UI rule:** **edge-hive-admin is the reference UI of the SWAL lab** (React 19 +
@@ -48,7 +56,7 @@ cross-app verified accounts (anti-scam).
 
 ## SWAL rules
 
-- Repos **private** by default
+- **Visibility:** This repository is PUBLIC on GitHub.
 - GitHub Actions **disabled** (`.github/workflows.disabled`)
 - Pro features = **SWAL node active** — **no Stripe**
 - Multi-instance data **decoupled** by default: `instance_id` per workspace
@@ -60,9 +68,8 @@ cross-app verified accounts (anti-scam).
 
 - HTTP: `http://127.0.0.1:8006` (token if required)
 - Namespace: `app/nido/instance/{instanceId}` (paths: `app/nido/instance/{id}/...`)
-- MCP: connect Xavier MCP server when available; if connection is WIP, note in
-  TASK.md and use HTTP fallback
-- Ecosystem map: monorepo `docs/SWAL/README.md`
+- MCP: connect Xavier MCP server when available; if connection is WIP, use HTTP fallback
+- Ecosystem map: `monorepo:docs/SWAL/README.md`
 
 ## Forbidden root scratch
 

@@ -14,12 +14,12 @@ network with cross-app verified accounts.
 | Field | Value |
 |-------|--------|
 | Path | `$SWAL_ROOT/nido` (workspace-relative; never a personal absolute path) |
-| GitHub | `iberi22/floor-plan-designer` (PRIVATE, rename target: `iberi22/nido`) |
+| GitHub | `iberi22/nido` (PUBLIC; historical origin: `iberi22/floor-plan-designer`) |
 | Stack | Svelte 5 (runes) + Vite + TypeScript · Konva 2D · Three.js 3D · `@swal/ui` |
-| Protocol | GitCore 3.9.0 |
-| Visibility | **PUBLIC en GitHub (verificado 2026-09-16)** — contradice el default SWAL; decidir si pasa a privado |
+| Protocol | GitCore 3.8.0 |
+| Visibility | PUBLIC |
 | Pro model | SWAL node active (not Stripe) |
-| Product plan | monorepo `docs/SWAL/NIDO_PLAN.md` |
+| Product plan | `monorepo:docs/SWAL/NIDO_PLAN.md` |
 
 ## 2. Directory structure
 
@@ -37,16 +37,15 @@ nido/
 ├── .git-core-protocol-version # 3.8.0
 ├── .gitignore
 ├── .gitcore/
-│   ├── ARCHITECTURE.md        # non-negotiables + domain architecture
-│   ├── AGENT_INDEX.md         # agent routing
 │   ├── features.json          # source of truth: features + user stories + tests
 │   ├── features/details/      # 1 JSON per feature (GitCore detail schema v1)
 │   ├── MANIFEST.json          # protocol extensions (user_stories field)
-│   ├── planning/PLANNING.md   # vision, phases, constraints
-│   ├── planning/TASK.md       # active tasks
-│   ├── docs/                  # canonical SWAL docs mirrors
 │   ├── scripts/               # gitcore feature-verify helpers
 │   └── state-report.json      # auto-generated (gitignored)
+│   # (Note: absent from origin/main: .gitcore/ARCHITECTURE.md)
+│   # (Note: absent from origin/main: .gitcore/AGENT_INDEX.md)
+│   # (Note: absent from origin/main: .gitcore/planning/PLANNING.md)
+│   # (Note: absent from origin/main: .gitcore/planning/TASK.md)
 ├── docs/
 │   ├── SRS/index.md           # SRS status
 │   ├── SRS/REQUIREMENTS.md    # REQ-001..007 base + REQ-008+ domain w/ user stories
@@ -82,9 +81,9 @@ nido/
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| Protocol meta | `.gitcore/` | Architecture, features (source of truth), planning |
+| Protocol meta | `.gitcore/` | Features (source of truth) |
 | SRS | `docs/SRS/` | Formal requirements w/ user stories (REQ-IDs) |
-| Product plan | monorepo `docs/SWAL/NIDO_PLAN.md` | Vision, architecture, roadmap |
+| Product plan | `monorepo:docs/SWAL/NIDO_PLAN.md` | Vision, architecture, roadmap |
 | Agent rules | `AGENTS.md` | Read order + SWAL constraints |
 | 2D canvas | `src/lib/CanvasStage.svelte` | Konva blueprint editor |
 | 3D viewer | `src/lib/Scene3D.svelte` | Three.js visualization |
