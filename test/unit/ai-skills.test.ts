@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/svelte';
 import {
   executeSkill,
   skillMaintenanceAdvice,
@@ -18,6 +18,11 @@ describe('AI skills registry + executeSkill', () => {
     if (floor) {
       floor.components = floor.components.filter((c) => c.type !== 'wall' && c.type !== 'door');
     }
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
   });
 
   // 1. Original tests updated for guards (no .toBe(false))
@@ -202,8 +207,6 @@ describe('AI skills registry + executeSkill', () => {
   });
 
   it('AIChat smoke: detects local AI capability and renders status', async () => {
-    // Stub global scope for detection
-    const { vi } = await import('vitest');
     vi.stubGlobal('LanguageModel', {
       availability: async () => 'available'
     });
@@ -213,13 +216,9 @@ describe('AI skills registry + executeSkill', () => {
 
     render(AIChat, { props: { context: {} } });
     await tick();
-    // Re-await tick / macrotask for detectLocalAiCapability promise to resolve in $effect
-    await new Promise(r => setTimeout(r, 0));
 
-    const statusEl = screen.getByTestId('local-ai-status');
+    const statusEl = await screen.findByTestId('local-ai-status');
     expect(statusEl).toBeTruthy();
     expect(statusEl.textContent).toContain('on-device ready');
-
-    vi.unstubAllGlobals();
   });
 });

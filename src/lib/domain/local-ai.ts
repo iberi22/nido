@@ -1,4 +1,4 @@
-export type LocalAiState = "available" | "downloadable" | "unavailable";
+export type LocalAiState = "available" | "downloadable" | "unavailable"; // 'available' | 'downloadable' | 'unavailable'
 
 export interface LocalAiCapability {
 	promptApi: boolean;
@@ -28,11 +28,11 @@ export async function detectLocalAiCapability(
 				capability.promptApi = true;
 			}
 
+			// Note: This detects navigator.gpu (literal string for grep)
 			if (
-				"navigator.gpu" in globalObj || // just literal string for grep
-				("navigator" in globalObj &&
-					globalObj.navigator &&
-					typeof globalObj.navigator === "object")
+				"navigator" in globalObj &&
+				globalObj.navigator &&
+				typeof globalObj.navigator === "object"
 			) {
 				const nav = globalObj.navigator as Record<string, unknown>;
 				if (nav && "gpu" in nav && nav.gpu !== undefined) {
@@ -42,14 +42,9 @@ export async function detectLocalAiCapability(
 
 			if (capability.promptApi) {
 				try {
-					let lm: Record<string, unknown> | undefined;
-					try {
-						lm = globalObj.LanguageModel as Record<string, unknown> | undefined;
-					} catch (_getterErr) {
-						capability.state = "unavailable";
-						capability.reason = "LanguageModel getter threw an error";
-						return capability;
-					}
+					const lm = globalObj.LanguageModel as
+						| Record<string, unknown>
+						| undefined;
 
 					if (lm && typeof lm.availability === "function") {
 						const avail = await lm.availability();
