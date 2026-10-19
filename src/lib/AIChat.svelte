@@ -2,9 +2,18 @@
   import { Input, Button } from '@swal/ui';
   import { toast } from './vendor/swal-ui/lib/toast.svelte.js';
   import { executeSkill, parseSkillCommand } from './domain/ai-skills';
+  import { detectLocalAiCapability, localAiSummary, type LocalAiCapability } from './domain/local-ai';
 
   // Export optional context prop
   let { context = {} } = $props<{ context?: any }>();
+
+  let capability = $state<LocalAiCapability | null>(null);
+
+  $effect(() => {
+    detectLocalAiCapability().then(cap => {
+      capability = cap;
+    });
+  });
 
   let command = $state('');
   let results = $state<Array<{ id: string; name: string; ok: boolean; message: string }>>([]);
@@ -34,6 +43,11 @@
 </script>
 
 <div class="ai-chat">
+  {#if capability}
+    <p data-testid="local-ai-status" class="hint local-ai-status">
+      {localAiSummary(capability)}
+    </p>
+  {/if}
   <p class="hint">e.g. addWall x=2 y=3 width=5 height=0.15</p>
   <form class="row" onsubmit={handleSubmit} aria-label="AI Assistant panel">
     <Input label="Command" bind:value={command} />
@@ -62,6 +76,9 @@
     margin: 0;
     font-size: 11px;
     color: var(--swal-text-secondary, #94a3b8);
+  }
+  .local-ai-status {
+    color: var(--swal-accent, #3b82f6);
   }
   .row {
     display: flex;
