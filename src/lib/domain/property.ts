@@ -4,6 +4,9 @@
 // type: house|apartment|bodega|construction
 // type: water|energy|gas|internet
 
+import type { Lot, RoofSpec, HouseBrief } from './design/types';
+export type { Lot, RoofSpec, HouseBrief } from './design/types';
+
 export type PropertyType = 'house' | 'apartment' | 'bodega' | 'construction';
 
 export interface Location {
@@ -33,13 +36,28 @@ export interface Zone {
   properties?: Record<string, any>;
 }
 
+export interface Wall {
+  id?: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  thickness?: number;
+  exterior?: boolean;
+  note?: string;
+  [k: string]: unknown;
+}
+
 export interface Floor {
   id: string;
   name: string;
   ref?: string;
   height_m?: number;
+  elevation_m?: number;
+  slab_m?: number;
+  roof?: RoofSpec;
   zones: Zone[];
-  walls?: any[];
+  walls?: Wall[];
   stairs?: any;
   elements?: any[];
   dimensions?: any[];
@@ -119,6 +137,15 @@ export interface Property {
   leases?: Lease[];
   maintenance?: Maintenance[];
   utilities?: Utility[];
+  lot?: Lot;
+  brief?: HouseBrief;
+  design?: {
+    generator: 'nido-layout@1';
+    seed: number;
+    strategy: string;
+    generatedAt: string;
+    diagnostics?: string[];
+  };
   config?: any; // For backward compatibility / metadata
 }
 
@@ -154,6 +181,28 @@ export function validateProperty(p: any): { valid: boolean; errors: string[] } {
     }
     if (typeof p.location.estrato !== 'number') {
       errors.push('Location estrato must be a number');
+    }
+  }
+
+  // 2b. Lot (Optional)
+  if (p.lot !== undefined) {
+    const lot = p.lot;
+    if (!lot || typeof lot !== 'object') {
+      errors.push('Property lot must be an object');
+    } else {
+      const poly = lot.polygon;
+      const okPoly =
+        Array.isArray(poly) &&
+        poly.length >= 3 &&
+        poly.every((pt: any) => Array.isArray(pt) && pt.length === 2 && Number.isFinite(pt[0]) && Number.isFinite(pt[1]));
+      if (!okPoly) errors.push('Lot polygon must have at least 3 finite [x, y] points');
+      if (
+        !Number.isInteger(lot.frontEdge) ||
+        lot.frontEdge < 0 ||
+        (Array.isArray(poly) && lot.frontEdge >= poly.length)
+      ) {
+        errors.push('Lot frontEdge must be an index within the polygon');
+      }
     }
   }
 

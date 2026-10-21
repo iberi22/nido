@@ -273,3 +273,68 @@ export const RULES: Rule[] = [
     }
   }
 ];
+
+// ---- Lot rules (POT) — user-editable defaults; verify with curaduría, not legal advice ----
+
+export interface LotRules {
+  front: number;
+  rear: number;
+  left: number;
+  right: number;
+  maxOccupancy: number;
+  maxFloors: number;
+}
+
+export const LOT_RULE_DEFAULTS: LotRules = {
+  front: 2.0, rear: 3.0, left: 0, right: 0, maxOccupancy: 0.75, maxFloors: 5
+};
+
+export const LOT_RULES_DISCLAIMER = 'verify with curaduria, not legal advice';
+
+export function resolveLotRules(norms: any): LotRules {
+  const src = norms?.POT_lot ?? {};
+  const out: LotRules = { ...LOT_RULE_DEFAULTS };
+  for (const k of ['front', 'rear', 'left', 'right'] as const) {
+    const v = src[k];
+    if (typeof v === 'number' && Number.isFinite(v) && v >= 0) out[k] = v;
+  }
+  const occ = src.maxOccupancy;
+  if (typeof occ === 'number' && occ > 0 && occ <= 1) out.maxOccupancy = occ;
+  const fl = src.maxFloors;
+  if (typeof fl === 'number' && Number.isInteger(fl) && fl >= 1) out.maxFloors = fl;
+  return out;
+}
+
+export function validateLotOccupancy(footprintArea: number, lotArea: number, rules: LotRules): ValidationResult {
+  const max = rules.maxOccupancy * lotArea;
+  if (footprintArea > max + 1e-9) {
+    return {
+      pass: false,
+      severity: 'fail',
+      message: `Footprint ${footprintArea.toFixed(1)}m² exceeds max occupancy ${(rules.maxOccupancy * 100).toFixed(0)}% (${max.toFixed(1)}m²).`,
+      fixHint: `Reduce the footprint or ${LOT_RULES_DISCLAIMER}.`
+    };
+  }
+  return {
+    pass: true,
+    severity: 'pass',
+    message: 'Lot occupancy within limit.',
+    fixHint: ''
+  };
+}
+
+export interface StairSpec {
+  riser_mm: number;
+  tread_mm: number;
+  totalSteps: number;
+  width_m: number;
+}
+
+/** Stair dimensions for a floor height (m) that satisfy validateStairs. */
+export function stairSpec(floorHeight: number): StairSpec {
+  const totalMm = floorHeight * 1000;
+  const totalSteps = Math.max(1, Math.ceil(totalMm / 180 - 1e-9));
+  const riser_mm = totalMm / totalSteps;
+  const tread_mm = Math.max(280, Math.round(630 - 2 * riser_mm));
+  return { riser_mm, tread_mm, totalSteps, width_m: 0.9 };
+}
