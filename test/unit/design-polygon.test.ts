@@ -33,6 +33,20 @@ describe('normalizeLot', () => {
     expect(a[1]).toBeCloseTo(0); expect(c[1]).toBeCloseTo(0);
     expect(a[0]).toBeCloseTo(0); expect(c[0]).toBeCloseTo(6);
   });
+  it('clockwise input: normalised front edge is the chosen edge (20 m) with interior at +y', () => {
+    // CW 6x20 m rect (0.1 m/px); edges: 0 = 20 m, 1 = 6 m, 2 = 20 m, 3 = 6 m
+    const px: [number, number][] = [[0, 0], [0, 200], [60, 200], [60, 0]];
+    for (const [fe, len, depth] of [[0, 20, 6], [1, 6, 20], [2, 20, 6], [3, 6, 20]]) {
+      const r = normalizeLot(px, fe, 0.1);
+      const a = r.polygon[r.frontEdge], c = r.polygon[(r.frontEdge + 1) % 4];
+      expect(a[0]).toBeCloseTo(0); expect(a[1]).toBeCloseTo(0);
+      expect(c[1]).toBeCloseTo(0);
+      expect(c[0]).toBeCloseTo(len);
+      const b = bbox(r.polygon);
+      expect(b.minY).toBeCloseTo(0); expect(b.maxY).toBeCloseTo(depth);
+      expect(polygonArea(r.polygon)).toBeGreaterThan(0);
+    }
+  });
   it('handles a rotated front edge', () => {
     const px: [number, number][] = [[0, 0], [0, 100], [200, 100], [200, 0]]; // arbitrary winding
     const r = normalizeLot(px, 1, 0.1);
