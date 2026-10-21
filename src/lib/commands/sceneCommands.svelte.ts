@@ -69,6 +69,12 @@ class SceneCommands {
   redo(): ExecResult {
     return this.history.redo();
   }
+
+  /** drop every per-floor history (e.g. after the whole design is replaced) */
+  reset(): void {
+    this.histories.clear();
+    this.version++;
+  }
 }
 
 export const sceneCommands = new SceneCommands();
