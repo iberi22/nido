@@ -46,7 +46,7 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,webp,woff,woff2}'],
+        globPatterns: ['**/*.{js,mjs,css,html,ico,png,svg,webp,woff,woff2}'],
         importScripts: ['sw-push-listener.js'],
         runtimeCaching: [
           {
@@ -104,6 +104,9 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes('node_modules/three') || id.includes('three.module') || id.includes('three/')) {
             return 'vendor-three';
+          }
+          if (id.includes('node_modules/pdfjs-dist') && !id.includes('pdf.worker')) {
+            return 'vendor-pdf';
           }
           if (id.includes('node_modules/konva') || id.includes('konva/')) {
             return 'vendor-konva';

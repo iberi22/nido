@@ -13,6 +13,12 @@ describe('Bundle Code-Splitting Configuration', () => {
     expect(content).toContain('manualChunks');
   });
 
+  it('should have vite.config.ts with pdf worker mjs precache glob and vendor-pdf chunk', () => {
+    const content = fs.readFileSync(path.resolve(__dirname, '../../vite.config.ts'), 'utf8');
+    expect(content).toContain('mjs');
+    expect(content).toContain('vendor-pdf');
+  });
+
   it('should have the analyze-bundle.sh script in scripts directory with correct shebang', () => {
     const scriptPath = path.resolve(__dirname, '../../scripts/analyze-bundle.sh');
     const exists = fs.existsSync(scriptPath);
