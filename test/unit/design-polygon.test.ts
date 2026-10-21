@@ -47,6 +47,20 @@ describe('normalizeLot', () => {
       expect(polygonArea(r.polygon)).toBeGreaterThan(0);
     }
   });
+  it('clockwise trapezoid: front edge is the chosen edge (opposite sides differ in length)', () => {
+    // CW trapezoid, 0.1 m/px: edges 0 = 20 m, 1 = sqrt(61)/10 m, 2 = 10 m, 3 = sqrt(61)/10 m
+    const px: [number, number][] = [[0, 0], [0, 200], [60, 150], [60, 50]];
+    const len = [20, Math.hypot(6, 5), 10, Math.hypot(6, 5)];
+    for (let fe = 0; fe < 4; fe++) {
+      const r = normalizeLot(px, fe, 0.1);
+      const a = r.polygon[r.frontEdge], c = r.polygon[(r.frontEdge + 1) % 4];
+      expect(a[0]).toBeCloseTo(0); expect(a[1]).toBeCloseTo(0);
+      expect(c[1]).toBeCloseTo(0); expect(c[0]).toBeGreaterThan(0);
+      expect(Math.hypot(c[0] - a[0], c[1] - a[1])).toBeCloseTo(len[fe]);
+      expect(polygonArea(r.polygon)).toBeGreaterThan(0);
+      expect(polygonArea(r.polygon)).toBeCloseTo(90);
+    }
+  });
   it('handles a rotated front edge', () => {
     const px: [number, number][] = [[0, 0], [0, 100], [200, 100], [200, 0]]; // arbitrary winding
     const r = normalizeLot(px, 1, 0.1);
