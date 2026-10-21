@@ -78,9 +78,9 @@ describe('lot / brief / design data model', () => {
     expect(s.previousProperty?.floors.length).toBe(before);
   });
 
-  const design = () => ({
-    floors: [{ id: 'g', name: 'G', zones: [] }],
-    states: { g: { id: 'g', name: 'G', components: [] } }
+  const design = (fid: string) => ({
+    floors: [{ id: fid, name: 'G', zones: [] }],
+    states: { [fid]: { id: fid, name: 'G', components: [] } }
   });
   const addWall = (id: string) =>
     sceneCommands.execute({ op: 'addWall', id, x1: 0, y1: 0, x2: 2000, y2: 0 });
@@ -92,7 +92,7 @@ describe('lot / brief / design data model', () => {
     sceneCommands.reset();
     expect(addWall('hist-w').ok).toBe(true);
     expect(sceneCommands.canUndo).toBe(true);
-    s.applyDesign(design());
+    s.applyDesign(design(s.property.floors[0].id));
     expect(sceneCommands.canUndo).toBe(false);
   });
 
@@ -102,7 +102,7 @@ describe('lot / brief / design data model', () => {
     s.setFloor(s.property.floors[0].id);
     sceneCommands.reset();
     expect(addWall('unsaved-w').ok).toBe(true);
-    s.applyDesign(design());
+    s.applyDesign(design(s.property.floors[0].id));
     const walls = s.previousProperty!.floors.flatMap((f) => f.walls ?? []);
     expect(walls.some((w: any) => w.id === 'unsaved-w')).toBe(true);
   });
