@@ -6,6 +6,7 @@
   import { rulesEsProposer } from './commands/rules-es';
   import type { CommandProposer } from './commands/proposer';
   import type { Command } from './commands/schema';
+  import { detectLocalAiCapability, localAiSummary, type LocalAiCapability } from './domain/local-ai';
 
   // `proposer` is the plug-in point for a local LLM (WebLLM/Gemma, JSON-schema output).
   let { context = {}, proposer = rulesEsProposer } = $props<{
@@ -18,6 +19,14 @@
     summary: string[];
     error: string | null;
   }
+
+  let capability = $state<LocalAiCapability | null>(null);
+
+  $effect(() => {
+    detectLocalAiCapability().then(cap => {
+      capability = cap;
+    });
+  });
 
   let command = $state('');
   let pending = $state<Pending | null>(null);
@@ -93,6 +102,11 @@
 </script>
 
 <div class="ai-chat">
+  {#if capability}
+    <p data-testid="local-ai-status" class="hint local-ai-status">
+      {localAiSummary(capability)}
+    </p>
+  {/if}
   <p class="hint">Ej.: "agrega una pared de 3 m al norte", "haz la cocina 50 cm más ancha", "pon una ventana en la pared norte", "deshacer"</p>
   <form class="row" onsubmit={handleSubmit} aria-label="AI Assistant panel">
     <Input label="Command" bind:value={command} />
@@ -170,6 +184,9 @@
   .preview-error {
     margin: 0;
     color: var(--swal-danger, #ef4444);
+  }
+  .local-ai-status {
+    color: var(--swal-accent, #3b82f6);
   }
   .row {
     display: flex;

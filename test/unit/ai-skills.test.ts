@@ -1,5 +1,5 @@
-import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/svelte';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { render, screen, cleanup } from '@testing-library/svelte';
 import {
   executeSkill,
   skillMaintenanceAdvice,
@@ -18,6 +18,11 @@ describe('AI skills registry + executeSkill', () => {
     if (floor) {
       floor.components = floor.components.filter((c) => c.type !== 'wall' && c.type !== 'door');
     }
+  });
+
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
   });
 
   // 1. Original tests updated for guards (no .toBe(false))
@@ -199,5 +204,21 @@ describe('AI skills registry + executeSkill', () => {
     render(AIChat, { props: { context: {} } });
     expect(screen.getByLabelText(/command/i)).toBeTruthy();
     expect(screen.getByRole('button', { name: /send/i })).toBeTruthy();
+  });
+
+  it('AIChat smoke: detects local AI capability and renders status', async () => {
+    vi.stubGlobal('LanguageModel', {
+      availability: async () => 'available'
+    });
+
+    const { default: AIChat } = await import('../../src/lib/AIChat.svelte');
+    const { tick } = await import('svelte');
+
+    render(AIChat, { props: { context: {} } });
+    await tick();
+
+    const statusEl = await screen.findByTestId('local-ai-status');
+    expect(statusEl).toBeTruthy();
+    expect(statusEl.textContent).toContain('on-device ready');
   });
 });
