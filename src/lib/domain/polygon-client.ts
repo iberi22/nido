@@ -21,11 +21,7 @@ import {
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { polygonAmoy } from "viem/chains";
-import {
-  ESCROW_CONTRACT_ADDRESS,
-  POLYGON_PRIVATE_KEY,
-  RPC_URL
-} from "./polygon-config";
+import { requireEscrowAddress, RPC_URL } from "./polygon-config";
 
 /**
  * Minimal escrow contract surface used by NIDO.
@@ -102,8 +98,12 @@ export class ViemPolygonClient implements PolygonClient {
     privateKey?: `0x${string}`;
   }) {
     const rpcUrl = options?.rpcUrl ?? RPC_URL;
-    this.contractAddress = options?.contractAddress ?? ESCROW_CONTRACT_ADDRESS;
-    this.account = privateKeyToAccount(options?.privateKey ?? POLYGON_PRIVATE_KEY);
+    this.contractAddress = options?.contractAddress ?? requireEscrowAddress();
+    // The SPA bundle ships no signer key: a caller (test, local tool) must inject one.
+    if (!options?.privateKey) {
+      throw new Error("escrow signer not configured: no private key is bundled in the client");
+    }
+    this.account = privateKeyToAccount(options.privateKey);
 
     this.publicClient = createPublicClient({
       chain: polygonAmoy,
