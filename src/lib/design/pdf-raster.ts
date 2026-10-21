@@ -33,7 +33,8 @@ export async function rasterizePdf(data: ArrayBuffer | Uint8Array, page = 1): Pr
   pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
   const bytes = data instanceof Uint8Array ? data : new Uint8Array(data);
-  const task = pdfjs.getDocument({ data: bytes, isEvalSupported: false });
+  // pdfjs-dist 5.x has no eval path, so no isEvalSupported option is needed.
+  const task = pdfjs.getDocument({ data: bytes });
   const pdf = await task.promise;
   try {
     const pageCount = pdf.numPages;
