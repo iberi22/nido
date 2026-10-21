@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'vitest';
 import { validateProperty } from '../../src/lib/domain/property';
 import type { Property } from '../../src/lib/domain/property';
-import { FloorPlanStore } from '../../src/lib/stores/floorPlanStore.svelte';
+import { FloorPlanStore, floorPlanStore } from '../../src/lib/stores/floorPlanStore.svelte';
 import { sceneCommands } from '../../src/lib/commands/sceneCommands.svelte';
 import { applyCommand } from '../../src/lib/commands';
 import houseData from '../../src/lib/data/house-data.json';
@@ -76,5 +76,34 @@ describe('lot / brief / design data model', () => {
     expect(s.currentFloorId).toBe('g');
     expect(sceneCommands.canUndo).toBe(false);
     expect(s.previousProperty?.floors.length).toBe(before);
+  });
+
+  const design = () => ({
+    floors: [{ id: 'g', name: 'G', zones: [] }],
+    states: { g: { id: 'g', name: 'G', components: [] } }
+  });
+  const addWall = (id: string) =>
+    sceneCommands.execute({ op: 'addWall', id, x1: 0, y1: 0, x2: 2000, y2: 0 });
+
+  test('applyDesign clears history that existed before it', () => {
+    const s = floorPlanStore;
+    s.loadProperty(base());
+    s.setFloor(s.property.floors[0].id);
+    sceneCommands.reset();
+    expect(addWall('hist-w').ok).toBe(true);
+    expect(sceneCommands.canUndo).toBe(true);
+    s.applyDesign(design());
+    expect(sceneCommands.canUndo).toBe(false);
+  });
+
+  test('applyDesign undo snapshot includes unsaved live floor edits', () => {
+    const s = floorPlanStore;
+    s.loadProperty(base());
+    s.setFloor(s.property.floors[0].id);
+    sceneCommands.reset();
+    expect(addWall('unsaved-w').ok).toBe(true);
+    s.applyDesign(design());
+    const walls = s.previousProperty!.floors.flatMap((f) => f.walls ?? []);
+    expect(walls.some((w: any) => w.id === 'unsaved-w')).toBe(true);
   });
 });

@@ -307,6 +307,8 @@ export class FloorPlanStore {
     design?: Property['design'];
     config?: Partial<FloorPlanConfig>;
   }) {
+    // sync live floors into the property first so the undo snapshot has unsaved edits
+    this.saveProperty();
     this.previousProperty = JSON.parse(JSON.stringify($state.snapshot(this.property)));
     // skeleton FIRST: saveProperty only syncs floors already listed
     this.property.floors = result.floors;
