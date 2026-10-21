@@ -17,6 +17,61 @@
       "required": ["city", "comuna", "estrato"]
     },
     "norms": { "type": "object" },
+    "lot": {
+      "type": "object",
+      "properties": {
+        "polygon": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 }
+        },
+        "frontEdge": { "type": "integer", "minimum": 0 },
+        "area_m2": { "type": "number" },
+        "setbacks": {
+          "type": "object",
+          "properties": {
+            "front": { "type": "number" },
+            "rear": { "type": "number" },
+            "left": { "type": "number" },
+            "right": { "type": "number" }
+          },
+          "required": ["front", "rear", "left", "right"]
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "kind": { "enum": ["image", "pdf", "dimensions", "manual"] },
+            "assetId": { "type": "string" },
+            "fileName": { "type": "string" },
+            "page": { "type": "integer" },
+            "m_per_px": { "type": "number" },
+            "calibration": {
+              "type": "object",
+              "properties": {
+                "p1": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+                "p2": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
+                "distance_m": { "type": "number" }
+              },
+              "required": ["p1", "p2", "distance_m"]
+            }
+          },
+          "required": ["kind"]
+        }
+      },
+      "required": ["polygon", "frontEdge"]
+    },
+    "brief": { "type": "object" },
+    "design": {
+      "type": "object",
+      "properties": {
+        "generator": { "enum": ["nido-layout@1"] },
+        "seed": { "type": "number" },
+        "strategy": { "type": "string" },
+        "generatedAt": { "type": "string" },
+        "diagnostics": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["generator", "seed", "strategy", "generatedAt"]
+    },
     "config": {
       "type": "object",
       "properties": {
@@ -45,6 +100,9 @@
           "subtitle": { "type": "string" },
           "ref": { "type": "string" },
           "height_m": { "type": "number" },
+          "elevation_m": { "type": "number" },
+          "slab_m": { "type": "number" },
+          "roof": { "type": "object" },
           "zones": {
             "type": "array",
             "items": {
@@ -73,6 +131,8 @@
                 "y1": { "type": "number" },
                 "x2": { "type": "number" },
                 "y2": { "type": "number" },
+                "thickness": { "type": "number" },
+                "exterior": { "type": "boolean" },
                 "note": { "type": "string" }
               },
               "required": ["x1", "y1", "x2", "y2"]

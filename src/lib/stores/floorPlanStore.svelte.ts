@@ -1,4 +1,5 @@
 // Floor Plan Store - Svelte 5 Runes
+import { sceneCommands } from '../commands/sceneCommands.svelte';
 import houseData from '../data/house-data.json';
 import type { Property, Floor, Zone, Room, Item, Taxes, Lease, Maintenance, Utility } from '../domain/property';
 
@@ -223,7 +224,7 @@ export class FloorPlanStore {
         rotation: 0,
         properties: {
           x1: w.x1, y1: w.y1, x2: w.x2, y2: w.y2,
-          thickness: this.config.wallThickness,
+          thickness: w.thickness ?? this.config.wallThickness,
           note: w.note
         }
       });
@@ -235,7 +236,7 @@ export class FloorPlanStore {
       if (['car', 'motorcycle', 'furniture'].includes(el.type)) layer = 'furniture';
 
       components.push({
-        id: `el-${i}-${crypto.randomUUID()}`,
+        id: el.id || `el-${i}-${crypto.randomUUID()}`,
         type: el.type,
         x: el.x,
         y: el.y,
@@ -295,6 +296,33 @@ export class FloorPlanStore {
     this.initData();
   }
 
+  /** one-level "undo generation": the Property replaced by the last applyDesign */
+  previousProperty: Property | null = null;
+
+  applyDesign(result: {
+    floors: Floor[];
+    states: Record<string, FloorState>;
+    lot?: Property['lot'];
+    brief?: Property['brief'];
+    design?: Property['design'];
+    config?: Partial<FloorPlanConfig>;
+  }) {
+    this.previousProperty = JSON.parse(JSON.stringify($state.snapshot(this.property)));
+    // skeleton FIRST: saveProperty only syncs floors already listed
+    this.property.floors = result.floors;
+    this.floors = result.states;
+    if (result.lot) this.property.lot = result.lot;
+    if (result.brief) this.property.brief = result.brief;
+    if (result.design) this.property.design = result.design;
+    if (result.config) this.config = { ...this.config, ...result.config } as FloorPlanConfig;
+    if (!this.floors[this.currentFloorId]) {
+      this.currentFloorId = result.floors[0]?.id ?? this.currentFloorId;
+    }
+    this.selectedComponentId = null;
+    sceneCommands.reset();
+    this.saveProperty();
+  }
+
   saveProperty(): Property {
     // Sync current components from floors record back to property.floors before saving
     this.property.floors = this.property.floors.map(floor => {
@@ -320,17 +348,23 @@ export class FloorPlanStore {
               y1: c.properties.y1 ?? c.y,
               x2: c.properties.x2 ?? (c.x + (c.width || 0)),
               y2: c.properties.y2 ?? (c.y + (c.height || 0)),
+              thickness: c.properties.thickness,
               note: c.properties.note
             })),
           elements: liveFloor.components
-            .filter(c => ['door', 'sliding_door', 'garage_door', 'pedestrian_door', 'car', 'motorcycle', 'furniture'].includes(c.type) || c.layer === 'furniture')
-            .map(c => ({
-              type: c.type,
-              x: c.x, y: c.y,
-              width: c.width || 0, height: c.height || 0,
-              rotation: c.rotation || 0,
-              note: c.properties.note
-            })),
+            .filter(c => ['door', 'window', 'sliding_door', 'garage_door', 'pedestrian_door', 'car', 'motorcycle', 'furniture'].includes(c.type) || c.layer === 'furniture')
+            .map(c => {
+              const isOpening = c.type === 'door' || c.type === 'window' || c.type.endsWith('_door');
+              return {
+                // openings keep full properties (wallId/offsetMm/widthMm/heightMm/sillMm) and id
+                ...(isOpening ? { ...$state.snapshot(c.properties), id: c.id } : {}),
+                type: c.type,
+                x: c.x, y: c.y,
+                width: c.width || 0, height: c.height || 0,
+                rotation: c.rotation || 0,
+                note: c.properties.note
+              };
+            }),
           stairs: liveFloor.components.find(c => c.type === 'stairs')?.properties.data || floor.stairs,
           dimensions: liveFloor.components
             .filter(c => c.type === 'dimension')
