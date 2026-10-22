@@ -15,11 +15,13 @@
     "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "security": "bash scripts/verify-security.sh",
-    "deploy": "bash scripts/deploy-cloudflare.sh"
+    "deploy": "bash scripts/deploy-cloudflare.sh",
+    "e2e:ta": "E2E_TELEMETRY_DISABLED=1 e2e run",
+    "e2e:ta:live": "test -n \"$E2E_LIVE_URL\" || { echo 'set E2E_LIVE_URL to a deployed NIDO URL first'; exit 1; }; E2E_TELEMETRY_DISABLED=1 e2e run"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.14",
-    "@playwright/test": "1.62.1",
+    "@playwright/test": "1.64.0",
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
     "@testing-library/svelte": "5.4.2",
     "@tsconfig/svelte": "^5.0.6",
@@ -38,7 +40,9 @@
     "vite": "^8.0.0-beta.13",
     "vite-plugin-pwa": "1.3.0",
     "vitest": "4.1.10",
-    "wrangler": "^4.123.0"
+    "wrangler": "^4.123.0",
+    "e2e": "0.20.0",
+    "@e2e-dev/web": "0.14.0"
   },
   "overrides": {
     "vite": "^8.0.0-beta.13"
