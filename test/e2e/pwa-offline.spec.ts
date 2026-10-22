@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('PWA Offline-First and Reload State Persistence', () => {
-  test('should load the application and keep state on reload/offline', async ({ page }) => {
+  test('should load the application and keep state on reload/offline', async ({ page, context }) => {
     // 1. Go to the app homepage
     await page.goto('/');
 
@@ -18,11 +18,13 @@ test.describe('PWA Offline-First and Reload State Persistence', () => {
       // Wait a moment for IndexedDB persistence to fire
       await page.waitForTimeout(500);
 
-      // Reload the page
+      // Reload the page offline
+      await context.setOffline(true);
       await page.reload();
 
       // Check that the updated state was successfully reloaded from IndexedDB
       await expect(wallThicknessInput).toHaveValue('0.35');
+      await context.setOffline(false);
     }
 
     // 4. Verify Service Worker support and registration array is defined
@@ -32,15 +34,17 @@ test.describe('PWA Offline-First and Reload State Persistence', () => {
     expect(hasServiceWorkerSupport).toBe(true);
   });
 
-  test('after reload, the app still serves and title stays NIDO with active SW support', async ({ page }) => {
+  test('after reload, the app still serves and title stays NIDO with active SW support', async ({ page, context }) => {
     // 1. Go to the app homepage
     await page.goto('/');
 
     // 2. Expect the title to be NIDO (G5)
     await expect(page).toHaveTitle(/NIDO/i);
 
-    // 3. Reload the page (simulate a refresh)
+    // 3. Reload the page (simulate a refresh) offline
+    await context.setOffline(true);
     await page.reload();
+    await context.setOffline(false);
 
     // 4. Expect the title is still NIDO (G5)
     await expect(page).toHaveTitle(/NIDO/i);
