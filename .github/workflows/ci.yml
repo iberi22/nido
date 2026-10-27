@@ -31,7 +31,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run lint
-        run: npx biome check
+        run: npx biome lint
 
       - name: Run typecheck
         run: pnpm run check
@@ -39,8 +39,8 @@ jobs:
       - name: Build
         run: pnpm build
 
-      - name: Run unit tests
-        run: pnpm run test:unit
+      - name: Run tests
+        run: pnpm run test
 
       - name: Run E2E tests
         run: pnpm exec playwright test --workers=1
