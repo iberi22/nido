@@ -9,10 +9,12 @@
   import { detectLocalAiCapability, localAiSummary, type LocalAiCapability } from './domain/local-ai';
 
   // `proposer` is the plug-in point for a local LLM (WebLLM/Gemma, JSON-schema output).
-  let { context = {}, proposer = rulesEsProposer } = $props<{
-    context?: any;
-    proposer?: CommandProposer;
-  }>();
+  interface Props { context?: any; proposer?: CommandProposer; };
+  let { context = {}, proposer = rulesEsProposer }: Props = $props();
+  // $props<{
+
+
+ // }>();
 
   interface Pending {
     commands: Command[];

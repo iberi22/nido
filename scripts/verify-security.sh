@@ -61,7 +61,7 @@ fi
 # Stage 2: npm audit
 echo "==> Stage 2: Running npm audit --omit=dev..."
 # Ensure zero high/critical vulnerabilities
-if ! npm audit --omit=dev --audit-level=high; then
+if ! pnpm audit --prod --audit-level=high; then
   echo "CRITICAL: High or critical vulnerabilities detected in production dependencies!"
   exit 1
 fi

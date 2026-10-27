@@ -1015,7 +1015,7 @@
           "req_id": "REQ-027"
         }
       ],
-      "implemented_in": "src/App.svelte,src/lib/Toolbar.svelte,src/lib/FloorSelector.svelte,src/lib/vendor/swal-ui/",
+      "implemented_in": "src/App.svelte,src/lib/Toolbar.svelte,src/lib/FloorSelector.svelte,package.json",
       "last_updated": null,
       "notes": "PASS — @swal/ui shell, data-testid hooks, a11y 0 warnings (wave 3)",
       "last_verified": "2026-08-04",
