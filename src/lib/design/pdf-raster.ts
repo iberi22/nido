@@ -54,6 +54,6 @@ export async function rasterizePdf(data: ArrayBuffer | Uint8Array, page = 1): Pr
     );
     return { blob, width: canvas.width || width, height: canvas.height || height, page: n, pageCount };
   } finally {
-    await pdf.destroy();
+    (pdf as any).destroy();
   }
 }

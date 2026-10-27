@@ -4,9 +4,11 @@
   import type { MeshClient, MeshPeer, MeshMessage } from './domain/mesh';
 
   // 1. Props using Svelte 5 runes
-  let { client } = $props<{
-    client: MeshClient;
-  }>();
+  interface Props { client: MeshClient; }
+  let { client }: Props = $props();
+  // $props<{
+
+ // }>();
 
   // 2. Local state derived or tracked reactively
   // To allow tests to easily bind or read these lists, we can define reactive lists

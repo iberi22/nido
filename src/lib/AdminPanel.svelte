@@ -4,15 +4,17 @@
   import { toast } from '@swal/ui/toast';
 
   // Props using Svelte 5 runes (DI style)
-  let { client } = $props<{
-    client: {
-      getInstanceId?: () => string;
-      instanceId?: string;
-      getTier?: () => Promise<{ isPro: boolean; name?: string }> | { isPro: boolean; name?: string };
-      tier?: { isPro: boolean; name?: string };
-      refresh?: () => Promise<void> | void;
-    };
-  }>();
+  interface Props { client: { getInstanceId?: () => string; instanceId?: string; getTier?: () => Promise<{ isPro: boolean; name?: string }> | { isPro: boolean; name?: string }; tier?: { isPro: boolean; name?: string }; refresh?: () => Promise<void> | void; } }
+  let { client }: Props = $props();
+  // $props<{
+
+
+
+
+
+
+
+ // }>();
 
   // Component state using runes
   let loading = $state(false);

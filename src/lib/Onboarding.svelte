@@ -3,7 +3,9 @@
   import { t } from './i18n/index.svelte';
 
   // We accept an ondismiss callback so the parent (App.svelte) can remove it from view
-  let { ondismiss } = $props<{ ondismiss?: () => void }>();
+  interface Props { ondismiss?: () => void; }
+  let { ondismiss }: Props = $props();
+  // $props<{ ondismiss?: () => void  // }>();
 
   let currentStep = $state(0);
 
