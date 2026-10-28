@@ -118,7 +118,7 @@ export class SkillExecutor {
         });
         break;
 
-      case 'addComponent':
+      case 'addComponent': {
         let layer: LayerType = 'furniture';
         if (['door', 'window', 'sliding_door'].includes(args.type)) layer = 'structure';
 
@@ -134,6 +134,7 @@ export class SkillExecutor {
           properties: {}
         });
         break;
+      }
 
       case 'toggleLayer':
         floorPlanStore.toggleLayer(args.layer as LayerType);
@@ -143,9 +144,10 @@ export class SkillExecutor {
          floorPlanStore.currentFloor.components = [];
          break;
 
-      case 'validateDesign':
+      case 'validateDesign': {
          const issues = DesignValidator.validate();
          return issues.length > 0 ? `Issues found: ${JSON.stringify(issues)}` : 'Design is valid.';
+      }
 
       case 'getDesignJson':
          return JSON.stringify({

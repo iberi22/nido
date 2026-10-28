@@ -1,5 +1,7 @@
 # 🪺 NIDO — Intelligent Home Administration
 
+[![CI](https://github.com/iberi22/nido/actions/workflows/ci.yml/badge.svg)](https://github.com/iberi22/nido/actions/workflows/ci.yml)
+
 > Plans, rules and measurements for any dwelling — plus a private, verified
 > peer-to-peer rental network.
 
@@ -100,6 +102,8 @@ test/
 ```
 
 ## 🔒 Security & governance
+
+For security reporting and supported versions, please refer to our [Security Policy](SECURITY.md).
 
 - Post-quantum key signing (**ML-DSA-65**) via edge-mesh
 - Geolocation only with explicit user consent (data minimization)
